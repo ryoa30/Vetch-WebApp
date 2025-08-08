@@ -1,0 +1,133 @@
+const UserRepository = require('../repository/UserRepository');
+const PetRepository = require('../repository/PetRepository');
+const VetRepository = require('../repository/VetRepository');
+const LocationRepository = require('../repository/LocationRepository');
+
+class UserController {
+    #userRepository;
+    #petRepository;
+    #vetRepository;
+    #locationRepository;
+    #otpController;
+
+    constructor(otpController) {
+        this.#otpController = otpController;
+        this.#userRepository = new UserRepository();
+        this.#petRepository = new PetRepository();
+        this.#vetRepository = new VetRepository();
+        this.#locationRepository = new LocationRepository();
+
+        this.getAllUsers = this.getAllUsers.bind(this);
+        this.getUserById = this.getUserById.bind(this);
+        this.saveValidatedUser = this.saveValidatedUser.bind(this);
+        this.savePet = this.savePet.bind(this);
+        this.register = this.register.bind(this);
+        this.validateOTP = this.validateOTP.bind(this);
+    }
+
+    getAllUsers(req, res) {
+        try {
+            console.log('Authenticated user:', req.user);
+            const users = this.#userRepository.findAll();
+            res.status(200).json(users);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching users', error: error.message });
+        }
+    }
+
+    // Method to handle GET /api/users/:id
+    getUserById(req, res) {
+        try {
+            const { id } = req.params;
+            const user = this.#userRepository.findById(id);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching user', error: error.message });
+        }
+    }
+
+    async register(req, res) {
+        try {
+            const user = req.body;
+            console.log("--- Requesting OTP ---");
+            await this.#otpController.generateAndSend(user);
+            console.log("Check your email (or Mailtrap inbox) for the OTP.");
+            res.status(200).json({ message: 'OTP sent successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Error Register', error: error.message });
+        }
+    }
+    
+    async validateOTP(req, res) {
+        try {
+            const {email, otp} = req.body;
+            const result =await this.#otpController.verify(email, otp);
+            if(result.success){
+                console.log(result);
+                const insertedUser = await this.saveValidatedUser(result.data.userInfo);
+                if(result.data.userInfo.role === 'vet'){
+                    const vet = await this.saveVet({...result.data.vetInfo, userId: insertedUser.id});
+                    console.log(vet);
+                }else if(result.data.userInfo.role === 'user'){
+                    const pet =await this.savePet({...result.data.petInfo, petDob: new Date(result.data.petInfo.petDob), userId: insertedUser.id});
+                    console.log(pet);                    
+                }
+                res.status(200).json({ message: 'OTP Verified successfully', data: insertedUser });
+            }else{
+                throw new Error(result.message)
+            }
+        } catch (error) {
+            res.status(500).json({ message: 'Error Validate OTP', error: error.message });
+        }
+    }
+    
+    async savePet(payload){
+        try {
+            const newPet = await this.#petRepository.create(payload);
+            return newPet;
+        } catch (error) {
+            return error.message;
+        }
+    }
+
+    async saveVet(payload){
+        try {
+            const newVet = await this.#vetRepository.create(payload);
+            return newVet;
+        } catch (error) {
+            return error.message;
+        }
+    }
+    
+    // Method to handle POST /api/users
+    async saveValidatedUser(payload) {
+        try {
+            // console.log(req.body);
+            const prefix = payload.role.toLowerCase() === 'vet' ? 'V' : payload.role.toLowerCase() === 'admin'? 'A' : 'U';
+            const lastIdDigit = await this.#userRepository.findLastId(prefix);
+            const newId = `${prefix}${String(lastIdDigit+1).padStart(3, '0')}`;
+            const user = {
+                id: newId,
+                email: payload.email,
+                password: payload.password,
+                firstName: payload.firstName,
+                lastName: payload.lastName,
+                phoneNumber: payload.phoneNumber,
+                profilePicture: payload.profilePicture
+            }
+            console.log(payload.location);
+            const newUser = await this.#userRepository.create(user);
+            await this.#locationRepository.create({...payload.location, userId: newId});
+            console.log(newUser)
+            return newUser;
+        } catch (error) {
+            return error.message;
+        }
+    }
+}
+
+
+module.exports = UserController;
