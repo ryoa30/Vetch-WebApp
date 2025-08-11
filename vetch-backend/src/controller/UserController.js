@@ -2,6 +2,7 @@ const UserRepository = require('../repository/UserRepository');
 const PetRepository = require('../repository/PetRepository');
 const VetRepository = require('../repository/VetRepository');
 const LocationRepository = require('../repository/LocationRepository');
+const authController = require('../middleware/AuthController');
 
 class UserController {
     #userRepository;
@@ -9,6 +10,7 @@ class UserController {
     #vetRepository;
     #locationRepository;
     #otpController;
+    #authController;
 
     constructor(otpController) {
         this.#otpController = otpController;
@@ -16,6 +18,7 @@ class UserController {
         this.#petRepository = new PetRepository();
         this.#vetRepository = new VetRepository();
         this.#locationRepository = new LocationRepository();
+        this.#authController = authController;
 
         this.getAllUsers = this.getAllUsers.bind(this);
         this.getUserById = this.getUserById.bind(this);
@@ -23,6 +26,7 @@ class UserController {
         this.savePet = this.savePet.bind(this);
         this.register = this.register.bind(this);
         this.validateOTP = this.validateOTP.bind(this);
+        this.validateLogin = this.validateLogin.bind(this);
     }
 
     getAllUsers(req, res) {
@@ -125,6 +129,24 @@ class UserController {
             return newUser;
         } catch (error) {
             return error.message;
+        }
+    }
+
+    async validateLogin(req, res) {
+        try {
+            const user = await this.#userRepository.findByEmail(req.body.email);
+            if(user){
+                if(user.password === req.body.password){
+                    const token = this.#authController.generateToken(user.id, user.email, (user.id.startsWith('V') ? 'vet' : user.id.startsWith('A') ? 'admin' : 'user'));
+                    res.status(200).json({ message: 'Login successful', data: user, token: token });
+                }else{
+                    throw new Error('Invalid Password');
+                }
+            }else{
+                throw new Error('User not found');
+            }
+        } catch (error) {
+            res.status(500).json({ message: 'Error Login', error: error.message });
         }
     }
 }

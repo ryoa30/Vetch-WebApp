@@ -1,35 +1,60 @@
 const jwt = require('jsonwebtoken');
-const userRepository = require('../repository/UserRepository');
 
 class AuthController {
-    login(req, res) {
-        const { email, password } = req.body;
+    generateToken = ({
+        userId,
+        email,
+        role
+    }) => {
+        const payload = {
+            userId,
+            email,
+            role
+        };
 
-        // 1. Find the user by email
-        const user = userRepository.findByEmail(email);
-        if (!user) {
-            return res.status(401).json({ message: 'Authentication failed. User not found.' });
-        }
-
-        // 2. Check the password (in a real app, use bcrypt.compare)
-        if (user.password !== password) {
-            return res.status(401).json({ message: 'Authentication failed. Wrong password.' });
-        }
-
-        // 3. User is valid, create a JWT
-        const payload = { userId: user.id, email: user.email };
-        const token = jwt.sign(
-            payload,
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' } // Token expires in 1 hour
-        );
-
-        // 4. Send the token to the client
-        res.status(200).json({
-            message: 'Logged in successfully!',
-            token: token
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: "8h",
         });
-    }
+
+        return token;
+    };
+    authorize = (req, res, next) => {
+        try {
+            const header = req.header("Authorization");
+            let token = "";
+
+            if (header) {
+            const split = header.split(" ")
+
+            if (split.length > 0)
+                token = header.split(" ")[1];
+            }
+            if (!header || !token) {
+            return res.status(401).json(
+                apiResponse({
+                status: 0,
+                message: "You are not authorize.",
+                errors: ["header/token is empty"],
+                statusCode: 401,
+                })
+            );
+            }
+            const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            req.user = user;
+            next();
+        } catch (error) {
+            console.log('error', error.message);
+            const errors = [error];
+            return res.status(401).json(
+            apiResponse({
+                status: 0,
+                message: "You are not authorize.",
+                errors: errors,
+                statusCode: 401,
+            })
+            );
+        }
+    };
 }
 
 module.exports = new AuthController();
