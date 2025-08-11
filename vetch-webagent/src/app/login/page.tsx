@@ -68,9 +68,11 @@ export default function LoginPage() {
         </div>
 
         {/* Login Button */}
-        <Button className="w-full bg-white text-black hover:bg-gray-100 font-semibold">
-          Login
-        </Button>
+        <Link href="/home">
+          <Button className="w-full bg-white text-black hover:bg-gray-100 font-semibold">
+            Login
+          </Button>
+        </Link>
 
         <div className="mt-4 text-sm text-center">
           <p>Don’t have an account?</p>
