@@ -33,7 +33,7 @@ export default function NavigationBar() {
   );
 
   return (
-    <nav className="w-full bg-[#439484] px-6 py-3 flex items-center justify-between rounded-b-lg shadow-md">
+    <nav className="w-full bg-[#439484] px-6 py-3 flex items-center justify-between shadow-md">
       {/* Logo */}
       <div className="flex items-center">
         <Image src="/file.svg" alt="Logo" width={40} height={40} className="mr-3" />
