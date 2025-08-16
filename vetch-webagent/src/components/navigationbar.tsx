@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ThemeToggleSwitch } from "@/components/ui/togglebutton";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function NavigationBar() {
   const [openMenu, setOpenMenu] = useState(null);
@@ -36,7 +37,9 @@ export default function NavigationBar() {
     <nav className="w-full bg-[#439484] px-6 py-3 flex items-center justify-between shadow-md">
       {/* Logo */}
       <div className="flex items-center">
-        <Image src="/file.svg" alt="Logo" width={40} height={40} className="mr-3" />
+        <Link href="/home">
+          <Image src="/file.svg" alt="Logo" width={40} height={40} className="mr-3 cursor-pointer" />
+        </Link>
       </div>
 
       {/* Menu */}
@@ -75,8 +78,14 @@ export default function NavigationBar() {
           )}
         </div>
 
-        <span className="font-semibold text-white text-lg cursor-pointer">Blog</span>
-        <span className="font-semibold text-white text-lg cursor-pointer">About Us</span>
+        {/* Blog */}
+        <Link href="/blog">
+          <span className="font-semibold text-white text-lg cursor-pointer">Blog</span>
+        </Link>
+        {/* About Us */}
+        <Link href="/aboutUs">
+          <span className="font-semibold text-white text-lg cursor-pointer">About Us</span>
+        </Link>
       </div>
 
       {/* Icons */}
