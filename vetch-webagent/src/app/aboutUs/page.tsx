@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import NavigationBar from "@/components/navigationbar";
+import Footer from "@/components/footer2";
 
 export default function HomePage() {
   
@@ -48,7 +49,7 @@ export default function HomePage() {
           </div>
           <div className="md:ml-10 mt-6 md:mt-0 max-w-xl mb-10 md:mb-0">
             <h2 className="text-3xl font-bold mb-4">About Us</h2>
-            <p className="text-gray-700">
+            <p className="text-white">
               Vetch is a telemedicine platform built to connect pet owners with
               certified veterinarians through online consultations. Our mission is
               to make pet healthcare more accessible, reliable, and convenient
@@ -59,8 +60,8 @@ export default function HomePage() {
 
         <div className="flex flex-1 flex-col md:flex-row justify-center items-center p-12">
           <div className="md:mr-10 mb-6 md:mb-0 max-w-xl mb-10 md:mb-0">
-            <h2 className="text-3xl font-bold mb-4">Our Vision</h2>
-            <p className="text-gray-700">
+            <h2 className="text-3xl font-bold mb-4 text-black">Our Vision</h2>
+            <p className="text-black">
               Vetch aims to address the significant challenges in Indonesian veterinary care, 
               including a shortage of veterinarians (only around 13,500 available against an estimated 
               need for 50,000 in 2024)78 and difficult access to facilities, which results in only 
@@ -89,18 +90,19 @@ export default function HomePage() {
           </div>
           <div className="md:ml-10 mt-6 md:mt-0 max-w-xl mb-10 md:mb-0">
             <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
-            <p className="text-gray-700">
-              Vetch is committed to:
-              <ul className="list-disc list-inside">
-                <li>Enhancing Accessibility and Convenience for Pet Owners: We strive to provide pet owners with easy and practical access to veterinary health services anytime and anywhere through a digital application.</li>
-                <li>Facilitating Comprehensive Pet Health Management: Our goal is to improve access and simplify the tracking of animal health history, such as vaccination schedules, treatments, and behavioral changes, by providing digital medical records to aid accurate diagnoses and service efficiency.</li>
-                <li>Empowering Veterinarians and Building Trust: We aim to assist veterinarians in managing practice schedules efficiently, accepting and processing service bookings, and monitoring the health history of pets with ongoing conditions, enabling them to reach more owners and run more organized services.</li>
-              </ul>
-            </p>
+            <p className="text-white">Vetch is committed to:</p>
+            <ul className="list-disc list-inside">
+              <li>Enhancing Accessibility and Convenience for Pet Owners: We strive to provide pet owners with easy and practical access to veterinary health services anytime and anywhere through a digital application.</li>
+              <li>Facilitating Comprehensive Pet Health Management: Our goal is to improve access and simplify the tracking of animal health history, such as vaccination schedules, treatments, and behavioral changes, by providing digital medical records to aid accurate diagnoses and service efficiency.</li>
+              <li>Empowering Veterinarians and Building Trust: We aim to assist veterinarians in managing practice schedules efficiently, accepting and processing service bookings, and monitoring the health history of pets with ongoing conditions, enabling them to reach more owners and run more organized services.</li>
+            </ul>
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
+
 

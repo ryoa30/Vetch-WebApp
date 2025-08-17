@@ -71,7 +71,7 @@ export default function NavigationBar() {
           </span>
           {openMenu === "parents" && (
             <Dropdown>
-              <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-[#a1cbb5]">Consultation</a>
+              <a href="/forPetParent/consultationVetList" className="block px-4 py-2 text-gray-800 hover:bg-[#a1cbb5]">Consultation</a>
               <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-[#a1cbb5]">Homecare</a>
               <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-[#a1cbb5]">Emergency</a>
             </Dropdown>

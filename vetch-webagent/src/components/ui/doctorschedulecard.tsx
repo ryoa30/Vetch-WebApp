@@ -20,13 +20,13 @@ export default function DoctorScheduleCard({name, fee, rating, reviews, times,})
       {/* Content */}
       <div className="p-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">{name}</h3>
-          <span className="text-gray-600 font-medium">Fee</span>
+          <h3 className="text-black text-2xl font-semibold">{name}</h3>
+          <span className="text-black font-medium">Fee</span>
         </div>
 
         <div className="flex justify-between items-center mt-1">
-          <div className="flex items-center text-sm text-gray-600">
-            <Star className="text-green-600 fill-green-600 mr-1" size={16} />
+          <div className="flex items-center text-sm text-black">
+            <Star className="text-green-600 fill-green-600 mr-1 stroke-black mr-1" size={16} />
             {rating} <span className="ml-1">({reviews})</span>
           </div>
           <span className="text-gray-700 text-sm">{fee}</span>
@@ -42,7 +42,7 @@ export default function DoctorScheduleCard({name, fee, rating, reviews, times,})
           {times.map((time, index) => (
             <button
               key={index}
-              className="bg-green-500 text-white px-4 py-1 rounded-full hover:bg-green-600 transition-colors"
+              className="bg-[#3D8D7A] text-white px-4 py-1 rounded-full hover:bg-green-600 transition-colors"
             >
               {time}
             </button>

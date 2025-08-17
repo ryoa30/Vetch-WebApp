@@ -3,7 +3,8 @@
 import { useState } from "react";
 import NavigationBar from "@/components/navigationbar";
 import Footer2 from "@/components/footer2";
-import DoctorCard from "@/components/ui/doctorcard";
+import { ScheduleButton, FilterButton, PetTypeButton } from "@/components/ui/buttonCustom";
+import DoctorScheduleCard from "@/components/ui/doctorschedulecard";
 
 export default function HomePage() {
   const [remember, setRemember] = useState("no");
@@ -32,14 +33,28 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col">
       <NavigationBar />
       <div className="flex flex-1">
-        <div className="flex-1 bg-[#f6ffd8] flex justify-center items-center p-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {doctors.map((doc, index) => (
-              <DoctorCard key={index} {...doc} />
+        <div className="flex-1 bg-[#f6ffd8] p-8">
+          <div className="flex gap-10 pb-10">
+            <PetTypeButton />
+            <ScheduleButton />
+            <FilterButton />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6 justify-items-center">
+            {Array(6).fill(0).map((_, i) => (
+              <DoctorScheduleCard
+                key={i}
+                name={doctors[0].name}
+                fee={doctors[0].fee}
+                rating="4.9"
+                reviews="500"
+                times={["12.00", "12.30", "13.00"]}
+              />
             ))}
           </div>
         </div>
       </div>
+
       <Footer2 />
     </div>
   );
