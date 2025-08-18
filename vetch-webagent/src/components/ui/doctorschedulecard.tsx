@@ -49,7 +49,7 @@ export default function DoctorScheduleCard({name, fee, rating, reviews, times,})
           ))}
         </div>
         <button className="text-center w-full font-medium text-gray-800 hover:underline">
-          See Details
+          <a href="/forPetParent/consultationVetList/consultationDetails" className="block px-4 py-2 text-gray-800">See Details</a>
         </button>
       </div>
     </div>
