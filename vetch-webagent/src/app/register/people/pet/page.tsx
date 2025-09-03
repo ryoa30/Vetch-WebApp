@@ -16,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRegisterPeople } from "@/contexts/RegisterPeopleContext";
 import DatePicker from "@/components/DatePicker";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PetValidator } from "@/lib/validators/PetValidator";
 
 
@@ -57,7 +57,9 @@ const RegisterPeoplePetPage = () => {
       setPetWeight,
       setPetSpecies,
       setPetName,
-      setPetDob,} = useRegisterPeople();
+      setPetDob,
+      setIsPetInfoValid,
+      isAccountInfoValid} = useRegisterPeople();
 
     const router = useRouter();
     const [errors, setErrors] = useState<IErrors>({
@@ -84,11 +86,19 @@ const RegisterPeoplePetPage = () => {
       petDob,
     })
     if (!result.ok) {
+      setIsPetInfoValid(false);
       setErrors(result.errors);
       return;
     }
+    setIsPetInfoValid(true);
     router.push('/register/people/location');
   }
+
+  useEffect(()=> {
+    if(!isAccountInfoValid) {
+      router.push('/register/people/account');
+    }
+  }, [])
 
   return (
       <div className="relative w-full max-w-4xl h-fit -mt-4 bg-[#B3D8A8] rounded-xl p-6 md:p-10 flex flex-col items-start gap-8">

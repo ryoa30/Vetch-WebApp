@@ -17,6 +17,12 @@ import { useRegisterPeople } from "@/contexts/RegisterPeopleContext";
 import { LocationService } from "@/lib/services/LocationService";
 import { SearchableDropdown } from "@/components/SearchableDropdown";
 import { UserValidator } from "@/lib/validators/UserValidator";
+import { useRouter } from "next/navigation";
+import { UserService } from "@/lib/services/UserService";
+import { HttpClient } from "@/lib/http/HttpClient";
+import { API_URL } from "@/constant/apiConstant";
+import { setWithExpiry } from "@/lib/utils/localStorage";
+
 
 interface IOptions {
   value: string;
@@ -51,11 +57,13 @@ const RegisterLocationPage = () => {
   // const [districts, setDistricts] = useState<IOptions[]>([]);
   // const [urbanVillages, setUrbanVillages] = useState<IOptions[]>([]);
   const userValidator = new UserValidator();
+  const userService = new UserService(new HttpClient({ baseUrl: API_URL.USER }));
   const locationService = new LocationService();
   const [autocomplete, setAutocomplete] = useState<ILocationResponse[]>([]);
   const [addresses, setAddresses] = useState<IOptions[]>([]);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const [errors, setErrors] = useState<IErrors>({
     address: "",
     addressNotes: "",
@@ -77,7 +85,13 @@ const RegisterLocationPage = () => {
     setUrbanVillage,
     postalCode,
     setPostalCode,
+    isAccountInfoValid,
+    isPetInfoValid,
+    setIsLocationValid
   } = useRegisterPeople();
+
+  const context = useRegisterPeople();
+  console.log(context);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -131,7 +145,7 @@ const RegisterLocationPage = () => {
     }
   }
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     const result = userValidator.validateLocation(
       address,
       addressNotes,
@@ -141,53 +155,33 @@ const RegisterLocationPage = () => {
       postalCode
     );
     if (!result.ok) {
+      setIsLocationValid(false);
       setErrors(result.errors);
     }else{
+      setIsLocationValid(true);
       setErrors({})
+      try {
+        const result: any = await userService.register(context);
+        if(result.ok) {
+          setWithExpiry('email', context.email, 300000);
+          router.push('/OTP');
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
 
   }
-  // useEffect(() =>{
-  //   const fetchProvinces = async () => {
-  //     const result = await locationService.getProvinces();
-  //     console.log(result);
-  //     setProvinces(result.data.map((item: ILocationResponse) => ({ value: item.code, label: item.name })));
-  //   }
-  //   fetchProvinces();
-  // }, [])
+  
+  useEffect(()=> {
+    
+    if(!isAccountInfoValid) {
+      router.push('/register/people/account');
+    }else if(!isPetInfoValid) {
+      router.push('/register/people/pet');
+    }
+  }, [])
 
-  // useEffect(() =>{
-  //   if(province.value) {
-  //     const fetchCities = async () => {
-  //       const result = await locationService.getCities(province.value);
-  //       console.log(result);
-  //       setCities(result.data.map((item: ILocationResponse) => ({ value: item.code, label: item.name })));
-  //     }
-  //     fetchCities();
-  //   }
-  // }, [province])
-
-  // useEffect(() =>{
-  //   if(city.value) {
-  //     const fetchDistricts = async () => {
-  //       const result = await locationService.getDistricts(city.value);
-  //       console.log("districts", result);
-  //       setDistricts(result.data.map((item: ILocationResponse) => ({ value: item.code, label: item.name })));
-  //     }
-  //     fetchDistricts();
-  //   }
-  // }, [city])
-
-  // useEffect(() =>{
-  //   if(district.value) {
-  //     const fetchUrbanVillages = async () => {
-  //       const result = await locationService.getVillages(district.value);
-  //       console.log("district",result);
-  //       setUrbanVillages(result.data.map((item: ILocationResponse) => ({ value: item.code, label: item.name })));
-  //     }
-  //     fetchUrbanVillages();
-  //   }
-  // }, [district])
   return (
     <div className="relative w-full max-w-4xl -mt-4 bg-[#B3D8A8] rounded-xl p-6 md:p-16 flex flex-col md:flex-row items-center gap-8">
       <Image

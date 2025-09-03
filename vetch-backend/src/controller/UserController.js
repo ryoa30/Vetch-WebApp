@@ -4,6 +4,9 @@ const VetRepository = require('../repository/VetRepository');
 const LocationRepository = require('../repository/LocationRepository');
 const authController = require('../middleware/AuthController');
 
+const bcrypt = require('bcrypt');
+
+
 class UserController {
     #userRepository;
     #petRepository;
@@ -70,12 +73,13 @@ class UserController {
     async register(req, res) {
         try {
             const user = req.body;
-            console.log("--- Requesting OTP ---");
+            user.userInfo.password = await bcrypt.hash(user.userInfo.password, 10);
+            console.log("--- Requesting OTP ---", user);
             await this.#otpController.generateAndSend(user);
             console.log("Check your email (or Mailtrap inbox) for the OTP.");
-            res.status(200).json({ message: 'OTP sent successfully' });
+            res.status(200).json({ok: true, message: 'OTP sent successfully' });
         } catch (error) {
-            res.status(500).json({ message: 'Error Register', error: error.message });
+            res.status(500).json({ok: false, message: 'Error Register', error: error.message });
         }
     }
     
@@ -86,6 +90,7 @@ class UserController {
             if(result.success){
                 console.log(result);
                 const insertedUser = await this.saveValidatedUser(result.data.userInfo);
+                console.log(insertedUser);
                 if(result.data.userInfo.role === 'vet'){
                     const vet = await this.saveVet({...result.data.vetInfo, userId: insertedUser.id});
                     console.log(vet);
@@ -93,12 +98,12 @@ class UserController {
                     const pet =await this.savePet({...result.data.petInfo, petDob: new Date(result.data.petInfo.petDob), userId: insertedUser.id});
                     console.log(pet);                    
                 }
-                res.status(200).json({ message: 'OTP Verified successfully', data: insertedUser });
+                res.status(200).json({ ok: true, message: 'OTP Verified successfully', data: insertedUser });
             }else{
                 throw new Error(result.message)
             }
         } catch (error) {
-            res.status(500).json({ message: 'Error Validate OTP', error: error.message });
+            res.status(500).json({ ok: false, message: 'Error Validate OTP', error: error.message });
         }
     }
     

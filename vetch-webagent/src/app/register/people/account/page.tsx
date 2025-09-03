@@ -19,7 +19,7 @@ interface IErrors {
 }
 
 const RegisterPeopleAccountPage = () => {
-  const {email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, firstName, setFirstName, lastName, setLastName, phone, setPhone} = useRegisterPeople();
+  const {email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, firstName, setFirstName, lastName, setLastName, phone, setPhone, setIsAccountInfoValid} = useRegisterPeople();
 
   const [errors, setErrors] = useState<IErrors>({
     email: '',
@@ -37,12 +37,15 @@ const RegisterPeopleAccountPage = () => {
   const handleNext = async () =>{
     const result = userValidator.validateAccountInfo({email, password, confirmPassword, firstName, lastName, phone});
     if(!result.ok){
+
       setErrors(result.errors);
     }else{
       const result = await userValidator.validateEmail(email);
       if(!result.ok){
+        setIsAccountInfoValid(false);
         setErrors(result.errors);
       }else{
+        setIsAccountInfoValid(true);
         router.push('/register/people/pet');
       }
     }

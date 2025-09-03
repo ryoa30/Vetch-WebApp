@@ -46,6 +46,12 @@ type RegisterPeopleContextType = {
   setProvince: (province: string) => void;
   postalCode: string;
   setPostalCode: (postalCode: string) => void;
+  isAccountInfoValid: boolean;
+  setIsAccountInfoValid: (isAccountInfoValid: boolean) => void;
+  isLocationValid: boolean;
+  setIsLocationValid: (isLocationValid: boolean) => void;
+  isPetInfoValid: boolean;
+  setIsPetInfoValid: (isPetInfoValid: boolean) => void;
 };
 
 const RegisterPeopleContext = createContext<RegisterPeopleContextType | undefined>(undefined);
@@ -70,6 +76,9 @@ export function RegisterPeopleContextProvider({ children }: { children: ReactNod
   const [district, setDistrict] = useState<string>('');
   const [province, setProvince] = useState<string>('');
   const [postalCode, setPostalCode] = useState<string>('');
+  const [isAccountInfoValid, setIsAccountInfoValid] = useState(false);
+  const [isLocationValid, setIsLocationValid] = useState(false);
+  const [isPetInfoValid, setIsPetInfoValid] = useState(false);
 
 
   const context = {
@@ -111,6 +120,12 @@ export function RegisterPeopleContextProvider({ children }: { children: ReactNod
     setProvince,
     postalCode,
     setPostalCode,
+    isAccountInfoValid,
+    setIsAccountInfoValid,
+    isLocationValid,
+    setIsLocationValid,
+    isPetInfoValid,
+    setIsPetInfoValid
   };
 
   return (

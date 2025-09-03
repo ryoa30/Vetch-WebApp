@@ -14,7 +14,6 @@ datasource db {
 // ---------------------------------
 
 model User {
-  // You create this ID yourself (e.g., 'U001', 'A002')
   id             String     @id
   email          String     @unique
   password       String
@@ -26,8 +25,7 @@ model User {
   updatedAt      DateTime   @updatedAt @map("updated_at")
   isDeleted      Boolean    @default(false) @map("is_deleted")
 
-
-  // --- Relations ---
+  // --- Relations (parents) ---
   locations   Location[]
   pets        Pet[]
   ratings     Rating[]
@@ -37,7 +35,6 @@ model User {
 }
 
 model Vet {
-  // Automatic ID for this model
   id                 String     @id @default(cuid())
   userId             String     @unique @map("user_id")
   uploadCertificate  String?    @map("upload_certificate")
@@ -46,7 +43,7 @@ model Vet {
   price              Int
 
   // --- Relations ---
-  user             User               @relation(fields: [userId], references: [id])
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   speciesHandled   Species[]
   ratings          Rating[]
   bookings         Booking[]
@@ -55,7 +52,6 @@ model Vet {
 
   @@map("vet")
 }
-
 
 // ---------------------------------
 // User & Pet Related Models
@@ -67,15 +63,14 @@ model Location {
   addressName  String     @map("address_name")
   postalCode   String     @map("postal_code") @db.VarChar(65)
   urbanVillage String     @map("urban_village") @db.VarChar(65)
-  distict      String     @db.VarChar(65)
+  district      String     @db.VarChar(65)
   city         String     @db.VarChar(65)
   province     String     @db.VarChar(65)
   addressNotes String?    @map("address_notes") @db.VarChar(65)
-  isDeleted      Boolean    @default(false) @map("is_deleted")
-
+  isDeleted    Boolean    @default(false) @map("is_deleted")
 
   // --- Relations ---
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bookings  Booking[]
 
   @@map("location")
@@ -95,11 +90,10 @@ model Pet {
   reminderVaccine          String?    @map("reminder_vaccine") @db.VarChar(65)
   reminderConsultationDate DateTime?  @map("reminder_consultation_date")
   reminderVaccineDate      DateTime?  @map("reminder_vaccine_date")
-  isDeleted      Boolean    @default(false) @map("is_deleted")
-
+  isDeleted                Boolean    @default(false) @map("is_deleted")
 
   // --- Relations ---
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bookings  Booking[]
   chats     Chat[]
 
@@ -116,9 +110,8 @@ model Species {
   speciesName       String  @map("species_name") @db.VarChar(255)
   uploadCertificate String? @map("upload_certificate")
 
-
   // --- Relations ---
-  vet Vet @relation(fields: [vetId], references: [id])
+  vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)
 
   @@map("species")
 }
@@ -137,15 +130,14 @@ model Booking {
   bookingPrice       Int        @map("booking_price")
   bookingStatus      String     @map("booking_status") @db.VarChar(20)
   bookingType        String     @map("booking_type") @db.VarChar(65)
-  isDeleted      Boolean    @default(false) @map("is_deleted")
-
+  isDeleted          Boolean    @default(false) @map("is_deleted")
 
   // --- Relations ---
-  vet             Vet              @relation(fields: [vetId], references: [id])
-  pet             Pet              @relation(fields: [petId], references: [id])
-  location        Location         @relation(fields: [locationId], references: [id])
-  payment         Payment?
-  concernDetails  ConcernDetail[]
+  vet            Vet             @relation(fields: [vetId], references: [id], onDelete: Cascade)
+  pet            Pet             @relation(fields: [petId], references: [id], onDelete: Cascade)
+  location       Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  payment        Payment?
+  concernDetails ConcernDetail[]
 
   @@map("booking")
 }
@@ -158,7 +150,7 @@ model Payment {
   paymentDate   DateTime @map("payment_date")
 
   // --- Relations ---
-  booking Booking @relation(fields: [bookingId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@map("payment")
 }
@@ -174,17 +166,16 @@ model ConcernType {
 }
 
 model ConcernDetail {
-  id         String @id @default(cuid())
-  concernId  String @map("concern_id")
-  bookingId  String @map("booking_id")
+  id        String @id @default(cuid())
+  concernId String @map("concern_id")
+  bookingId String @map("booking_id")
 
   // --- Relations ---
-  concern ConcernType @relation(fields: [concernId], references: [id])
-  booking Booking     @relation(fields: [bookingId], references: [id])
+  concern ConcernType @relation(fields: [concernId], references: [id], onDelete: Cascade)
+  booking Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@map("concern_detail")
 }
-
 
 // ---------------------------------
 // Other Models
@@ -199,8 +190,8 @@ model Rating {
   ratingDate DateTime @map("rating_date")
 
   // --- Relations ---
-  vet  Vet  @relation(fields: [vetId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+  vet  Vet  @relation(fields: [vetId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("rating")
 }
@@ -212,11 +203,10 @@ model Blog {
   context    String   @db.VarChar(255)
   picture    String?
   date       DateTime
-  isDeleted      Boolean    @default(false) @map("is_deleted")
-
+  isDeleted  Boolean  @default(false) @map("is_deleted")
 
   // --- Relations ---
-  category Category @relation(fields: [categoryId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@map("blog")
 }
@@ -240,21 +230,21 @@ model Chat {
   status           String  @db.VarChar(5)
 
   // --- Relations ---
-  vet Vet @relation(fields: [vetId], references: [id])
-  pet Pet @relation(fields: [petId], references: [id])
+  vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
 
   @@map("chat")
 }
 
 model Schedule {
-  id          String   @id @default(cuid())
-  vetId       String   @map("vet_id")
-  dayOfWeek   String   @map("day_of_week") @db.VarChar(10)
-  timeOfDay   DateTime @map("time_of_day") @db.Timestamp
-  isDeleted      Boolean    @default(false) @map("is_deleted")
+  id        String   @id @default(cuid())
+  vetId     String   @map("vet_id")
+  dayOfWeek String   @map("day_of_week") @db.VarChar(10)
+  timeOfDay DateTime @map("time_of_day") @db.Timestamp
+  isDeleted Boolean  @default(false) @map("is_deleted")
 
   // --- Relations ---
-  vet Vet @relation(fields: [vetId], references: [id])
+  vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)
 
   @@map("schedule")
 }
