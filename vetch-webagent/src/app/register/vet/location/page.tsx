@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 
 const RegisterLocationPage = () => {
+  
+
   return (
     <div className="min-h-screen bg-[#A3D1C6] text-gray-800 flex flex-col items-center">
       {/* Header */}

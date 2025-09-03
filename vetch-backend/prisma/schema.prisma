@@ -66,6 +66,8 @@ model Location {
   userId       String     @map("user_id")
   addressName  String     @map("address_name")
   postalCode   String     @map("postal_code") @db.VarChar(65)
+  urbanVillage String     @map("urban_village") @db.VarChar(65)
+  distict      String     @db.VarChar(65)
   city         String     @db.VarChar(65)
   province     String     @db.VarChar(65)
   addressNotes String?    @map("address_notes") @db.VarChar(65)

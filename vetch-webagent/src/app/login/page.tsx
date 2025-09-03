@@ -13,20 +13,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Side - Form */}
       <div className="w-full md:w-1/2 bg-[#A3D1C6] flex flex-col justify-center px-8 md:px-16">
-        {/* Logo */}
         <h1 className="text-white font-bold text-2xl mb-6">Vetch</h1>
 
-        {/* Title */}
         <h2 className="text-2xl font-bold text-white">Welcome Back! 🐾</h2>
 
         <div className="h-1 w-24 bg-white rounded-full mt-2 mb-6"></div>
 
-        {/* User Login */}
         <h3 className="text-lg font-semibold mb-4">User Login</h3>
 
-        {/* Email */}
         <div className="space-y-2 mb-4">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -36,7 +31,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Password */}
         <div className="space-y-2 mb-4">
           <Label htmlFor="password">Password</Label>
           <Input
@@ -47,7 +41,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Remember me */}
         <div className="flex items-center justify-between mb-6">
           <RadioGroup
             value={remember}
@@ -67,7 +60,6 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Login Button */}
         <Button className="w-full bg-white text-black hover:bg-gray-100 font-semibold">
           Login
         </Button>

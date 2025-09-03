@@ -12,7 +12,9 @@ class OtpController {
         }
         this.#emailService = emailService;
 
-        this.#redisClient = createClient();
+        this.#redisClient = createClient({
+            url: process.env.REDIS_URL
+        });
         this.#redisClient.on('error', (err) => console.log('Redis Client Error', err));
     }
 

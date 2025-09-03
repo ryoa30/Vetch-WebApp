@@ -1,19 +1,56 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import RegisterPeopleHeader from "@/components/registerpeopleheader";
+import { useState } from "react";
+import { UserValidator } from "@/lib/validators/UserValidator";
+import { useRegisterPeople } from "@/contexts/RegisterPeopleContext";
+
+interface IErrors {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+}
 
 const RegisterPeopleAccountPage = () => {
-  return (
-    <div className="min-h-screen bg-[#A3D1C6] text-gray-800 flex flex-col items-center">
-      {/* Header */}
-      <RegisterPeopleHeader />
+  const {email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, firstName, setFirstName, lastName, setLastName, phone, setPhone} = useRegisterPeople();
 
-      <div className="relative w-full h-[450px] max-w-4xl -mt-4 bg-[#B3D8A8] rounded-xl p-6 md:p-10 flex flex-col md:flex-row items-start gap-8">  
+  const [errors, setErrors] = useState<IErrors>({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+  });
+
+  const userValidator = new UserValidator();
+
+  const router = useRouter();
+
+  const handleNext = async () =>{
+    const result = userValidator.validateAccountInfo({email, password, confirmPassword, firstName, lastName, phone});
+    if(!result.ok){
+      setErrors(result.errors);
+    }else{
+      const result = await userValidator.validateEmail(email);
+      if(!result.ok){
+        setErrors(result.errors);
+      }else{
+        router.push('/register/people/pet');
+      }
+    }
+  }
+
+  return (
+
+      <div className="relative w-full h-fit max-w-4xl -mt-4 bg-[#B3D8A8] rounded-xl p-6 md:p-10 flex flex-col md:flex-row items-start gap-8">  
         <Image
         src="/img/register/paw.png" 
         alt="Paw Icon"
@@ -27,43 +64,53 @@ const RegisterPeopleAccountPage = () => {
           {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email<span className="text-red-500">*</span></Label>
-            <Input id="email" placeholder="Email must contains @ and verified" required className="!bg-[#FBFFE4]" />
+            <Input id="email" placeholder="Email must contains @ and verified" required className="!bg-[#FBFFE4] mb-0" value={email} onChange={(e) => setEmail(e.target.value)} />
+            {errors.email && <span className="text-red-500 text-xs">{errors.email}</span>}
           </div>
 
           {/* Password */}
           <div className="space-y-1">
             <Label htmlFor="password">Password<span className="text-red-500">*</span></Label>
-            <Input id="password" type="password" placeholder="At least 8 characters & numbers" required className="!bg-[#FBFFE4]" />
+            <Input id="password" type="password" placeholder="At least 8 characters & numbers" required className="!bg-[#FBFFE4]" value={password} onChange={(e) => setPassword(e.target.value)}/>
+            {errors.password &&<span className="text-red-500 text-xs">{errors.password}</span>}
           </div>
 
           {/* Confirm Password */}
           <div className="space-y-1">
             <Label htmlFor="confirmPassword">Confirm Password<span className="text-red-500">*</span></Label>
-            <Input id="confirmPassword" type="password" placeholder="Must match password" required className="!bg-[#FBFFE4]" />
+            <Input id="confirmPassword" type="password" placeholder="Must match password" required className="!bg-[#FBFFE4]" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
+            {errors.confirmPassword &&<span className="text-red-500 text-xs">{errors.confirmPassword}</span>}
           </div>
 
           {/* Owner Name */}
           <div className="space-y-1">
             <Label>Owner Name<span className="text-red-500">*</span></Label>
             <div className="flex gap-2">
-              <Input placeholder="First Name" required className="!bg-[#FBFFE4]" />
-              <Input placeholder="Last Name" required className="!bg-[#FBFFE4]" />
+              <div className="flex-col">
+                <Input placeholder="First Name" required className="!bg-[#FBFFE4]" value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
+                {errors.firstName &&<span className="text-red-500 text-xs">{errors.firstName}</span>}
+              </div>
+              <div className="flex-col">
+                <Input placeholder="Last Name" required className="!bg-[#FBFFE4]" value={lastName} onChange={(e) => setLastName(e.target.value)}/>
+                {errors.lastName &&<span className="text-red-500 text-xs">{errors.lastName}</span>}
+              </div>
             </div>
           </div>
 
           {/* Owner Phone */}
           <div className="space-y-1">
             <Label htmlFor="phone">Owner Phone<span className="text-red-500">*</span></Label>
-            <Input id="phone" placeholder='Must start with "08"' required className="!bg-[#FBFFE4]" />
+            <Input id="phone" placeholder='Must start with "08"' required className="!bg-[#FBFFE4]" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            {errors.phone &&<span className="text-red-500 text-xs">{errors.phone}</span>}
           </div>
 
           {/* Next Button */}
           <div className="absolute bottom-4 right-16">
-            <Link href="/register/people/pet">
-              <Button className="w-32 bg-[#3D8D7A] text-white hover:bg-[#356f61]">
+            {/* <Link href="/register/people/pet"> */}
+              <Button className="w-32 bg-[#3D8D7A] text-white hover:bg-[#356f61]" onClick={handleNext}>
                 Next
               </Button>
-            </Link>
+            {/* </Link> */}
           </div>
         </div>
 
@@ -79,7 +126,6 @@ const RegisterPeopleAccountPage = () => {
           />
         </div>
       </div>
-    </div>
   );
 };
 

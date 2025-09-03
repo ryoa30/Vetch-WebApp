@@ -22,6 +22,7 @@ class UserController {
 
         this.getAllUsers = this.getAllUsers.bind(this);
         this.getUserById = this.getUserById.bind(this);
+        this.getUserByEmail = this.getUserByEmail.bind(this);
         this.saveValidatedUser = this.saveValidatedUser.bind(this);
         this.savePet = this.savePet.bind(this);
         this.register = this.register.bind(this);
@@ -40,14 +41,27 @@ class UserController {
     }
 
     // Method to handle GET /api/users/:id
-    getUserById(req, res) {
+    async getUserById(req, res) {
         try {
             const { id } = req.params;
-            const user = this.#userRepository.findById(id);
+            const user = await this.#userRepository.findById(id);
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
             res.status(200).json(user);
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching user', error: error.message });
+        }
+    }
+
+    async getUserByEmail(req, res) {
+        try {
+            const { email } = req.params;
+            const user = await this.#userRepository.findByEmail(email);
+            if (!user) {
+                return res.status(205).json({ message: 'User not found' });
+            }
+            res.status(200).json({message: "User found", data:user});
         } catch (error) {
             res.status(500).json({ message: 'Error fetching user', error: error.message });
         }
