@@ -77,7 +77,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Remember me */}
         <div className="flex items-center justify-between mb-6">
           <RadioGroup
             value={remember}

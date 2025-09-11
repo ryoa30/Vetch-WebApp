@@ -1,26 +1,264 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
+// ---------------------------------
+// Core Models
+// ---------------------------------
+
 model User {
-  id Int @id 
-  email String @db.VarChar(256)
-  password String
-  first_name String
-  last_name String
-  phone_number String
-  profile_picvture String
+  id             String     @id
+  email          String     @unique
+  password       String
+  firstName      String     @map("first_name")
+  lastName       String?    @map("last_name")
+  phoneNumber    String?    @map("phone_number")
+  profilePicture String?    @map("profile_picture")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  isDeleted      Boolean    @default(false) @map("is_deleted")
+
+  // --- Relations (parents) ---
+  locations   Location[]
+  pets        Pet[]
+  ratings     Rating[]
+  vetProfile  Vet?
+
+  @@map("users")
+}
+
+model Vet {
+  id                 String     @id @default(cuid())
+  userId             String     @unique @map("user_id")
+  uploadCertificate  String?    @map("upload_certificate")
+  sipNumber          String     @map("sip_number") @db.VarChar(255)
+  description        String     @db.VarChar(255)
+  price              Int
+  isAvailHomecare    Boolean    @map("is_avail_homecare")
+  isAvailEmergency   Boolean    @map("is_avail_emergency")
+  verified           Boolean    @default(false)
+
+  // --- Relations ---
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  speciesHandled   Species[]
+  ratings          Rating[]
+  bookings         Booking[]
+  chats            Chat[]
+  schedules        Schedule[]
+
+  @@map("vet")
+}
+
+// ---------------------------------
+// User & Pet Related Models
+// ---------------------------------
+
+model Location {
+  id           String     @id @default(cuid())
+  userId       String     @map("user_id")
+  addressName  String     @map("address_name")
+  postalCode   String     @map("postal_code") @db.VarChar(65)
+  urbanVillage String     @map("urban_village") @db.VarChar(65)
+  district      String     @db.VarChar(65)
+  city         String     @db.VarChar(65)
+  province     String     @db.VarChar(65)
+  addressNotes String?    @map("address_notes") @db.VarChar(65)
+  coordinates  String     @db.VarChar(65) @default("0,0")
+  isDeleted    Boolean    @default(false) @map("is_deleted")
+
+  // --- Relations ---
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+
+  @@map("location")
+}
+
+model Pet {
+  id                       String     @id @default(cuid())
+  userId                   String     @map("user_id")
+  petName                  String     @map("pet_name") @db.VarChar(65)
+  speciesName              String     @map("species_name") @db.VarChar(65)
+  gender                   String     @db.VarChar(65)
+  petDob                   DateTime   @map("pet_dob") @db.Timestamp
+  neuterStatus             Boolean    @map("neuter_status")
+  primaryColor             String     @map("primary_color") @db.VarChar(65)
+  weight                   Float
+  reminderConsultation     String?    @map("reminder_consultation") @db.VarChar(65)
+  reminderVaccine          String?    @map("reminder_vaccine") @db.VarChar(65)
+  reminderConsultationDate DateTime?  @map("reminder_consultation_date")
+  reminderVaccineDate      DateTime?  @map("reminder_vaccine_date")
+  isDeleted                Boolean    @default(false) @map("is_deleted")
+
+  // --- Relations ---
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+  chats     Chat[]
+
+  @@map("pet")
+}
+
+// ---------------------------------
+// Vet Specialization Models
+// ---------------------------------
+
+model Species {
+  id                String  @id @default(cuid())
+  vetId             String  @map("vet_id")
+  speciesTypeId     String  @map("species_type_id")
+
+  // --- Relations ---
+  speciesType SpeciesType @relation(fields: [speciesTypeId], references: [id], onDelete: Cascade)
+  vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)
+
+  @@map("species")
+}
+
+model SpeciesType {
+  id          String  @id @default(cuid())
+  speciesName String  @map("species_name") @db.VarChar(255)
+
+  // --- Relations ---
+  species Species[]
+
+  @@map("species_type")
+}
+
+// ---------------------------------
+// Booking & Consultation Models
+// ---------------------------------
+
+model Booking {
+  id                 String     @id @default(cuid())
+  vetId              String     @map("vet_id")
+  petId              String     @map("pet_id")
+  locationId         String     @map("location_id")
+  illnessDescription String     @map("illness_description") @db.Text
+  bookingDate        DateTime   @map("booking_date")
+  bookingPrice       Int        @map("booking_price")
+  bookingStatus      String     @map("booking_status") @db.VarChar(20)
+  bookingType        String     @map("booking_type") @db.VarChar(65)
+  isDeleted          Boolean    @default(false) @map("is_deleted")
+
+  // --- Relations ---
+  vet            Vet             @relation(fields: [vetId], references: [id], onDelete: Cascade)
+  pet            Pet             @relation(fields: [petId], references: [id], onDelete: Cascade)
+  location       Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  payment        Payment?
+  concernDetails ConcernDetail[]
+
+  @@map("booking")
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  bookingId     String   @unique @map("booking_id")
+  paymentMethod String   @map("payment_method") @db.VarChar(65)
+  paymentStatus String   @map("payment_status") @db.VarChar(65)
+  paymentDate   DateTime @map("payment_date")
+
+  // --- Relations ---
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("payment")
+}
+
+model ConcernType {
+  id          String          @id @default(cuid())
+  concernName String          @map("concern_name") @db.VarChar(65)
+
+  // --- Relations ---
+  concernDetails ConcernDetail[]
+
+  @@map("concern_type")
+}
+
+model ConcernDetail {
+  id        String @id @default(cuid())
+  concernId String @map("concern_id")
+  bookingId String @map("booking_id")
+
+  // --- Relations ---
+  concern ConcernType @relation(fields: [concernId], references: [id], onDelete: Cascade)
+  booking Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("concern_detail")
+}
+
+// ---------------------------------
+// Other Models
+// ---------------------------------
+
+model Rating {
+  id         String   @id @default(cuid())
+  vetId      String   @map("vet_id")
+  userId     String   @map("user_id")
+  context    String   @db.VarChar(100)
+  rating     Int
+  ratingDate DateTime @map("rating_date")
+
+  // --- Relations ---
+  vet  Vet  @relation(fields: [vetId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("rating")
+}
+
+model Blog {
+  id         String   @id @default(cuid())
+  categoryId String   @map("category_id")
+  title      String   @db.VarChar(65)
+  context    String   @db.VarChar(255)
+  picture    String?
+  date       DateTime
+  isDeleted  Boolean  @default(false) @map("is_deleted")
+
+  // --- Relations ---
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("blog")
+}
+
+model Category {
+  id           String  @id @default(cuid())
+  categoryName String  @map("category_name") @db.VarChar(65)
+
+  // --- Relations ---
+  blogs Blog[]
+
+  @@map("category")
+}
+
+model Chat {
+  id               String  @id @default(cuid())
+  vetId            String  @map("vet_id")
+  petId            String  @map("pet_id")
+  chatHistory      String? @map("chat_history") @db.Text
+  videoCallHistory String? @map("video_call_history") @db.Text
+  status           String  @db.VarChar(5)
+
+  // --- Relations ---
+  vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("chat")
+}
+
+model Schedule {
+  id        String   @id @default(cuid())
+  vetId     String   @map("vet_id")
+  dayOfWeek String   @map("day_of_week") @db.VarChar(10)
+  timeOfDay DateTime @map("time_of_day") @db.Timestamp
+  isDeleted Boolean  @default(false) @map("is_deleted")
+
+  // --- Relations ---
+  vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)
+
+  @@map("schedule")
 }

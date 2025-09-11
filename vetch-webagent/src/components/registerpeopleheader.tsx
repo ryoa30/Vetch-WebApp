@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const RegisterPeopleHeader = () => {
@@ -34,21 +33,15 @@ const RegisterPeopleHeader = () => {
           className="absolute top-0"
         />
         <div className="flex justify-between w-full max-w-[300px] z-10 text-white text-sm font-semibold mt-10">
-          <Link href="/register/people/account">
             <span className={isAccountPage ? "border-b-2 border-white" : ""}>
               Account Info
             </span>
-          </Link>
-          <Link href="/register/people/pet">
             <span className={isPetPage ? "border-b-2 border-white" : ""}>
               Pet
             </span>
-          </Link>
-          <Link href="/register/people/location">
             <span className={isLocationPage ? "border-b-2 border-white" : ""}>
               Location
             </span>
-          </Link>
         </div>
       </div>
     </div>
