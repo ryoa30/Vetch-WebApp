@@ -43,6 +43,7 @@ model Vet {
   price              Int
   isAvailHomecare    Boolean    @map("is_avail_homecare")
   isAvailEmergency   Boolean    @map("is_avail_emergency")
+  verified           Boolean    @default(false)
 
   // --- Relations ---
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -69,6 +70,7 @@ model Location {
   city         String     @db.VarChar(65)
   province     String     @db.VarChar(65)
   addressNotes String?    @map("address_notes") @db.VarChar(65)
+  coordinates  String     @db.VarChar(65) @default("0,0")
   isDeleted    Boolean    @default(false) @map("is_deleted")
 
   // --- Relations ---
@@ -109,13 +111,23 @@ model Pet {
 model Species {
   id                String  @id @default(cuid())
   vetId             String  @map("vet_id")
-  speciesName       String  @map("species_name") @db.VarChar(255)
-  uploadCertificate String? @map("upload_certificate")
+  speciesTypeId     String  @map("species_type_id")
 
   // --- Relations ---
+  speciesType SpeciesType @relation(fields: [speciesTypeId], references: [id], onDelete: Cascade)
   vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)
 
   @@map("species")
+}
+
+model SpeciesType {
+  id          String  @id @default(cuid())
+  speciesName String  @map("species_name") @db.VarChar(255)
+
+  // --- Relations ---
+  species Species[]
+
+  @@map("species_type")
 }
 
 // ---------------------------------

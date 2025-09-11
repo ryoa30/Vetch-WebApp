@@ -60,6 +60,8 @@ type RegisterPeopleContextType = {
   setIsAvailHomecare: (isAvailHomecare: boolean) => void;
   isAvailEmergency: boolean;
   setIsAvailEmergency: (isAvailEmergency: boolean) => void;
+  locationCoordinates: string;
+  setLocationCoordinates: (locationCoordinates: string) => void;
 };
 
 const RegisterPeopleContext = createContext<RegisterPeopleContextType | undefined>(undefined);
@@ -84,6 +86,7 @@ export function RegisterContextProvider({ children }: { children: ReactNode }) {
   const [district, setDistrict] = useState<string>('');
   const [province, setProvince] = useState<string>('');
   const [postalCode, setPostalCode] = useState<string>('');
+  const [locationCoordinates, setLocationCoordinates] = useState<string>("");
   const [isAccountInfoValid, setIsAccountInfoValid] = useState(false);
   const [isLocationValid, setIsLocationValid] = useState(false);
   const [isPetInfoValid, setIsPetInfoValid] = useState(false);
@@ -145,7 +148,9 @@ export function RegisterContextProvider({ children }: { children: ReactNode }) {
     isAvailHomecare,
     setIsAvailHomecare,
     isAvailEmergency,
-    setIsAvailEmergency
+    setIsAvailEmergency,
+    locationCoordinates,
+    setLocationCoordinates
   };
 
   return (

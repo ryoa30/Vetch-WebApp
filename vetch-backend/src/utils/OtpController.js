@@ -48,9 +48,30 @@ class OtpController {
             // Use the injected email service to send the OTP
             await this.#emailService.sendMail({
                 to: user.userInfo.email,
-                subject: 'Your One-Time Password',
-                text: `Your OTP is: ${otp}`,
-                html: `<b>Your OTP is: ${otp}</b><p>It will expire in 5 minutes.</p>`,
+                subject: "🔐 Your One-Time Password",
+                html: `
+                <div style="font-family: Arial, sans-serif; background-color: #f9fafb; padding: 20px;">
+                    <div style="max-width: 500px; margin: 0 auto; background: #ffffff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h2 style="color: #111827; text-align: center; margin-bottom: 20px;">Your One-Time Password</h2>
+                    <p style="font-size: 15px; color: #374151; text-align: center;">
+                        Use the code below to complete your verification. <br>
+                        <strong>This code will expire in 5 minutes.</strong>
+                    </p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <span style="display: inline-block; background: linear-gradient(90deg, #4f46e5, #3b82f6); color: white; font-size: 24px; font-weight: bold; letter-spacing: 4px; padding: 15px 25px; border-radius: 8px;">
+                        ${otp}
+                        </span>
+                    </div>
+                    <p style="font-size: 14px; color: #6b7280; text-align: center;">
+                        Didn’t request this code? Please ignore this email.
+                    </p>
+                    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 25px 0;">
+                    <p style="font-size: 12px; color: #9ca3af; text-align: center;">
+                        © ${new Date().getFullYear()} MyApp. All rights reserved.
+                    </p>
+                    </div>
+                </div>
+                `,
             });
 
             console.log(`Successfully generated and sent OTP for ${user.userInfo.email}`);

@@ -42,6 +42,7 @@ export class UserService {
             urbanVillage: context.urbanVillage,
             province: context.province,
             addressNotes: context.addressNotes,
+            coordinates: context.locationCoordinates,
           },
         },
         petInfo: {
@@ -72,6 +73,7 @@ export class UserService {
             urbanVillage: context.urbanVillage,
             province: context.province,
             addressNotes: context.addressNotes,
+            coordinates: context.locationCoordinates,
           },
         },
         vetInfo: {

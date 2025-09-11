@@ -5,6 +5,10 @@ class VetRepository extends BaseRepository {
         super('Vet');
     }
 
+    async findVetsCards(options = {}) {
+        return this._model.findMany(options);
+    }
+
 }
 
 module.exports = VetRepository;

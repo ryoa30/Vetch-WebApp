@@ -76,6 +76,7 @@ const LocationForm:FC<IProps> = ({role}) => {
     postalCode,
     setPostalCode,
     setIsLocationValid,
+    setLocationCoordinates,
   } = useRegister();
 
   const context = useRegister();
@@ -133,6 +134,7 @@ const LocationForm:FC<IProps> = ({role}) => {
       setDistrict(selectedAutocomplete.district);
       setUrbanVillage(selectedAutocomplete.urbanVillalges);
       setPostalCode(selectedAutocomplete.postalCode);
+      setLocationCoordinates(`${selectedAutocomplete.latitude},${selectedAutocomplete.longitude}`);
     }
   };
 
