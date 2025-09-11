@@ -177,8 +177,9 @@ class UserController {
     async validateLogin(req, res) {
         try {
             const user = await this.#userRepository.findByEmail(req.body.email);
+            console.log(user);
             if(user){
-                if(user.password === req.body.password){
+                if(await bcrypt.compare(user.password, req.body.password)){
                     const token = this.#authController.generateToken(user.id, user.email, (user.id.startsWith('V') ? 'vet' : user.id.startsWith('A') ? 'admin' : 'user'));
                     res.status(200).json({ message: 'Login successful', data: user, token: token });
                 }else{
