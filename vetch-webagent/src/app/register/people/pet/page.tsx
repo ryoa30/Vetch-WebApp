@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useRegisterPeople } from "@/contexts/RegisterPeopleContext";
+import { useRegister } from "@/contexts/RegisterContext";
 import DatePicker from "@/components/DatePicker";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -59,7 +59,7 @@ const RegisterPeoplePetPage = () => {
       setPetName,
       setPetDob,
       setIsPetInfoValid,
-      isAccountInfoValid} = useRegisterPeople();
+      isAccountInfoValid} = useRegister();
 
     const router = useRouter();
     const [errors, setErrors] = useState<IErrors>({

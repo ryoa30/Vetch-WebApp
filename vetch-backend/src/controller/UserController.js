@@ -3,6 +3,7 @@ const PetRepository = require('../repository/PetRepository');
 const VetRepository = require('../repository/VetRepository');
 const LocationRepository = require('../repository/LocationRepository');
 const authController = require('../middleware/AuthController');
+const cloudinary = require("../utils/cloudinary");
 
 const bcrypt = require('bcrypt');
 
@@ -72,7 +73,29 @@ class UserController {
 
     async register(req, res) {
         try {
-            const user = req.body;
+            const user = req.body.data ? JSON.parse(req.body.data) : req.body;
+
+            if (req.file) {
+                console.log("masukkkk",req.file);
+                // stream the buffer into Cloudinary
+                const uploadResult = await new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: "my-app",
+                        resource_type: "image",
+                        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+                    },
+                    (error, result) => (error ? reject(error) : resolve(result))
+                    );
+                    // Multer memory buffer -> upload_stream
+                    stream.end(req.file.buffer);
+                });
+
+                console.log("uploadResult",uploadResult);
+
+                user.vetInfo.uploadCertificate = uploadResult.secure_url;
+            }
+
             user.userInfo.password = await bcrypt.hash(user.userInfo.password, 10);
             console.log("--- Requesting OTP ---", user);
             await this.#otpController.generateAndSend(user);
@@ -88,9 +111,9 @@ class UserController {
             const {email, otp} = req.body;
             const result =await this.#otpController.verify(email, otp);
             if(result.success){
-                console.log(result);
+                console.log("result ",result);
                 const insertedUser = await this.saveValidatedUser(result.data.userInfo);
-                console.log(insertedUser);
+                console.log("insertedUser",insertedUser);
                 if(result.data.userInfo.role === 'vet'){
                     const vet = await this.saveVet({...result.data.vetInfo, userId: insertedUser.id});
                     console.log(vet);
@@ -129,7 +152,7 @@ class UserController {
     async saveValidatedUser(payload) {
         try {
             // console.log(req.body);
-            const prefix = payload.role.toLowerCase() === 'vet' ? 'V' : payload.role.toLowerCase() === 'admin'? 'A' : 'U';
+            const prefix = payload.role === 'vet' ? 'V' : payload.role === 'admin'? 'A' : 'U';
             const lastIdDigit = await this.#userRepository.findLastId(prefix);
             const newId = `${prefix}${String(lastIdDigit+1).padStart(3, '0')}`;
             const user = {

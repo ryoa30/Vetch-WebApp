@@ -41,6 +41,8 @@ model Vet {
   sipNumber          String     @map("sip_number") @db.VarChar(255)
   description        String     @db.VarChar(255)
   price              Int
+  isAvailHomecare    Boolean    @map("is_avail_homecare")
+  isAvailEmergency   Boolean    @map("is_avail_emergency")
 
   // --- Relations ---
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)

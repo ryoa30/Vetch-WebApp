@@ -10,6 +10,9 @@ export type AccountInfoInput = {
   firstName: string;
   lastName: string;
   phone: string;
+  role: string;
+  sipNumber: string;
+  certificate: File | null;
 };
 export type LocationInput = {
   address: string;
@@ -51,7 +54,14 @@ export class UserValidator {
     const phone = (input.phone ?? "").trim();
     if (!phone) errors.phone = "Phone is required";
     else if(!phone.startsWith("08")) errors.phone = "Phone must start with 08";
+    
+    if(input.role === "vet"){
+      const certificate = input.certificate;
+      if(!certificate) errors.certificate = "Certificate is required";
 
+      const sipNumber = input.sipNumber;
+      if(!sipNumber) errors.sipNumber = "SIP Number is required";
+    }
 
     if (Object.keys(errors).length) return { ok: false, errors: errors };
 
@@ -63,7 +73,10 @@ export class UserValidator {
         confirmPassword,
         firstName,
         lastName,
-        phone
+        phone,
+        role: input.role,
+        sipNumber: input.sipNumber,
+        certificate: input.certificate
       },
     };
   }

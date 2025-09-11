@@ -6,7 +6,6 @@ export type HttpClientOptions = {
   timeoutMs?: number;
 };
 
-
 export class HttpError extends Error {
   constructor(
     public status: number,
@@ -17,6 +16,20 @@ export class HttpError extends Error {
     this.name = "HttpError";
   }
 }
+
+function safeJson(s: string) {
+  try { return JSON.parse(s); } catch { return s; }
+}
+
+// Narrow type guards that work in browser and Node runtimes
+const isFormData = (v: any): v is FormData =>
+  typeof FormData !== "undefined" && v instanceof FormData;
+
+const isURLSearchParams = (v: any): v is URLSearchParams =>
+  typeof URLSearchParams !== "undefined" && v instanceof URLSearchParams;
+
+const isBlobLike = (v: any): v is Blob =>
+  typeof Blob !== "undefined" && v instanceof Blob;
 
 export class HttpClient {
   private baseUrl: string;
@@ -37,15 +50,43 @@ export class HttpClient {
   ): Promise<T> {
     const url = `${this.baseUrl}${path.startsWith("/") ? "" : "/"}${path}`;
 
+    // Decide body
+    const hasExplicitBody = Object.prototype.hasOwnProperty.call(init, "body");
+    const isJsonMode = !hasExplicitBody && init.json !== undefined;
+
+    const body: BodyInit | undefined = hasExplicitBody
+      ? (init.body as BodyInit)
+      : isJsonMode
+      ? (JSON.stringify(init.json) as BodyInit)
+      : undefined;
+
+    // Build headers; don't force Content-Type for multipart or Blob
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
       ...this.defaultHeaders,
       ...(init.headers as Record<string, string>),
     };
 
-    const token = this.getToken?.();
-    if (token) headers.Authorization = `Bearer ${token}`;
+    // Only set Content-Type automatically when it's clearly JSON or URL-encoded.
+    const contentTypeAlreadySet = Object.keys(headers)
+      .some(h => h.toLowerCase() === "content-type");
 
+    if (!contentTypeAlreadySet) {
+      if (isJsonMode) {
+        headers["Content-Type"] = "application/json";
+      } else if (isURLSearchParams(body)) {
+        headers["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
+      }
+      // NOTE: For FormData and Blob/ArrayBuffer, do NOT set Content-Type.
+      // The browser/Fetch will set correct boundaries or type automatically.
+    }
+
+    // Auth
+    const token = this.getToken?.();
+    if (token && !headers.Authorization) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Timeout
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeoutMs);
 
@@ -53,16 +94,16 @@ export class HttpClient {
       const res = await fetch(url, {
         ...init,
         headers,
-        body: init.json !== undefined ? JSON.stringify(init.json) : init.body,
+        body,
         signal: controller.signal,
       });
 
       const text = await res.text();
-      const body = text ? safeJson(text) : null;
+      const parsed = text ? safeJson(text) : null;
 
-      if (!res.ok) throw new HttpError(res.status, body, url);
-      return body as T;
-    }finally {
+      if (!res.ok) throw new HttpError(res.status, parsed, url);
+      return parsed as T;
+    } finally {
       clearTimeout(id);
     }
   }
@@ -71,11 +112,12 @@ export class HttpClient {
     return this.request<T>(path, { method: "GET", ...(init ?? {}) });
   }
 
-  getCatch<T>(path: string, init?: RequestInit) {
+  // fixed: properly catches async errors
+  async getCatch<T>(path: string, init?: RequestInit): Promise<T | Error> {
     try {
-      return this.request<T>(path, { method: "GET", ...(init ?? {}) });
-    } catch (error) {
-      return error;
+      return await this.request<T>(path, { method: "GET", ...(init ?? {}) });
+    } catch (err: any) {
+      return err;
     }
   }
 
@@ -88,8 +130,15 @@ export class HttpClient {
   delete<T>(path: string, init?: RequestInit) {
     return this.request<T>(path, { method: "DELETE", ...(init ?? {}) });
   }
-}
 
-function safeJson(s: string) {
-  try { return JSON.parse(s); } catch { return s; }
+  // Convenience: explicit multipart helper
+  postForm<T>(path: string, form: FormData, init?: RequestInit) {
+    return this.request<T>(path, { method: "POST", body: form, ...(init ?? {}) });
+  }
+
+  // Convenience: x-www-form-urlencoded
+  postUrlEncoded<T>(path: string, params: Record<string, string>, init?: RequestInit) {
+    const body = new URLSearchParams(params);
+    return this.request<T>(path, { method: "POST", body, ...(init ?? {}) });
+  }
 }

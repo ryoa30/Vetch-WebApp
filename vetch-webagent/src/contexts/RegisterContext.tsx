@@ -52,11 +52,19 @@ type RegisterPeopleContextType = {
   setIsLocationValid: (isLocationValid: boolean) => void;
   isPetInfoValid: boolean;
   setIsPetInfoValid: (isPetInfoValid: boolean) => void;
+  sipNumber: string;
+  setSipNumber: (sipNumber: string) => void;
+  certificate: File | null;
+  setCertificate: (certificate: File | null) => void;
+  isAvailHomecare: boolean;
+  setIsAvailHomecare: (isAvailHomecare: boolean) => void;
+  isAvailEmergency: boolean;
+  setIsAvailEmergency: (isAvailEmergency: boolean) => void;
 };
 
 const RegisterPeopleContext = createContext<RegisterPeopleContextType | undefined>(undefined);
 
-export function RegisterPeopleContextProvider({ children }: { children: ReactNode }) {
+export function RegisterContextProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -79,6 +87,10 @@ export function RegisterPeopleContextProvider({ children }: { children: ReactNod
   const [isAccountInfoValid, setIsAccountInfoValid] = useState(false);
   const [isLocationValid, setIsLocationValid] = useState(false);
   const [isPetInfoValid, setIsPetInfoValid] = useState(false);
+  const [sipNumber, setSipNumber] = useState('');
+  const [certificate, setCertificate] = useState<File | null>(null);
+  const [isAvailHomecare, setIsAvailHomecare] = useState(false);
+  const [isAvailEmergency, setIsAvailEmergency] = useState(false);
 
 
   const context = {
@@ -125,7 +137,15 @@ export function RegisterPeopleContextProvider({ children }: { children: ReactNod
     isLocationValid,
     setIsLocationValid,
     isPetInfoValid,
-    setIsPetInfoValid
+    setIsPetInfoValid,
+    sipNumber, 
+    setSipNumber,
+    certificate,
+    setCertificate,
+    isAvailHomecare,
+    setIsAvailHomecare,
+    isAvailEmergency,
+    setIsAvailEmergency
   };
 
   return (
@@ -135,9 +155,9 @@ export function RegisterPeopleContextProvider({ children }: { children: ReactNod
   );
 }
 
-export function useRegisterPeople() {
+export function useRegister() {
   const ctx = useContext(RegisterPeopleContext);
-  if (!ctx) throw new Error("useRegisterPeople must be used within RegisterPeopleContextProvider");
+  if (!ctx) throw new Error("useRegister must be used within RegisterContextProvider");
   return ctx;
 }
 
