@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertCircle } from "lucide-react";
 
-export function LoginConfirmDialog({
+export function AddBlogDialogBox({
   children,
 }: {
   children: React.ReactNode;
@@ -20,28 +20,35 @@ export function LoginConfirmDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-sm">
         <AlertDialogHeader>
           <div className="flex items-start gap-3">
+            {/* Icon kiri */}
             <AlertCircle className="h-10 w-10 text-black mt-1 dark:text-white" />
             <div>
-              <AlertDialogTitle className="text-xl">Do you want to log in?</AlertDialogTitle>
+              <AlertDialogTitle className="text-lg font-semibold">
+                Are you sure the blog details are correct?
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                You have to login to use this service.
+                The blog will be uploaded
               </AlertDialogDescription>
             </div>
           </div>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+
+        <AlertDialogFooter className="flex justify-end gap-3">
+          {/* Yes button */}
           <AlertDialogAction asChild>
             <Link
-              href="/login"
-              className="px-4 py-2 rounded-md border border-black bg-white !text-black hover:bg-transparent"
+              href="#"
+              className="px-6 py-2 rounded-md border border-black bg-white !text-black hover:bg-transparent"
             >
               Yes
             </Link>
           </AlertDialogAction>
-          <AlertDialogCancel className="bg-red-500 text-white hover:bg-red-600">
+
+          {/* No button */}
+          <AlertDialogCancel className="px-6 py-2 rounded-md bg-red-500 text-white hover:bg-red-600">
             No
           </AlertDialogCancel>
         </AlertDialogFooter>
@@ -50,4 +57,4 @@ export function LoginConfirmDialog({
   );
 }
 
-export default LoginConfirmDialog;
+export default AddBlogDialogBox;

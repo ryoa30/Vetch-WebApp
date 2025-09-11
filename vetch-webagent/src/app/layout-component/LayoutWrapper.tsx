@@ -1,4 +1,3 @@
-// src/app/LayoutWrapper.tsx
 "use client";
 
 import { usePathname } from "next/navigation";
@@ -7,6 +6,7 @@ import { Footer } from "@/app/layout-component/footer/footer";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
   const noLayoutRoutes = [
     "/login",
     "/register/people/account",
@@ -14,9 +14,17 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     "/register/people/pet",
     "/register/vet/account",
     "/register/vet/location",
+    "/admin/dashboard",
+    "/admin/certificates",
+    "/admin/approval-history",
+    "/admin/blog",
+    "/admin/blog/add-blog",
   ];
 
-  const isNoLayout = noLayoutRoutes.includes(pathname);
+  // cek exact match atau prefix match untuk edit-blog/[id]
+  const isNoLayout =
+    noLayoutRoutes.includes(pathname) ||
+    pathname.startsWith("/admin/blog/edit-blog/");
 
   return (
     <>

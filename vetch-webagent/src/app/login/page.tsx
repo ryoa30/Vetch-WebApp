@@ -9,9 +9,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { IoLockClosedOutline } from "react-icons/io5";
 import { CiMail } from "react-icons/ci";
+import SuccessDialog from "@/app/alert-dialog-box/SuccessLogin";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [remember, setRemember] = useState("no");
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const router = useRouter();
+
+  const handleLogin = () => {
+    // 👉 nanti diganti sama validasi login
+    setOpenSuccess(true);
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -36,10 +45,9 @@ export default function LoginPage() {
           </h2>
           <Image
             src="/img/register/paw.png"
-            alt="Vetch Logo"
+            alt="Paw"
             width={100}
             height={100}
-            className=""
           />
         </div>
 
@@ -91,11 +99,26 @@ export default function LoginPage() {
 
         {/* Login Button */}
         <div className="flex justify-center items-center">
-          <Button className="w-full bg-white text-black hover:bg-gray-100 font-semibold cursor-pointer">
+          <Button
+            onClick={handleLogin}
+            className="w-full bg-white text-black hover:bg-gray-100 font-semibold cursor-pointer"
+          >
             Login
           </Button>
         </div>
 
+        {/* Success Dialog */}
+        <SuccessDialog open={openSuccess} 
+        onOpenChange={(val) => {
+            setOpenSuccess(val);
+            if (!val) {
+              // Kalau dialog ditutup → redirect ke homepage
+              router.push("/");
+            }
+          }}
+        />
+
+        {/* Sign Up Links */}
         <div className="mt-4 text-sm text-center">
           <p>Don’t have an account?</p>
           <div className="flex justify-center gap-4 mt-1">
@@ -118,7 +141,6 @@ export default function LoginPage() {
 
       {/* Right Side - Image */}
       <div className="hidden md:flex w-1/2 bg-[#3D8D7A] relative flex-col items-center justify-center">
-        {/* Ganti ini nanti sesuai gambar */}
         <Image
           src="/img/login/foot-step.png"
           alt="Pets Illustration"
@@ -126,7 +148,9 @@ export default function LoginPage() {
           height={400}
           className="object-contain"
         />
-        <h1 className="mt-24 text-white text-4xl font-semibold">Caring for Your Pets, <br />Anytime, Anywhere</h1>
+        <h1 className="mt-24 text-white text-4xl font-semibold text-center">
+          Caring for Your Pets, <br />Anytime, Anywhere
+        </h1>
         <Image
           src="/img/login/girl-walking.png"
           alt="Pets Illustration"
