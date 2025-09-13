@@ -47,7 +47,7 @@ export function NavbarDesktop() {
               <NavigationMenuContent className="bg-[#B3D8A8]">
                 <div className="p-4 w-48 flex flex-col gap-2">
                   <NavigationMenuLink asChild>
-                    <Link href="#" className="text-base">
+                    <Link href="/forPetParent/consultationVetList" className="text-base">
                       Consultation
                     </Link>
                   </NavigationMenuLink>

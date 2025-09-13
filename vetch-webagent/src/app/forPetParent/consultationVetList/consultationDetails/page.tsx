@@ -11,8 +11,7 @@ import Footer from "@/components/footer2"
 
 export default function DoctorProfile() {
   return (
-    <div className="min-h-screen bg-[#FBFFE4] flex flex-col">
-      <NavigationBar />
+    <div className="min-h-screen bg-[#FBFFE4] dark:bg-[#2E4F4A] flex flex-col">
 
       <div className="w-vw m-20">
         <div className="flex items-start gap-20">
@@ -29,10 +28,10 @@ export default function DoctorProfile() {
 
           {/* Doctor Info */}
           <div className="flex-1 flex flex-col">
-            <h2 className="text-2xl font-semibold text-[#0F5544]">Dr. Seemore</h2>
+            <h2 className="text-2xl font-semibold text-[#0F5544] dark:text-white">Dr. Seemore</h2>
 
-            <div className="flex items-center text-gray-700 text-sm mt-1">
-              <Star className="w-4 h-4 fill-green-600 stroke-black mr-1" />
+            <div className="flex items-center text-gray-700 dark:text-white text-sm mt-1">
+              <Star className="w-4 h-4 fill-green-600 stroke-black mr-1 dark:stroke-white" />
               <span className="font-medium">4.9</span>
               <span className="mx-1">|</span>
               <span>500 Reviews</span>
@@ -40,12 +39,12 @@ export default function DoctorProfile() {
 
             {/* Species */}
             <div className="mt-4">
-              <Label className="text-[#0F5544] font-semibold">Species</Label>
+              <Label className="text-[#0F5544] dark:text-white font-semibold">Species</Label>
               <div className="flex gap-2 mt-1 flex-wrap">
                 {["Dog", "Cat", "Reptiles", "Horse"].map((s, i) => (
                   <span
                     key={i}
-                    className="px-3 py-1 bg-white border rounded-full text-sm font-medium text-gray-900 shadow-sm">
+                    className="px-3 py-1 bg-white dark:bg-black border rounded-full text-sm font-medium text-gray-900 dark:text-white shadow-sm">
                     {s}
                   </span>
                 ))}
@@ -54,12 +53,12 @@ export default function DoctorProfile() {
 
             {/* Specialty */}
             <div className="mt-4">
-              <Label className="text-[#0F5544] font-semibold">Specialty</Label>
+              <Label className="text-[#0F5544] dark:text-white font-semibold">Specialty</Label>
               <div className="flex gap-2 mt-1 flex-wrap">
                 {["Dermatology", "Nutrition", "Cardiology", "Immunology"].map((s, i) => (
                   <span
                     key={i}
-                    className="px-3 py-1 bg-white border rounded-full text-sm font-medium text-gray-900 shadow-sm"
+                    className="px-3 py-1 bg-white dark:bg-black border rounded-full text-sm font-medium text-gray-900 dark:text-white shadow-sm"
                   >
                     {s}
                   </span>
@@ -71,8 +70,8 @@ export default function DoctorProfile() {
 
         {/* Description */}
         <div className="mt-6">
-          <h3 className="text-4xl  text-[#0F5544] mb-2">Description</h3>
-          <p className="text-black text-sm leading-relaxed">
+          <h3 className="text-4xl  text-[#0F5544] dark:text-white mb-2">Description</h3>
+          <p className="text-black dark:text-white text-sm leading-relaxed">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
             tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
             veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
@@ -83,7 +82,7 @@ export default function DoctorProfile() {
 
         {/* Reviews */}
         <div className="mt-8">
-          <h3 className="text-4xl text-[#0F5544] mb-4">Reviews</h3>
+          <h3 className="text-4xl text-[#0F5544] dark:text-white mb-4">Reviews</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, index) => (
               <ReviewCard key={index} />
@@ -95,8 +94,6 @@ export default function DoctorProfile() {
           </div>
         </div>
       </div>
-
-      <Footer />
 
     </div>
   )

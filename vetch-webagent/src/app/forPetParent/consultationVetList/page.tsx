@@ -30,10 +30,9 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <NavigationBar />
+    <div className="min-h-screen w-full bg-[#3D8D7A] dark:bg-[#1F2D2A] text-white">
       <div className="flex flex-1">
-        <div className="flex-1 bg-[#f6ffd8] p-8">
+        <div className="flex-1 p-8 bg-[#FBFFE4] dark:bg-[#2E4F4A]">
           <div className="flex gap-10 pb-10">
             <PetTypeButton />
             <ScheduleButton />
@@ -54,8 +53,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
-      <Footer2 />
     </div>
   );
 }
