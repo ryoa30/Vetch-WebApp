@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 class AuthController {
-    generateToken = ({
+    generateAccessToken = ({
         userId,
         email,
         role
@@ -18,6 +18,26 @@ class AuthController {
 
         return token;
     };
+
+    generateRefreshToken = ({
+        userId,
+        email,
+        role,
+        rememberMe
+    }) => {
+        const payload = {
+            userId,
+            email,
+            role
+        };
+
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: rememberMe ? "30d" : "1d",
+        });
+
+        return token;
+    };
+
     authorize = (req, res, next) => {
         try {
             const header = req.header("Authorization");

@@ -19,6 +19,7 @@ model User {
   password       String
   firstName      String     @map("first_name")
   lastName       String?    @map("last_name")
+  fullName       String     @map("full_name")
   phoneNumber    String?    @map("phone_number")
   profilePicture String?    @map("profile_picture")
   createdAt      DateTime   @default(now()) @map("created_at")
@@ -44,6 +45,7 @@ model Vet {
   isAvailHomecare    Boolean    @map("is_avail_homecare")
   isAvailEmergency   Boolean    @map("is_avail_emergency")
   verified           Boolean    @default(false)
+  verifiedDate       DateTime?   @map("verified_date") 
 
   // --- Relations ---
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)

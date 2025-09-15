@@ -23,12 +23,17 @@ export type LocationInput = {
   postalCode: string;
 };
 
+export type LoginInput = {
+  email: string;
+  password: string;
+}
+
 export type ValidationResult<T> =
    { ok: true; data: T }
   | { ok: false; errors: Record<string, string> };
 
 export class UserValidator {
-  #userService = new UserService(new HttpClient({baseUrl: API_URL.USER}));
+  #userService = new UserService();
 
   validateAccountInfo(input: Partial<AccountInfoInput>): ValidationResult<AccountInfoInput> {
     const errors: Record<string, string> = {};
@@ -109,6 +114,26 @@ export class UserValidator {
         district,
         province,
         postalCode,
+      },
+    };
+  }
+
+  validateLogin(email: string, password: string): ValidationResult<LoginInput> {
+    const errors: Record<string, string> = {};
+
+    if (!email) errors.email = "Email is required";
+    else if (!email.includes("@")) errors.email = "Email must contains @";
+
+    if (!password) errors.password = "Password is required";
+    else if(password.length < 8) errors.password = "Min 8 characters";
+
+    if (Object.keys(errors).length) return { ok: false, errors: errors };
+
+    return {
+      ok: true,
+      data: {
+        email,
+        password,
       },
     };
   }

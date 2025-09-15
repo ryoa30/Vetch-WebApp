@@ -1,18 +1,38 @@
 // /lib/services/AuthService.ts
-import { is } from "date-fns/locale";
 import { HttpClient } from "../http/HttpClient";
+import { API_URL } from "@/constant/apiConstant";
 
 
 export class UserService {
-  constructor(private http: HttpClient) {}
+  #http: HttpClient = new HttpClient({baseUrl: API_URL.USER});
 
   async getUserByEmail(email: string) {
-    return await this.http.getCatch('/email/' + email);
+    return await this.#http.getCatch('/email/' + email);
   }
 
   async validateOtp (email: string, otp: string) {
-    return await this.http.post('/validate-otp', {email: email, otp: otp});
+    return await this.#http.post('/validate-otp', {email: email, otp: otp});
   }
+
+  async login(email: string, password: string, rememberMe: boolean) {
+    try {
+      const result = await this.#http.post('/login', {email: email, password: password, rememberMe: rememberMe}, { credentials: "include" });
+      console.log(result);
+      if(result.ok){
+        sessionStorage.setItem('accessToken', result.accessToken);
+        sessionStorage.setItem('email', result.data.email);
+        sessionStorage.setItem('role', result.data.role);
+        sessionStorage.setItem('userId', result.data.id);
+        sessionStorage.setItem('fullName', result.data.fullName);
+
+        return result.data.role;
+      }
+    } catch (error) {
+      alert('Invalid email or password');
+      return null;
+    }
+  }
+
 
   async register(context: any, role: string) {
 
@@ -32,6 +52,7 @@ export class UserService {
           password: context.password,
           firstName: context.firstName,
           lastName: context.lastName,
+          fullName: context.firstName + " " + context.lastName,
           phoneNumber: context.phone,
           role: role,
           location: {
@@ -63,6 +84,7 @@ export class UserService {
           password: context.password,
           firstName: context.firstName,
           lastName: context.lastName,
+          fullName: context.firstName + " " + context.lastName,
           phoneNumber: context.phone,
           role: role,
           location: {
@@ -93,7 +115,7 @@ export class UserService {
 
     console.log("formaData: ",formData.getAll("file"));
 
-    return await this.http.postForm("/register", formData);
+    return await this.#http.postForm("/register", formData);
 
     
   }

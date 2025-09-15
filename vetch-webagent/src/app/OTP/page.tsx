@@ -16,12 +16,14 @@ import { useRouter } from "next/navigation";
 import { UserService } from "@/lib/services/UserService";
 import { HttpClient } from "@/lib/http/HttpClient";
 import { API_URL } from "@/constant/apiConstant";
+import OTPSuccess from "../alert-dialog-box/OTPSuccess";
 
 export default function OTPPage() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
+  const [dialog, setDialog] = useState(false);
 
-  const userService = new UserService(new HttpClient({ baseUrl: API_URL.USER }));
+  const userService = new UserService();
   const router = useRouter();
 
   const checkEmail = () => {
@@ -30,7 +32,6 @@ export default function OTPPage() {
     else router.push('/login');
   }
 
-  console.log(email, otp)
 
   useEffect(() => {
       checkEmail();
@@ -42,7 +43,7 @@ export default function OTPPage() {
         const result = await userService.validateOtp(email, otp);
         console.log(result);
         if(result.ok) {
-          router.push('/login');
+          setDialog(true);
         }else{
           alert('Invalid OTP');
         }
@@ -53,6 +54,7 @@ export default function OTPPage() {
     <div className="min-h-screen bg-[#A3D1C6] text-gray-800 flex flex-col items-center">
       {/* Header */}
       <OTPHeader />
+      <OTPSuccess open={dialog} onOpenChange={() => {setDialog(false); router.push('/login');}} />
 
       <div className="relative w-full h-[350px] max-w-4xl -mt-4 bg-[#B3D8A8] rounded-xl p-6 md:p-10 flex flex-col items-center justify-center gap-4">
         <h1 className="text-black text-2xl font-bold">Verification</h1>

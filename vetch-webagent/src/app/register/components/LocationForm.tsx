@@ -8,8 +8,6 @@ import { SearchableDropdown } from "@/components/SearchableDropdown";
 import { UserValidator } from "@/lib/validators/UserValidator";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/lib/services/UserService";
-import { HttpClient } from "@/lib/http/HttpClient";
-import { API_URL } from "@/constant/apiConstant";
 import { setWithExpiry } from "@/lib/utils/localStorage";
 
 interface IOptions {
@@ -45,9 +43,7 @@ interface IProps {
 
 const LocationForm:FC<IProps> = ({role}) => {
   const userValidator = new UserValidator();
-  const userService = new UserService(
-    new HttpClient({ baseUrl: API_URL.USER })
-  );
+  const userService = new UserService();
   const locationService = new LocationService();
   const [autocomplete, setAutocomplete] = useState<ILocationResponse[]>([]);
   const [addresses, setAddresses] = useState<IOptions[]>([]);
