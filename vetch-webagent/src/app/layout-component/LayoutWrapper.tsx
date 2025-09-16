@@ -18,13 +18,13 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     "/admin/certificates",
     "/admin/approval-history",
     "/admin/blog",
-    "/admin/blog/add-blog",
+    "/admin/blog/set-blog",
   ];
 
   // cek exact match atau prefix match untuk edit-blog/[id]
   const isNoLayout =
     noLayoutRoutes.includes(pathname) ||
-    pathname.startsWith("/admin/blog/edit-blog/");
+    pathname.startsWith("/admin/blog/set-blog/");
 
   return (
     <>

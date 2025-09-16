@@ -76,7 +76,6 @@ class UserController {
             const user = req.body.data ? JSON.parse(req.body.data) : req.body;
 
             if (req.file) {
-                console.log("masukkkk",req.file);
                 // stream the buffer into Cloudinary
                 const uploadResult = await new Promise((resolve, reject) => {
                     const stream = cloudinary.uploader.upload_stream(

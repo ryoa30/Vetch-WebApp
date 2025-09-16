@@ -21,15 +21,8 @@ function safeJson(s: string) {
   try { return JSON.parse(s); } catch { return s; }
 }
 
-// Narrow type guards that work in browser and Node runtimes
-const isFormData = (v: any): v is FormData =>
-  typeof FormData !== "undefined" && v instanceof FormData;
-
 const isURLSearchParams = (v: any): v is URLSearchParams =>
   typeof URLSearchParams !== "undefined" && v instanceof URLSearchParams;
-
-const isBlobLike = (v: any): v is Blob =>
-  typeof Blob !== "undefined" && v instanceof Blob;
 
 export class HttpClient {
   private baseUrl: string;
@@ -134,6 +127,9 @@ export class HttpClient {
   // Convenience: explicit multipart helper
   postForm<T>(path: string, form: FormData, init?: RequestInit) {
     return this.request<T>(path, { method: "POST", body: form, ...(init ?? {}) });
+  }
+  putForm<T>(path: string, form: FormData, init?: RequestInit) {
+    return this.request<T>(path, { method: "PUT", body: form, ...(init ?? {}) });
   }
 
   // Convenience: x-www-form-urlencoded

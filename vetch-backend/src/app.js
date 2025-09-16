@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const userRoutes = require('./routes/UserRoute');
 const locationRoutes = require('./routes/LocationRoute');
+const blogRoutes = require('./routes/BlogRoute');
 const adminRoutes = require('./routes/AdminRoute');
 const cookieParser = require('cookie-parser');
 
@@ -18,6 +19,7 @@ app.use(cors({
 app.use('/api/users', userRoutes);
 
 app.use('/api/admin', adminRoutes);
+app.use('/api/blogs', blogRoutes);
 
 app.use('/api/locations', locationRoutes);
 app.get('/', (req, res) => {

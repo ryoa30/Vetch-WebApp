@@ -16,6 +16,7 @@ import { IVet } from "../type";
 import { AdminService } from "@/lib/services/AdminService";
 import AppPaginationClient from "@/components/app-pagination-client";
 import { formatIsoJakarta } from "@/lib/utils/formatDate";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 // const historyData = [
 //   {
@@ -53,6 +54,7 @@ export default function ApprovalHistoryPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [volume, setVolume] = useState(5);
   const [query, setQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   
   const loadCertificates = async () =>{
     try {
@@ -65,6 +67,7 @@ export default function ApprovalHistoryPage() {
     } catch (error) {
       console.log(error);
     }
+    setIsLoading(false);
   }
 
   useEffect(() =>{
@@ -124,6 +127,12 @@ export default function ApprovalHistoryPage() {
             </CardHeader>
           </Card>
         )})}
+
+        {historyData.length === 0 && (
+          <div className="flex items-center justify-center px-4 py-3">
+            <p className="text-black dark:text-white font-medium">No Approval Yet</p>
+          </div>
+        )}
       </div>
 
       <AppPaginationClient 
@@ -131,12 +140,15 @@ export default function ApprovalHistoryPage() {
           currentPage={pageNumber}
           totalPages={totalPages}
           onPageChange={(page) => {
+            setIsLoading(true);
             setPageNumber(page);
           }}
           pageSize={volume}
-          onPageSizeChange={(size) => setVolume(size)}
+          onPageSizeChange={(size) => {setIsLoading(true); setVolume(size)}}
           resetToPage1OnSizeChange={true}
         />
+
+        <LoadingOverlay show={isLoading} />
 
       {/* Dialog */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>

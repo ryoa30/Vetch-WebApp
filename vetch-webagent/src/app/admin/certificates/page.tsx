@@ -18,6 +18,7 @@ import { IVet } from "../type";
 import ApproveCertificateDialogBox from "@/app/alert-dialog-box/ApproveCertificateDialogBox";
 import DisapproveCertificateDialogBox from "@/app/alert-dialog-box/DisapproveCertificateDialogBox";
 import AppPaginationClient from "@/components/app-pagination-client";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 export default function CertificatesPage() {
   const [selected, setSelected] = useState<IVet| null>(null);
@@ -34,6 +35,7 @@ export default function CertificatesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [volume, setVolume] = useState(5);
   const [query, setQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
 
   const loadCertificates = async () =>{
@@ -47,6 +49,7 @@ export default function CertificatesPage() {
     } catch (error) {
       console.log(error);
     }
+    setIsLoading(false);
   }
 
   useEffect(() =>{
@@ -126,12 +129,15 @@ export default function CertificatesPage() {
         currentPage={pageNumber}
         totalPages={totalPages}
         onPageChange={(page) => {
+          setIsLoading(true);
           setPageNumber(page);
         }}
         pageSize={volume}
-        onPageSizeChange={(size) => setVolume(size)}
+        onPageSizeChange={(size) =>{setIsLoading(true); setVolume(size)}}
         resetToPage1OnSizeChange={true}
       />
+
+      <LoadingOverlay show={isLoading} />
 
       {/* Dialog confirm */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>

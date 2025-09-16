@@ -1,25 +1,26 @@
 // /lib/services/AuthService.ts
 import { HttpClient } from "../http/HttpClient";
 import { API_URL } from "@/constant/apiConstant";
+import { IResponse } from "../http/types";
 
 
 export class UserService {
   #http: HttpClient = new HttpClient({baseUrl: API_URL.USER});
 
   async getUserByEmail(email: string) {
-    return await this.#http.getCatch('/email/' + email);
+    return await this.#http.getCatch<IResponse>('/email/' + email);
   }
 
   async validateOtp (email: string, otp: string) {
-    return await this.#http.post('/validate-otp', {email: email, otp: otp});
+    return await this.#http.post<IResponse>('/validate-otp', {email: email, otp: otp});
   }
 
   async login(email: string, password: string, rememberMe: boolean) {
     try {
-      const result = await this.#http.post('/login', {email: email, password: password, rememberMe: rememberMe}, { credentials: "include" });
+      const result = await this.#http.post<IResponse>('/login', {email: email, password: password, rememberMe: rememberMe}, { credentials: "include" });
       console.log(result);
       if(result.ok){
-        sessionStorage.setItem('accessToken', result.accessToken);
+        sessionStorage.setItem('accessToken', result.accessToken || '');
         sessionStorage.setItem('email', result.data.email);
         sessionStorage.setItem('role', result.data.role);
         sessionStorage.setItem('userId', result.data.id);
@@ -112,8 +113,6 @@ export class UserService {
     }
 
     formData.append('data', JSON.stringify(payload));
-
-    console.log("formaData: ",formData.getAll("file"));
 
     return await this.#http.postForm("/register", formData);
 

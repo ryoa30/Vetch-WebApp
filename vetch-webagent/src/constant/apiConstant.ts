@@ -4,5 +4,6 @@ export const API_URL = {
     USER: `${API_BASE_URL}/api/users`,
     LOCATION: `${API_BASE_URL}/api/locations`,
     ADMIN: `${API_BASE_URL}/api/admin`,
+    BLOG: `${API_BASE_URL}/api/blogs`,
     
 }

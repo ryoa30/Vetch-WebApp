@@ -215,10 +215,10 @@ model Rating {
 model Blog {
   id         String   @id @default(cuid())
   categoryId String   @map("category_id")
-  title      String   @db.VarChar(65)
-  context    String   @db.VarChar(255)
+  title      String   @db.VarChar(255)
+  context    String   @db.Text
   picture    String?
-  date       DateTime
+  date       DateTime @default(now()) @updatedAt
   isDeleted  Boolean  @default(false) @map("is_deleted")
 
   // --- Relations ---
