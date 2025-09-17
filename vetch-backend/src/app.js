@@ -4,6 +4,7 @@ const userRoutes = require('./routes/UserRoute');
 const locationRoutes = require('./routes/LocationRoute');
 const blogRoutes = require('./routes/BlogRoute');
 const adminRoutes = require('./routes/AdminRoute');
+const vetRoutes = require('./routes/VetRoute');
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(cors({
 app.use('/api/users', userRoutes);
 
 app.use('/api/admin', adminRoutes);
+app.use('/api/vet', vetRoutes);
 app.use('/api/blogs', blogRoutes);
 
 app.use('/api/locations', locationRoutes);
