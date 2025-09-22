@@ -1,6 +1,6 @@
 "use client"
 
-import { Star, QrCode, Building, Smartphone } from "lucide-react";
+import { Star, QrCode, Building, Smartphone, Dog, ClipboardPlus, List, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -62,28 +62,44 @@ export default function ConfirmBookingPage() {
 
                     <div className="space-y-6 h-full">
                         <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
-                            <div className="flex flex-col">
+
+                            <div className="flex justify-between items-center gap-2 py-3 border-b border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-[#1e2923] cursor-pointer" >
                                 <div className="flex items-center gap-2">
-                                    {/* <Dog className="w-5 h-5 text-black" /> */}
-                                    <span className="font-medium">Pet</span>
+                                    <div className="flex-shrink-0">
+                                        <Dog className="w-10 h-10 text-black dark:text-white" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="font-medium">Pet</span>
+                                        <span className="text-sm text-gray-500">Seemore</span>
+                                    </div>
                                 </div>
-                                <span className="text-sm text-gray-500">Seemore</span>
+                                <ChevronRight className="w-6 h-6 text-black dark:text-white" />
                             </div>
 
-                            <div className="flex flex-col">
+                            <div className="flex justify-between items-center gap-2 py-3 border-b border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-[#1e2923] cursor-pointer" >
                                 <div className="flex items-center gap-2">
-                                    {/* <PlusCircle className="w-5 h-5 text-black" /> */}
-                                    <span className="font-medium">Concerns</span>
+                                    <div className="flex-shrink-0">
+                                        <ClipboardPlus className="w-10 h-10 text-black dark:text-white" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="font-medium">Concerns</span>
+                                        <span className="text-sm text-gray-400">Select Concerns</span>
+                                    </div>
                                 </div>
-                                <span className="text-sm text-gray-400">Select Concerns</span>
+                                <ChevronRight className="w-6 h-6 text-black dark:text-white" />
                             </div>
 
-                            <div>
-                                <div className="flex">
-                                    {/* <FileText className="w-5 h-5 text-black" /> */}
-                                    <span className="font-medium">Illness Description</span>
+                            <div className="flex justify-between items-center gap-2 py-3 border-b border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-[#1e2923] cursor-pointer" >
+                                <div className="flex items-center gap-2">
+                                    <div className="flex-shrink-0">
+                                        <List className="w-10 h-10 text-black dark:text-white" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="font-medium">Illness Description</span>
+                                        <span className="text-sm text-gray-400">Add Consultation Reason Description</span>
+                                    </div>
                                 </div>
-                                <span className="text-sm text-gray-400">Add Consultation Reason Description</span>
+                                <ChevronRight className="w-6 h-6 text-black dark:text-white" />
                             </div>
                         </div>
                     </div>
@@ -158,9 +174,11 @@ export default function ConfirmBookingPage() {
                             <span>IDR 115.500</span>
                         </div>
                         <div className="flex justify-end mt-4">
-                            <button className="px-6 py-2 rounded-full bg-green-700 text-white font-semibold hover:bg-green-800">
-                                Confirm and Book
-                            </button>
+                            <a href="paymentBooking">
+                                <button className="px-6 py-2 rounded-full bg-green-700 text-white font-semibold hover:bg-green-800">
+                                    Confirm and Book
+                                </button>
+                            </a>
                         </div>
                     </div>
 
@@ -176,7 +194,7 @@ export default function ConfirmBookingPage() {
                             <label
                                 key={label}
                                 className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer ${
-                                paymentMethod === label ? "border-green-600 bg-green-50" : "hover:bg-gray-50"
+                                paymentMethod === label ? "border-green-600 bg-green-50 dark:bg-[#1e2923]" : "hover:bg-gray-50 dark:hover:bg-[#1e2923]" 
                                 }`}>
                                 <div className="flex items-center gap-2">
                                     {icon}
@@ -198,34 +216,6 @@ export default function ConfirmBookingPage() {
                     </div>
                 </div>                
             </div>
-
-
-        {/* Hero Section */}
-        {/* <section className="bg-[#A3D1C6] dark:bg-teal-800 flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-12 gap-8">
-            <div className="flex-1">
-            <h1 className="text-3xl md:text-4xl font-bold text-black dark:text-white">
-                Caring for Your Pets, <br />
-                <span className="italic font-normal text-gray-700 dark:text-gray-300">
-                Anytime, Anywhere
-                </span>
-            </h1>
-            <p className="mt-4 text-gray-700 dark:text-gray-300 max-w-md">
-                Connect with certified veterinarians for expert advice and treatment
-                for your pet's health.
-            </p>
-            </div>
-            <div className="flex-1 flex justify-center">
-            <Image
-                src="/img/about-us.png"
-                alt="Pet Hero"
-                width={300}
-                height={300}
-                className="rounded-lg"
-            />
-            </div>
-        </section> */}
-
-        
         </main>
     );
 }
