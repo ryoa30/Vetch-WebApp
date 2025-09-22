@@ -81,29 +81,9 @@ export default function DoctorProfile() {
 
   useEffect(() => {
     loadTimeSlots();
-    setSelectedTime("");
   }, [selectedDate])
 
-  // const timeSlots = [
-  //   "12.00",
-  //   "12.30",
-  //   "13.00",
-  //   "13.30",
-  //   "14.00",
-  //   "14.30",
-  //   "12.00",
-  //   "12.30",
-  //   "13.00",
-  //   "13.30",
-  //   "14.00",
-  //   "14.30",
-  //   "12.00",
-  //   "12.30",
-  //   "13.00",
-  //   "13.30",
-  //   "14.00",
-  //   "14.30",
-  // ];
+  // console.log(selectedTime);
 
   return (
     <div className="min-h-screen bg-[#FBFFE4] dark:bg-[#2E4F4A] flex flex-col">
@@ -195,7 +175,7 @@ export default function DoctorProfile() {
                   );
                 }}
                 selected={selectedDate}
-                onSelect={setSelectedDate}
+                onSelect={(date)=>{setSelectedDate(date); setSelectedTime("")}}
                 className="rounded-md bg-white dark:bg-[#2D4236] mx-auto w-[300px] sm:w-auto"
               />
             </div>
