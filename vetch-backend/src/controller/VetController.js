@@ -1,17 +1,23 @@
 const VetRepository = require('../repository/VetRepository');
 const ScheduleRepository = require('../repository/ScheduleRepository');
+const RatingRepository = require('../repository/RatingRepository');
 const { hhmmToUTCDate, dateToHHMM } = require('../utils/dateUtils');
 
 class VetController {
     #vetRepository;
     #scheduleRepository;
+    #ratingRepository;
 
     constructor() {
         this.#scheduleRepository = new ScheduleRepository();
         this.#vetRepository = new VetRepository();
+        this.#ratingRepository = new RatingRepository();
 
         this.createSchedule = this.createSchedule.bind(this);
         this.getVetListConsultation = this.getVetListConsultation.bind(this);
+        this.getVetDetailsById = this.getVetDetailsById.bind(this);
+        this.getVetRatings = this.getVetRatings.bind(this);
+        this.getVetSchedulesByDayAndId = this.getVetSchedulesByDayAndId.bind(this);
     }
 
 
@@ -24,7 +30,7 @@ class VetController {
                 return res.status(400).json({ok: false, message: 'Schedule conflict detected' });
             }
             const timeDate = hhmmToUTCDate(time);
-            const schedule = await this.#scheduleRepository.create({vetId, dayOfWeek: day,timeOfDay:timeDate});
+            const schedule = await this.#scheduleRepository.create({vetId, dayNumber: Number(day),timeOfDay:timeDate});
             console.log(schedule);
             res.status(201).json({ok: true, data: {...schedule, timeDate: dateToHHMM(schedule.timeOfDay)}, message: 'Schedule created successfully'});
         } catch (error) {
@@ -36,17 +42,46 @@ class VetController {
     async getVetListConsultation(req, res) {
         try {
             const { page, volume, query} = req.query;
-            const vets = await this.#vetRepository.findVetListConsultation(page, volume, query);
+            const vets = await this.#vetRepository.findVetListConsultation(Number(page), Number(volume), query);
             res.status(200).json({ok: true, data: vets, message: 'Vet list fetched successfully'});
         } catch (error) {
             console.log(error);
             res.status(500).json({ ok: false, message: 'Error fetching vet list', error: error.message });
         }
     }
-
     
+    async getVetDetailsById(req, res) {
+        try {
+            const {id} = req.params;
+            const vet = await this.#vetRepository.findVetById(id);
+            res.status(200).json({ok: true, data: vet, message: 'Vet details fetched successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching vet', error: error.message });
+        }
+    }
 
+    async getVetRatings(req,res){
+        try {
+            const {id} = req.params;
+            const vet = await this.#ratingRepository.getVetRatings(id);
+            res.status(200).json({ok: true, data: vet, message: 'Vet ratings fetched successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching vet', error: error.message });
+        }
+    }
     
+    async getVetSchedulesByDayAndId(req, res) {
+        try {
+            const {id, day} = req.query;
+            const schedules = await this.#scheduleRepository.findVetSchedulesByDayAndId(id, day);
+            res.status(200).json({ok: true, message: "Success fetching vet schedule", data: schedules})
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching vet Schedules', error: error.message })
+        }
+    }
 }
 
 

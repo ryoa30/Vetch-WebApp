@@ -40,7 +40,7 @@ model Vet {
   userId             String     @unique @map("user_id")
   uploadCertificate  String?    @map("upload_certificate")
   sipNumber          String     @map("sip_number") @db.VarChar(255)
-  description        String     @db.VarChar(255)
+  description        String     @db.Text
   price              Int
   isAvailHomecare    Boolean    @map("is_avail_homecare")
   isAvailEmergency   Boolean    @map("is_avail_emergency")
@@ -255,10 +255,10 @@ model Chat {
 model Schedule {
   id        String   @id @default(cuid())
   vetId     String   @map("vet_id")
-  dayOfWeek String   @map("day_of_week") @db.VarChar(10)
+  dayNumber Int      @map("day_number")
   isDeleted Boolean  @default(false) @map("is_deleted")
   timeOfDay DateTime @db.Time(0) // stores only time-of-day, no date
-  @@index([vetId, dayOfWeek, timeOfDay])
+  @@index([vetId, dayNumber, timeOfDay])
 
   // --- Relations ---
   vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)

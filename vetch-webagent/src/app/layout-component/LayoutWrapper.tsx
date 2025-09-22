@@ -3,9 +3,12 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/app/layout-component/navbar/Navbar";
 import { Footer } from "@/app/layout-component/footer/footer";
+import LoadingOverlay from "@/components/LoadingOverlay";
+import { useLoading } from "@/contexts/LoadingContext";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const {loading} = useLoading();
 
   const noLayoutRoutes = [
     "/login",
@@ -35,6 +38,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           <Navbar />
           <main>{children}</main>
           <Footer />
+          <LoadingOverlay show={loading}/>
         </>
       )}
     </>

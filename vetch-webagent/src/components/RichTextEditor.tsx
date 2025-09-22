@@ -76,7 +76,7 @@ export default function RichTextEditor({ value = "", onChange, className }: Prop
 
   useEffect(() => {
     if (editor && typeof value === "string" && value !== editor.getHTML()) {
-      editor.commands.setContent(value, false);
+      editor.commands.setContent(value);
     }
   }, [value, editor]);
 

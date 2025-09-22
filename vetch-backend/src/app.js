@@ -6,6 +6,7 @@ const blogRoutes = require('./routes/BlogRoute');
 const adminRoutes = require('./routes/AdminRoute');
 const vetRoutes = require('./routes/VetRoute');
 const cookieParser = require('cookie-parser');
+const main = require('./utils/seeder');
 
 const app = express();
 
@@ -28,6 +29,6 @@ app.get('/', (req, res) => {
     res.status(200).json({ message: 'Welcome to the OOP Backend API!' });
 });
 
-
+// main();
 
 module.exports = app;

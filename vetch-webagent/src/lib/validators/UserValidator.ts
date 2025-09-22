@@ -79,9 +79,9 @@ export class UserValidator {
         firstName,
         lastName,
         phone,
-        role: input.role,
-        sipNumber: input.sipNumber,
-        certificate: input.certificate
+        role: input.role || "",
+        sipNumber: input.sipNumber || "",
+        certificate: input.certificate || null,
       },
     };
   }
@@ -127,7 +127,7 @@ export class UserValidator {
     if (!password) errors.password = "Password is required";
     else if(password.length < 8) errors.password = "Min 8 characters";
 
-    if (Object.keys(errors).length) return { ok: false, errors: errors };
+    if (Object.keys(errors).length) return { ok: false, errors: {...errors} };
 
     return {
       ok: true,

@@ -41,7 +41,7 @@ export default function LoginPage() {
     const response = userValidator.validateLogin(email, password);
     if(!response.ok){
       setAllowLogin(false);
-      setErrors(response.errors);
+      setErrors({...errors ,...response.errors});
     }else{
       setAllowLogin(true);
       setErrors({email: "", password: ""});

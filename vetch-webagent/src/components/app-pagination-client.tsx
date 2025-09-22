@@ -87,7 +87,7 @@ export default function AppPaginationClient({
                   onClick={() => go(currentPage - 1)}
                   disabled={currentPage <= 1}
                   aria-disabled={currentPage <= 1}
-                  className={`px-3 py-2 font-medium hover:bg-white rounded-lg ${currentPage <= 1 ? "cursor-not-allowed" : "cursor-pointer"}`}
+                  className={`px-3 py-2 font-medium text-black dark:text-white hover:bg-white rounded-lg ${currentPage <= 1 ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
                   <ChevronLeft size={16} className="inline mr-1" /> Previous
                 </button>
@@ -103,7 +103,7 @@ export default function AppPaginationClient({
                     isActive={it === currentPage}
                     aria-current={it === currentPage ? "page" : undefined}
                   >
-                    <button type="button" className="cursor-pointer w-full h-full" onClick={() => go(it as number)}>
+                    <button type="button" className="text-black dark:text-white cursor-pointer w-full h-full" onClick={() => go(it as number)}>
                       {it}
                     </button>
                   </PaginationLink>
@@ -118,7 +118,7 @@ export default function AppPaginationClient({
                   onClick={() => go(currentPage + 1)}
                   disabled={currentPage >= totalPages}
                   aria-disabled={currentPage >= totalPages}
-                  className={`px-3 py-2 font-medium hover:bg-white rounded-lg ${currentPage >= totalPages ? "cursor-not-allowed" : "cursor-pointer"}`}
+                  className={`px-3 text-black dark:text-white py-2 font-medium hover:bg-white rounded-lg ${currentPage >= totalPages ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
                   Next <ChevronRight size={16} className="inline ml-1" />
                 </button>
@@ -151,7 +151,7 @@ function VolumeDropdown({
     <div className="flex items-center gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-1">
+          <Button variant="outline" size="sm" className="gap-1 text-black dark:text-white">
             {pageSize}
             <ChevronDown className="h-4 w-4" />
           </Button>

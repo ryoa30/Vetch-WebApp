@@ -140,6 +140,23 @@
 .tiptap ol { list-style: decimal; padding-left: 1.5rem; }
 .tiptap li { margin: 0.25rem 0; }
 
+.aspect-zero {
+  aspect-ratio: 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
 
 @layer base {
   * {

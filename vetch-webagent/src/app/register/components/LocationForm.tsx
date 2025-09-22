@@ -86,7 +86,7 @@ const LocationForm:FC<IProps> = ({role}) => {
             setAddress("");
             const result = await locationService.getAutocomplete(search);
             console.log(result);
-            if(result){
+            if(result.addresses){
                 setAutocomplete(
                   result.addresses.map((item: any, index: number) => ({
                     index,

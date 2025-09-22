@@ -17,6 +17,8 @@ function dateToHHMM(d) {
 
 const BUSINESS_TZ = "Asia/Jakarta";
 
+const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
 // Build { weekday: "monday", timeOfDay: Date(1970-01-01THH:mm:ssZ) }
 function nowForSchedule(zone = BUSINESS_TZ) {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -29,14 +31,14 @@ function nowForSchedule(zone = BUSINESS_TZ) {
   }).formatToParts(new Date());
 
   const get = (t) => parts.find((p) => p.type === t)?.value;
-  const weekday = get("weekday").toLowerCase(); // "monday", "tuesday", ...
+  const weekday = daysOfWeek.indexOf(get("weekday").toLowerCase())+1; // "monday", "tuesday", ...
   const hh = Number(get("hour"));
   const mm = Number(get("minute"));
   const ss = Number(get("second"));
 
   // Anchor to 1970-01-01 UTC so it matches Postgres TIME
   const timeOfDay = new Date(Date.UTC(1970, 0, 1, hh, mm, ss, 0));
-  return { weekday, timeOfDay };
+  return { weekday: Number(weekday), timeOfDay };
 }
 
 module.exports = {

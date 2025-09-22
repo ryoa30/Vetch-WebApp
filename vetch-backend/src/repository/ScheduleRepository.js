@@ -1,4 +1,4 @@
-const { hhmmToUTCDate } = require("../utils/dateUtils");
+const { hhmmToUTCDate, nowForSchedule } = require("../utils/dateUtils");
 const BaseRepository = require("./BaseRepository");
 
 const MIN_PER_DAY = 1440;
@@ -25,11 +25,14 @@ class ScheduleRepository extends BaseRepository {
     const lo = (center - 30 + MIN_PER_DAY) % MIN_PER_DAY;
     const hi = (center + 30) % MIN_PER_DAY;
 
-    console.log(hhmmToUTCDate(this.minsToHHMM(lo)))
+    console.log(hhmmToUTCDate(this.minsToHHMM(lo)));
 
     const timeFilter =
       lo <= hi
-        ? { gt: hhmmToUTCDate(this.minsToHHMM(lo)), lt: hhmmToUTCDate(this.minsToHHMM(hi)) }
+        ? {
+            gt: hhmmToUTCDate(this.minsToHHMM(lo)),
+            lt: hhmmToUTCDate(this.minsToHHMM(hi)),
+          }
         : {
             OR: [
               { gt: hhmmToUTCDate(this.minsToHHMM(lo)) }, // e.g., 23:40..24:00
@@ -38,9 +41,38 @@ class ScheduleRepository extends BaseRepository {
           };
 
     return this._model.findFirst({
-      where: { vetId, dayOfWeek:day, timeOfDay: timeFilter },
+      where: { vetId, dayNumber: day, timeOfDay: timeFilter },
       orderBy: { timeOfDay: "asc" },
     });
+  }
+
+  async findVetSchedulesByDayAndId(vetId, day) {
+    const { weekday, timeOfDay } = nowForSchedule();
+    console.log(weekday);
+
+    const where = weekday === Number(day)? { dayNumber:Number(day), timeOfDay: {gt:timeOfDay}}:{ dayNumber: Number(day)};
+
+    console.log({
+        ...where,
+        vetId,
+        isDeleted: false,
+      });
+
+    const result = await this._model.findMany({
+      where: {
+        ...where,
+        vetId,
+        isDeleted: false,
+      },
+      orderBy: { timeOfDay: "asc" },
+    });
+
+    // console.log(result);
+
+    return result.map((schedule) => ({
+      ...schedule,
+      timeOfDay: schedule.timeOfDay.toISOString().slice(11, 16)
+    }));
   }
 }
 
