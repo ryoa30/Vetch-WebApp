@@ -67,7 +67,7 @@ export default function HomePage() {
               need for 50,000 in 2024)78 and difficult access to facilities, which results in only 
               29.5% of pets visiting a vet910. We envision Vetch as an innovative platform that 
               simplifies the process of finding, booking, and consulting with veterinarians efficiently, 
-              significantly easing pet owners' access to vital services and enhancing the overall 
+              significantly easing pet owners`&apos; access to vital services and enhancing the overall 
               quality of animal care
             </p>
           </div>

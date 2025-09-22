@@ -19,6 +19,7 @@ model User {
   password       String
   firstName      String     @map("first_name")
   lastName       String?    @map("last_name")
+  fullName       String     @map("full_name")
   phoneNumber    String?    @map("phone_number")
   profilePicture String?    @map("profile_picture")
   createdAt      DateTime   @default(now()) @map("created_at")
@@ -39,11 +40,12 @@ model Vet {
   userId             String     @unique @map("user_id")
   uploadCertificate  String?    @map("upload_certificate")
   sipNumber          String     @map("sip_number") @db.VarChar(255)
-  description        String     @db.VarChar(255)
+  description        String     @db.Text
   price              Int
   isAvailHomecare    Boolean    @map("is_avail_homecare")
   isAvailEmergency   Boolean    @map("is_avail_emergency")
   verified           Boolean    @default(false)
+  verifiedDate       DateTime?   @map("verified_date") 
 
   // --- Relations ---
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -213,10 +215,10 @@ model Rating {
 model Blog {
   id         String   @id @default(cuid())
   categoryId String   @map("category_id")
-  title      String   @db.VarChar(65)
-  context    String   @db.VarChar(255)
+  title      String   @db.VarChar(255)
+  context    String   @db.Text
   picture    String?
-  date       DateTime
+  date       DateTime @default(now()) @updatedAt
   isDeleted  Boolean  @default(false) @map("is_deleted")
 
   // --- Relations ---
@@ -253,9 +255,10 @@ model Chat {
 model Schedule {
   id        String   @id @default(cuid())
   vetId     String   @map("vet_id")
-  dayOfWeek String   @map("day_of_week") @db.VarChar(10)
-  timeOfDay DateTime @map("time_of_day") @db.Timestamp
+  dayNumber Int      @map("day_number")
   isDeleted Boolean  @default(false) @map("is_deleted")
+  timeOfDay DateTime @db.Time(0) // stores only time-of-day, no date
+  @@index([vetId, dayNumber, timeOfDay])
 
   // --- Relations ---
   vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)

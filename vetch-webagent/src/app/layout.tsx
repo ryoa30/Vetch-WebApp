@@ -4,6 +4,7 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import LayoutWrapper from "@/app/layout-component/LayoutWrapper";
+import { LoadingContextProvider } from "@/contexts/LoadingContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
           enableSystem
           disableTransitionOnChange
         >
-          <LayoutWrapper>{children}</LayoutWrapper>
+          <LoadingContextProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </LoadingContextProvider>
         </ThemeProvider>
       </body>
     </html>

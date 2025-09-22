@@ -76,7 +76,6 @@ class UserController {
             const user = req.body.data ? JSON.parse(req.body.data) : req.body;
 
             if (req.file) {
-                console.log("masukkkk",req.file);
                 // stream the buffer into Cloudinary
                 const uploadResult = await new Promise((resolve, reject) => {
                     const stream = cloudinary.uploader.upload_stream(
@@ -123,7 +122,7 @@ class UserController {
                 }
                 res.status(200).json({ ok: true, message: 'OTP Verified successfully', data: insertedUser });
             }else{
-                throw new Error(result.message)
+                res.status(400).json({ ok: false, message: 'Invalid OTP' });
             }
         } catch (error) {
             res.status(500).json({ ok: false, message: 'Error Validate OTP', error: error.message });
@@ -177,10 +176,22 @@ class UserController {
     async validateLogin(req, res) {
         try {
             const user = await this.#userRepository.findByEmail(req.body.email);
+            console.log(user);
             if(user){
-                if(user.password === req.body.password){
-                    const token = this.#authController.generateToken(user.id, user.email, (user.id.startsWith('V') ? 'vet' : user.id.startsWith('A') ? 'admin' : 'user'));
-                    res.status(200).json({ message: 'Login successful', data: user, token: token });
+                // console.log(await bcrypt.compare(req.body.password, user.password));
+                if(await bcrypt.compare(req.body.password, user.password)){
+                    const role = user.id.startsWith('V') ? 'vet' : user.id.startsWith('A') ? 'admin' : 'user';
+                    const accessToken = this.#authController.generateAccessToken(user.id, user.email, role);
+                    const refreshToken = this.#authController.generateRefreshToken(user.id, user.email, role, req.body.rememberMe);
+                    res.cookie("refreshToken", refreshToken, {
+                        httpOnly: true,
+                        secure: true,
+                        sameSite: "lax",
+                        maxAge: req.body.rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000, // 30d vs 1d
+                    });
+                    console.log(accessToken, refreshToken);
+                    
+                    res.status(200).json({ok: true, message: 'Login successful', data: {fullName: `${user.firstName} ${user.lastName}`, id: user.id, email: user.email, role: role}, accessToken: accessToken});
                 }else{
                     throw new Error('Invalid Password');
                 }
@@ -188,7 +199,8 @@ class UserController {
                 throw new Error('User not found');
             }
         } catch (error) {
-            res.status(500).json({ message: 'Error Login', error: error.message });
+            console.log(error);
+            res.status(500).json({ok: false, message: 'Error Login', error: error.message });
         }
     }
 }

@@ -14,7 +14,7 @@ export default function AboutPage() {
           </h1>
           <p className="mt-4 text-gray-700 dark:text-gray-300 max-w-md">
             Connect with certified veterinarians for expert advice and treatment
-            for your pet's health.
+            for your pet&apos;s health.
           </p>
         </div>
         <div className="flex-1 flex justify-center">

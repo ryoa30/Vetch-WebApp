@@ -12,14 +12,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertCircle } from "lucide-react";
 
-export function AddBlogDialogBox({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+interface IProps {
+  open: boolean;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+}
+
+export function AddBlogDialogBox({ open, onConfirm, onCancel }: IProps) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+    <AlertDialog open={open}>
       <AlertDialogContent className="max-w-sm">
         <AlertDialogHeader>
           <div className="flex items-start gap-3">
@@ -38,17 +39,12 @@ export function AddBlogDialogBox({
 
         <AlertDialogFooter className="flex justify-end gap-3">
           {/* Yes button */}
-          <AlertDialogAction asChild>
-            <Link
-              href="#"
-              className="px-6 py-2 rounded-md border border-black bg-white !text-black hover:bg-transparent"
-            >
+          <AlertDialogAction onClick={onConfirm} className="cursor-pointer px-6 py-2 rounded-md border border-black bg-white !text-black hover:bg-gray-100">
               Yes
-            </Link>
           </AlertDialogAction>
 
           {/* No button */}
-          <AlertDialogCancel className="px-6 py-2 rounded-md bg-red-500 text-white hover:bg-red-600">
+          <AlertDialogCancel onClick={onCancel} className="cursor-pointer px-6 py-2 rounded-md bg-red-500 text-white hover:bg-red-600">
             No
           </AlertDialogCancel>
         </AlertDialogFooter>

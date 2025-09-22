@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -12,12 +11,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import RichTextEditor from "@/components/RichTextEditor";
+import { BlogValidator } from "@/lib/validators/BlogValidator";
+import { BlogService } from "@/lib/services/BlogService";
+import { useRouter } from "next/navigation";
+import ErrorDialog from "@/app/alert-dialog-box/ErrorDialogBox";
+
+interface IErrors {
+  title?: string;
+  categoryId?: string;
+  content?: string;
+  image?: string;
+}
 
 export default function AddBlogPage() {
   const [image, setImage] = useState<File | null>(null);
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<Array<{id: string, categoryName: string}>>([]);
+  const [categoryId, setCategoryId] = useState("");
   const [content, setContent] = useState("");
+  const [openError, setOpenError] = useState(false);
+
+  const router = useRouter();
+
+  const [errors, setErrors] = useState<IErrors>({
+    title: "",
+    categoryId: "",
+    content: "",
+    image: "",
+  });
+
+  const blogValidator = new BlogValidator();
+  const blogService = new BlogService();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -25,10 +50,36 @@ export default function AddBlogPage() {
     }
   };
 
-  const handlePublish = () => {
-    console.log({ title, category, content, image });
-    alert("Blog published!");
-  };
+  const handlePublish = async () => {
+    const result = blogValidator.validateBlogInfo({ title, categoryId, content, image: image as File });
+    if (!result.ok) {
+      setErrors(result.errors);
+      setOpenError(true);
+    } else {
+      setErrors({});
+      const result = await blogService.createBlog(categoryId, title, content, image as File);
+      if(result.ok){
+        alert("Blog published successfully!");
+        setImage(null);
+        setTitle("");
+        setCategoryId("");
+        setContent("");
+        router.push('/admin/blog');
+      }else{
+        alert("Failed to publish blog. Please try again.");
+      }
+    };
+  }
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      const result = await blogService.getAllCategories();
+      if(result.ok){
+        setCategories(result.data);
+      }
+    }
+    loadCategories();
+  }, [])
 
   return (
     <div className="p-6 dark:bg-[#71998F]">
@@ -47,16 +98,16 @@ export default function AddBlogPage() {
 
       {/* Upload Image */}
       <div className="w-full h-48 bg-gray-100 border border-dashed border-gray-400 flex items-center justify-center mb-6 relative rounded-md overflow-hidden">
-        {image ? (
+        {image && (
           <Image
             src={URL.createObjectURL(image)}
             alt="Preview"
             fill
             className="object-cover"
           />
-        ) : (
-          <label className="cursor-pointer flex flex-col items-center">
-            <span className="text-gray-600 font-medium">+ Add Picture</span>
+        )}
+        <label className={`cursor-pointer flex flex-col items-center justify-center z-10 ${image ? 'duration-300 opacity-0 hover:opacity-100 hover:bg-black/50 text-white p-2 w-full h-full rounded-md' : 'text-gray-600'}`}>
+            <span className={`font-medium ${image ? ' text-white ' : 'text-gray-600'}`}>+ Add Picture</span>
             <Input
               type="file"
               accept="image/*"
@@ -64,7 +115,6 @@ export default function AddBlogPage() {
               className="hidden"
             />
           </label>
-        )}
       </div>
 
       {/* Blog Title */}
@@ -81,14 +131,14 @@ export default function AddBlogPage() {
       {/* Blog Category */}
       <div className="mb-4">
         <label className="block text-white mb-2">Blog Category</label>
-        <Select onValueChange={setCategory}>
+        <Select onValueChange={setCategoryId} value={categoryId}>
           <SelectTrigger className="bg-white dark:bg-white text-black dark:text-black rounded-md">
             <SelectValue placeholder="Choose category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="daily">Daily Care</SelectItem>
-            <SelectItem value="nutrition">Nutrition</SelectItem>
-            <SelectItem value="health">Health</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>{category.categoryName}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -96,12 +146,7 @@ export default function AddBlogPage() {
       {/* Blog Content */}
       <div className="mb-6">
         <label className="block text-white mb-2">Content</label>
-        <Textarea
-          placeholder="Write your blog content here..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="min-h-[200px] bg-white dark:bg-white"
-        />
+        <RichTextEditor value={content} onChange={setContent} />
       </div>
 
       {/* Publish Button */}
@@ -113,6 +158,9 @@ export default function AddBlogPage() {
           Publish
         </Button>
       </div>
+
+      {/* Error Dialog */}
+      <ErrorDialog open={openError} onOpenChange={setOpenError} errors={Object.values(errors).filter(err => err !== "")} />
     </div>
   );
 }

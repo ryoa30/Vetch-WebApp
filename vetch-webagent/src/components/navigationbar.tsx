@@ -1,22 +1,22 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, RefObject } from "react";
 import { ThemeToggleSwitch } from "@/components/ui/togglebutton";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function NavigationBar() {
-  const [openMenu, setOpenMenu] = useState(null);
-  const [clickedMenu, setClickedMenu] = useState(null);
-  const parentsRef = useRef(null);
-  const accountRef = useRef(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [clickedMenu, setClickedMenu] = useState<string | null>(null);
+  const parentsRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
 
   // Close menus when clicking outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (
         parentsRef.current &&
-        !parentsRef.current.contains(e.target) &&
+        !(parentsRef.current.contains(e.target)) &&
         accountRef.current &&
-        !accountRef.current.contains(e.target)
+        !(accountRef.current.contains(e.target))
       ) {
         setOpenMenu(null);
         setClickedMenu(null);
