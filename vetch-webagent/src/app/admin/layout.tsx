@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Sidebar from "./components/sidebar";
 import { Footer } from "@/app/layout-component/footer/footer";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/contexts/SessionContext";
 
 export default function AdminLayout({
   children,
@@ -11,9 +12,10 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const {user } = useSession();
 
   useEffect(() => {
-    if(sessionStorage.getItem('role') !== 'admin' || !sessionStorage.getItem('accessToken')) router.push('/login');
+    if(user?.role !== 'admin') router.push('/login');
   }, [])
   return (
     <div className="flex min-h-screen">

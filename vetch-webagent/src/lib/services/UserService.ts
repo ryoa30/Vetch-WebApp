@@ -2,6 +2,7 @@
 import { HttpClient } from "../http/HttpClient";
 import { API_URL } from "@/constant/apiConstant";
 import { IResponse } from "../http/types";
+// Do not import server-only session utilities in client-land
 
 
 export class UserService {
@@ -20,16 +21,28 @@ export class UserService {
       const result = await this.#http.post<IResponse>('/login', {email: email, password: password, rememberMe: rememberMe}, { credentials: "include" });
       console.log(result);
       if(result.ok){
-        sessionStorage.setItem('accessToken', result.accessToken || '');
-        sessionStorage.setItem('email', result.data.email);
-        sessionStorage.setItem('role', result.data.role);
-        sessionStorage.setItem('userId', result.data.id);
-        sessionStorage.setItem('fullName', result.data.fullName);
+        // Set iron-session via server route to avoid client importing server-only code
+        await fetch('/api/session/set', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          cache: 'no-store',
+          body: JSON.stringify({
+            accessToken: result.accessToken,
+            user: {
+              id: result.data.id,
+              role: result.data.role,
+              fullName: result.data.fullName,
+              email: result.data.email,
+            }
+          }),
+        });
 
         return result.data.role;
       }
     } catch (error) {
       alert('Invalid email or password');
+      console.log(error); 
       return null;
     }
   }

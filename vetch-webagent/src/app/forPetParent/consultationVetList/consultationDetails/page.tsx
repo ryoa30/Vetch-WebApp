@@ -10,22 +10,23 @@ import { VetService } from "@/lib/services/VetService";
 import { useEffect, useState } from "react";
 import { ISchedules, IVet } from "../types";
 import { useLoading } from "@/contexts/LoadingContext";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function DoctorProfile() {
   const sp = useSearchParams();
   const id = sp.get("id");
   const time = sp.get("time");
-  const vetService = new VetService();
-  const [vet, setVet] = useState<IVet>();
+  const { setIsLoading } = useLoading();
   const [ratings, setRatings] = useState([]);
   const [showAllRating, setShowAllRating] = useState(false);
   const [seeMore, setSeeMore] = useState<boolean>(false);
-  const { setIsLoading } = useLoading();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(time);
   const [timeSlots, setTimeSlots] = useState<ISchedules[]>([]);
-
+  
+  const vetService = new VetService();
+  const [vet, setVet] = useState<IVet>();
+  const router = useRouter();
 
   const loadVetDetails = async () => {
     setIsLoading(true);
@@ -82,6 +83,32 @@ export default function DoctorProfile() {
   useEffect(() => {
     loadTimeSlots();
   }, [selectedDate])
+
+  const formattedDate = (() => {
+    if(selectedDate){
+      const day = String(selectedDate.getDate()).padStart(2, "0");
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const year = selectedDate.getFullYear();
+      return `${day} ${
+        months[selectedDate.getMonth()]
+      } ${year}`;
+    }else{
+      return "";
+    }
+    })();
 
   // console.log(selectedTime);
 
@@ -226,6 +253,7 @@ export default function DoctorProfile() {
                   You wont be charged yet
                 </p>
                 <Button
+                    onClick={() => {if(vet)router.push(`/forPetParent/consultationVetList/consultationBooking?${new URLSearchParams({ id: vet.id, time: selectedTime || "", date: formattedDate}).toString()}`)}} 
                   className="bg-white text-black border px-7 py-5 rounded-xl text-lg hover:bg-red-500 hover:text-white"
                   disabled={!selectedDate || !selectedTime}
                 >
