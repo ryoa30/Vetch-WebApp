@@ -24,6 +24,7 @@ class UserController {
         this.#locationRepository = new LocationRepository();
         this.#authController = authController;
 
+        this.getUserLocation = this.getUserLocation.bind(this);
         this.getAllUsers = this.getAllUsers.bind(this);
         this.getUserById = this.getUserById.bind(this);
         this.getUserByEmail = this.getUserByEmail.bind(this);
@@ -49,7 +50,7 @@ class UserController {
             const { userId } = req.params;
             console.log("userId",userId);
             const location = await this.#locationRepository.getLocationByUserId(userId);
-            res.status(200).json({ok: true, message: "User found", data:location});
+            res.status(200).json({ok: true, message: "User Location found", data:location});
         } catch (error) {
             console.log(error);
             res.status(500).json({ok: false, message: 'Error fetching user location', error: error.message });

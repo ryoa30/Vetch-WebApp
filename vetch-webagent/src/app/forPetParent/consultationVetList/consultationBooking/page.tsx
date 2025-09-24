@@ -237,8 +237,7 @@ export default function ConfirmBookingPage() {
               <div className="p-4 flex items-start gap-3">
                 {/* <MapPin className="w-5 h-5 text-black mt-1" /> */}
                 <p className="text-sm text-gray-600 dark:text-gray-200">
-                  Jl. ABC Blok A No. 01, Perumahan ABC, Kelurahan X, Kecamatan
-                  Y, Kota X, DKI Jakarta
+                  {location ? location.addressName : "No address found, please set your address in profile page."}
                 </p>
               </div>
             </div>

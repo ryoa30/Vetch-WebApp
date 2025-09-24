@@ -6,7 +6,7 @@ class LocationRepository extends BaseRepository {
     }
 
     async getLocationByUserId(userId) {
-        return this._model.findUnique({ where: { userId, isDeleted: false } });
+        return this._model.findFirst({ where: { userId, isDeleted: false } });
     }
 
 }
