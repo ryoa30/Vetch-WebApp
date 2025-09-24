@@ -230,6 +230,11 @@ export default function DoctorProfile() {
                       {time.timeOfDay}
                     </button>
                   ))}
+                  {timeSlots.length === 0 && (
+                    <span className="p-3 text-lg font-bold mb-[14px] text-gray-500 dark:text-gray-400">
+                      No available time slots for the selected date.
+                    </span>
+                  )}
                 </div>
               </div>
 

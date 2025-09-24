@@ -6,5 +6,7 @@ export const API_URL = {
     ADMIN: `${API_BASE_URL}/api/admin`,
     BLOG: `${API_BASE_URL}/api/blogs`,
     VET: `${API_BASE_URL}/api/vet`,
+    BOOKING: `${API_BASE_URL}/api/booking`,
+    PET: `${API_BASE_URL}/api/pet`,
     
 }

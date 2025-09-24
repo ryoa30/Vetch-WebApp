@@ -34,13 +34,25 @@ class UserController {
         this.validateLogin = this.validateLogin.bind(this);
     }
 
-    getAllUsers(req, res) {
+    async getAllUsers(req, res) {
         try {
             console.log('Authenticated user:', req.user);
-            const users = this.#userRepository.findAll();
+            const users = await this.#userRepository.findAll();
             res.status(200).json(users);
         } catch (error) {
             res.status(500).json({ message: 'Error fetching users', error: error.message });
+        }
+    }
+
+    async getUserLocation(req,res) {
+        try {
+            const { userId } = req.params;
+            console.log("userId",userId);
+            const location = await this.#locationRepository.getLocationByUserId(userId);
+            res.status(200).json({ok: true, message: "User found", data:location});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ok: false, message: 'Error fetching user location', error: error.message });
         }
     }
 
@@ -150,6 +162,7 @@ class UserController {
     // Method to handle POST /api/users
     async saveValidatedUser(payload) {
         try {
+            console.log("ini payload",payload);
             // console.log(req.body);
             const prefix = payload.role === 'vet' ? 'V' : payload.role === 'admin'? 'A' : 'U';
             const lastIdDigit = await this.#userRepository.findLastId(prefix);
@@ -161,7 +174,8 @@ class UserController {
                 firstName: payload.firstName,
                 lastName: payload.lastName,
                 phoneNumber: payload.phoneNumber,
-                profilePicture: payload.profilePicture
+                profilePicture: payload.profilePicture,
+                fullName: payload.fullName,
             }
             console.log(payload.location);
             const newUser = await this.#userRepository.create(user);

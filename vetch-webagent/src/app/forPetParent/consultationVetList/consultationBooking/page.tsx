@@ -9,13 +9,23 @@ import { useSearchParams } from "next/navigation";
 import { useLoading } from "@/contexts/LoadingContext";
 import { VetService } from "@/lib/services/VetService";
 import { IVet } from "../types";
+import { ConcernDialog } from "./components/ConcernDialog";
+import { PetDialog } from "./components/PetDialog";
+import {capitalize} from "lodash"
+import { UserService } from "@/lib/services/UserService";
+import { useSession } from "@/contexts/SessionContext";
 
 export default function ConfirmBookingPage() {
   const [consultationType, setConsultationType] = useState("Homecare");
   const [paymentMethod, setPaymentMethod] = useState("Gopay");
+  const [selectedConcerns, setSelectedConcerns] = useState<any[]>([]);
+  const [selectedPet, setSelectedPet] = useState<any>(null);
+  const [location, setLocation] = useState<any>(null);
+  const {user} = useSession();
 
   const [showConcern, setShowConcern] = useState(false);
   const [showPet, setShowPet] = useState(false);
+  const [consultationPrice, setConsultationPrice] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const sp = useSearchParams();
   const id = sp.get("id");
@@ -24,6 +34,7 @@ export default function ConfirmBookingPage() {
   const { setIsLoading } = useLoading();
 
   const vetService = new VetService();
+  const userService = new UserService();
   const [vet, setVet] = useState<IVet>();
 
   const loadVetDetails = async () => {
@@ -34,7 +45,13 @@ export default function ConfirmBookingPage() {
         if (result.ok) {
           console.log(result);
           setVet(result.data);
-          setTotalPrice(result.data.price + result.data.price * 0.1 + result.data.price * 0.05);
+          if(consultationType === "Homecare"){
+            setConsultationPrice(result.data.price * 1.5);
+            setTotalPrice((result.data.price * 1.5) + (result.data.price * 1.5 * 0.1) + (result.data.price * 1.5 * 0.05));
+          }else{
+            setConsultationPrice(result.data.price);
+            setTotalPrice(result.data.price + result.data.price * 0.1 + result.data.price * 0.05);
+          }
         }
       } catch (error) {
         console.log(error);
@@ -43,35 +60,37 @@ export default function ConfirmBookingPage() {
     setIsLoading(false);
   };
 
+  const loadLocation = async () => {
+    try {
+      const result = await userService.getUserLocationById(user?.id || "");
+      if(result.ok){
+        console.log(result);
+        setLocation(result.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  
+
+  useEffect(() =>{
+    if(consultationPrice != 0){
+      if(consultationType === "Homecare"){
+        setConsultationPrice(vet?.price ? vet.price * 1.5 : 0);
+        setTotalPrice((vet?.price ? vet.price * 1.5 : 0) + (vet?.price ? vet.price * 1.5 * 0.1 : 0) + (vet?.price ? vet.price * 1.5 * 0.05 : 0));
+      }else{
+        setConsultationPrice(vet?.price ? vet.price : 0);
+        setTotalPrice((vet?.price ? vet.price : 0) + (vet?.price ? vet.price * 0.1 : 0) + (vet?.price ? vet.price * 0.05 : 0));
+      }
+    }
+  }, [consultationType])
+
   useEffect(() => {
     loadVetDetails();
+    loadLocation();
   }, []);
 
-  const currentTime = new Date();
-  // Format today's date as dd mmm yyyy (e.g., 22 Sep 2025)
-  const formattedDate = (() => {
-    const day = String(currentTime.getDate()).padStart(2, "0");
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const year = currentTime.getFullYear();
-    const hours = String(currentTime.getHours()).padStart(2, "0");
-    const minutes = String(currentTime.getMinutes()).padStart(2, "0");
-    return `${day} ${
-      months[currentTime.getMonth()]
-    } ${year} ${hours}:${minutes}`;
-  })();
 
   return (
     <main className="bg-[#F5F5F5] dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -133,26 +152,28 @@ export default function ConfirmBookingPage() {
 
           <div className="space-y-6 h-full">
             <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
-              <button className="flex w-full cursor-pointer flex-row justify-between items-center">
+              <button className="flex w-full cursor-pointer flex-row justify-between items-center" onClick={() => setShowPet(true)}>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
                     {/* <Dog className="w-5 h-5 text-black" /> */}
                     <span className="font-medium">Pet</span>
                   </div>
-                  <span className="text-sm text-gray-500">Seemore</span>
+                  {!selectedPet && <span className="text-sm text-gray-500">Select a Pet</span>}
+                  {selectedPet && <span className="text-sm text-gray-500">{capitalize(selectedPet.petName)}</span>}
+                  
                 </div>
                 <ChevronRight className="w-5 h-5 text-black" />
               </button>
 
               <div className="w-full bg-gray-300 h-[0.5px] my-2"></div>
 
-              <button className="flex w-full cursor-pointer flex-row justify-between items-center">
+              <button onClick={()=>setShowConcern(true)} className="flex w-full cursor-pointer flex-row justify-between items-center">
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
                     {/* <PlusCircle className="w-5 h-5 text-black" /> */}
                     <span className="font-medium">Concerns</span>
                   </div>
-                  <span className="text-sm text-gray-400">Select Concerns</span>
+                  <span className="text-sm text-gray-400">{selectedConcerns.length === 0? "Select Concerns" : selectedConcerns.map((item, index) => (`${item.label}${index<selectedConcerns.length-1 ? ", ": ""}`))}</span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-black" />
               </button>
@@ -210,7 +231,7 @@ export default function ConfirmBookingPage() {
               </div>
             </div>
           </div>
-
+          {consultationType === "Homecare" &&
           <div className="space-y-6 h-full">
             <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
               <div className="p-4 flex items-start gap-3">
@@ -222,6 +243,7 @@ export default function ConfirmBookingPage() {
               </div>
             </div>
           </div>
+          }
         </div>
 
         {/* Price and Payment Section */}
@@ -234,21 +256,21 @@ export default function ConfirmBookingPage() {
             <div className="flex justify-between text-sm py-1">
               <span>Appointment Fee</span>
               <span>IDR{" "}
-                    {new Intl.NumberFormat("id-ID").format(Number(vet?.price))}</span>
+                    {new Intl.NumberFormat("id-ID").format(Number(consultationPrice))}</span>
             </div>
             <div className="flex justify-between text-sm py-1">
               <span>
                 Tax <sup>10%</sup>
               </span>
               <span>IDR{" "}
-                    {new Intl.NumberFormat("id-ID").format(Number(vet?.price )*0.1)}</span>
+                    {new Intl.NumberFormat("id-ID").format(Number(consultationPrice )*0.1)}</span>
             </div>
             <div className="flex justify-between text-sm py-1">
               <span>
                 Service <sup>5%</sup>
               </span>
               <span>IDR{" "}
-                    {new Intl.NumberFormat("id-ID").format(Number(vet?.price )*0.05)}</span>
+                    {new Intl.NumberFormat("id-ID").format(Number(consultationPrice )*0.05)}</span>
             </div>
             <hr className="my-2" />
             <div className="flex justify-between font-semibold text-green-900 dark:text-gray-200">
@@ -308,6 +330,10 @@ export default function ConfirmBookingPage() {
           </div>
         </div>
       </div>
+
+      <ConcernDialog show={showConcern} onClose={() => setShowConcern(false)} selected={selectedConcerns} setSelected={setSelectedConcerns}/>
+      <PetDialog show={showPet} onClose={() => setShowPet(false)} pet={selectedPet} setPet={setSelectedPet}/>
+
 
       {/* Hero Section */}
       {/* <section className="bg-[#A3D1C6] dark:bg-teal-800 flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-12 gap-8">

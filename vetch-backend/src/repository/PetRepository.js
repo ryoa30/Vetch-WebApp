@@ -5,6 +5,10 @@ class PetRepository extends BaseRepository {
         super('Pet');
     }
 
+    async getPetsByUserId(userId) {
+        return this._model.findMany({ where: { userId, isDeleted: false } });
+    }
+
 }
 
 module.exports = PetRepository;

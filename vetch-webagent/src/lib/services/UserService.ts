@@ -8,6 +8,10 @@ import { IResponse } from "../http/types";
 export class UserService {
   #http: HttpClient = new HttpClient({baseUrl: API_URL.USER});
 
+  async getUserLocationById (userId: string){
+    return await this.#http.get<IResponse>('/location/' + userId);
+  }
+
   async getUserByEmail(email: string) {
     return await this.#http.getCatch<IResponse>('/email/' + email);
   }
@@ -72,7 +76,7 @@ export class UserService {
           location: {
             addressName: context.address,
             postalCode: context.postalCode,
-            city: "",
+            city: context.city,
             district: context.district,
             urbanVillage: context.urbanVillage,
             province: context.province,

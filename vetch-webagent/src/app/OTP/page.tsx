@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getWithExpiry } from "@/lib/utils/localStorage";
+import { getWithExpiry, removeItem } from "@/lib/utils/localStorage";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/lib/services/UserService";
 import { HttpClient } from "@/lib/http/HttpClient";
@@ -44,6 +44,7 @@ export default function OTPPage() {
         console.log(result);
         if(result.ok) {
           setDialog(true);
+          removeItem('email');
         }else{
           alert('Invalid OTP');
         }

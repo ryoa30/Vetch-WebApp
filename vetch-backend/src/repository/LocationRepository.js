@@ -5,6 +5,10 @@ class LocationRepository extends BaseRepository {
         super('Location');
     }
 
+    async getLocationByUserId(userId) {
+        return this._model.findUnique({ where: { userId, isDeleted: false } });
+    }
+
 }
 
 module.exports = LocationRepository;
