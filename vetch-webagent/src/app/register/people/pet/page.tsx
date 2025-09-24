@@ -38,6 +38,7 @@ const speciesList = [
   "Hamster",
   "Fish",
   "Reptile",
+  "Farm Animal",
   "Exotic Pet",
   "Other"
 ]
@@ -257,7 +258,7 @@ const RegisterPeoplePetPage = () => {
               <Label htmlFor="petDob">
                 Pet&apos; DOB<span className="text-red-500">*</span>
               </Label>
-              <DatePicker className="h-fit w-full !bg-[#FBFFE4] cursor-pointer mb-0" date={petDob} setDate={setPetDob} />
+              <DatePicker className="h-fit w-full text-black dark:text-white !bg-[#FBFFE4] cursor-pointer mb-0" date={petDob} setDate={setPetDob} />
             {errors.dob && <span className="text-red-500 text-xs">{errors.dob}</span>}
             </div>
           </div>

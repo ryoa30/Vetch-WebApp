@@ -28,3 +28,7 @@ export function getWithExpiry(key: string) {
 
   return item.value;
 }
+
+export function removeItem(key: string) {
+  localStorage.removeItem(key);
+}

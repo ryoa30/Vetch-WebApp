@@ -5,8 +5,14 @@ import Navbar from "@/app/layout-component/navbar/Navbar";
 import { Footer } from "@/app/layout-component/footer/footer";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { useLoading } from "@/contexts/LoadingContext";
+import { SessionProvider } from "@/contexts/SessionContext";
 
-export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
+type MinimalSession = {
+  isAuthenticated: boolean;
+  user: { id: string; role: string; fullName: string; email: string } | null;
+};
+
+export default function LayoutWrapper({ children, session }: { children: React.ReactNode; session: MinimalSession }) {
   const pathname = usePathname();
   const {loading} = useLoading();
 
@@ -32,14 +38,16 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   return (
     <>
       {isNoLayout ? (
-        <main>{children}</main>
+        <SessionProvider value={session}>
+          <main>{children}</main>
+        </SessionProvider>
       ) : (
-        <>
-          <Navbar />
+        <SessionProvider value={session}>
+          <Navbar session={session} />
           <main>{children}</main>
           <Footer />
           <LoadingOverlay show={loading}/>
-        </>
+        </SessionProvider>
       )}
     </>
   );

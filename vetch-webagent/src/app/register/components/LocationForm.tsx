@@ -1,10 +1,11 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { useRegister } from "@/contexts/RegisterContext";
 import { LocationService } from "@/lib/services/LocationService";
 import { SearchableDropdown } from "@/components/SearchableDropdown";
+import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import { UserValidator } from "@/lib/validators/UserValidator";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/lib/services/UserService";
@@ -33,6 +34,7 @@ interface IErrors {
   addressNotes?: string;
   urbanVillage?: string;
   district?: string;
+  city?: string;
   province?: string;
   postalCode?: string;
 }
@@ -42,13 +44,14 @@ interface IProps {
 }
 
 const LocationForm:FC<IProps> = ({role}) => {
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    libraries: ["places"],
+  });
   const userValidator = new UserValidator();
   const userService = new UserService();
-  const locationService = new LocationService();
-  const [autocomplete, setAutocomplete] = useState<ILocationResponse[]>([]);
-  const [addresses, setAddresses] = useState<IOptions[]>([]);
-  const [search, setSearch] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const autoCompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const router = useRouter();
   const [errors, setErrors] = useState<IErrors>({
     address: "",
@@ -63,6 +66,8 @@ const LocationForm:FC<IProps> = ({role}) => {
     setAddress,
     addressNotes,
     setAddressNotes,
+    city,
+    setCity,
     province,
     setProvince,
     district,
@@ -79,60 +84,27 @@ const LocationForm:FC<IProps> = ({role}) => {
   console.log(context);
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (search) {
-        const fetchAutocomplete = async () => {
-          try {
-            setAddress("");
-            const result = await locationService.getAutocomplete(search);
-            console.log(result);
-            if(result.addresses){
-                setAutocomplete(
-                  result.addresses.map((item: any, index: number) => ({
-                    index,
-                    formattedAddress: item.formattedAddress,
-                    addressLabel: item.addressLabel,
-                    postalCode: item.postalCode,
-                    urbanVillalges: item.dependentLocality,
-                    district: item.city,
-                    province: item.state,
-                    latitude: item.latitude,
-                    longitude: item.longitude,
-                  }))
-                );
-                setAddresses(
-                  result.addresses.map((item: any, index: number) => ({
-                    value: index,
-                    label: item.formattedAddress,
-                  }))
-                );
-            }
-          } finally {
-            setIsLoading(false);
-          }
-        };
-        fetchAutocomplete();
+    if(address){
+      const result = userValidator.validateLocation(
+        address,
+        addressNotes,
+        urbanVillage,
+        district,
+        city,
+        province,
+        postalCode
+      );
+      if(!result.ok){
+        console.log("location invalid")
+        setIsLocationValid(false);
+        setErrors(result.errors);
+      }else{
+        console.log("location valid")
+        setIsLocationValid(true);
+        setErrors({});
       }
-    }, 300); // 0.3 seconds
-
-    return () => clearTimeout(delayDebounce); // clear if user keeps typing
-  }, [search]);
-
-  const setLocationSelected = (idx: string) => {
-    console.log(idx);
-    const selectedAutocomplete = autocomplete.find(
-      (item) => item.index === idx
-    );
-    console.log(selectedAutocomplete);
-    if (selectedAutocomplete) {
-      setAddress(selectedAutocomplete.addressLabel);
-      setProvince(selectedAutocomplete.province);
-      setDistrict(selectedAutocomplete.district);
-      setUrbanVillage(selectedAutocomplete.urbanVillalges);
-      setPostalCode(selectedAutocomplete.postalCode);
-      setLocationCoordinates(`${selectedAutocomplete.latitude},${selectedAutocomplete.longitude}`);
     }
-  };
+  }, [address])
 
   const handleFinish = async () => {
     const result = userValidator.validateLocation(
@@ -140,6 +112,7 @@ const LocationForm:FC<IProps> = ({role}) => {
       addressNotes,
       urbanVillage,
       district,
+      city,
       province,
       postalCode
     );
@@ -160,6 +133,19 @@ const LocationForm:FC<IProps> = ({role}) => {
       }
     }
   };
+  const handlePlaceChanged = () => {
+    const place = autoCompleteRef.current?.getPlace();
+    if (place?.geometry?.location) {
+      setAddress(place.formatted_address || "");
+      setProvince(place.address_components?.find((value)=>value.types[0] === "administrative_area_level_1")?.long_name || "");
+      setCity(place.address_components?.find((value)=>value.types[0] === "administrative_area_level_2")?.long_name || "");
+      setDistrict(place.address_components?.find((value)=>value.types[0] === "administrative_area_level_3")?.long_name || "");
+      setUrbanVillage(place.address_components?.find((value)=>value.types[0] === "administrative_area_level_4")?.long_name || "");
+      setPostalCode(place.address_components?.find((value)=>value.types[0] === "postal_code")?.long_name || "");
+      setLocationCoordinates(`${place.geometry.location.lat()},${place.geometry.location.lng()}`);
+      console.log("Picked:", place);
+    }
+  };
   return (
     <div className="flex-1 w-full space-y-4">
       {/* Address */}
@@ -167,7 +153,7 @@ const LocationForm:FC<IProps> = ({role}) => {
         <Label htmlFor="address">
           Address<span className="text-red-500">*</span>
         </Label>
-        <SearchableDropdown
+        {/* <SearchableDropdown
           options={addresses}
           selected={address}
           setSelected={setLocationSelected}
@@ -177,7 +163,30 @@ const LocationForm:FC<IProps> = ({role}) => {
           setIsLoading={setIsLoading}
           search={search}
           setSearch={setSearch}
-        />
+        /> */}
+        {loadError && (
+          <span className="text-red-500 text-xs">Failed to load Google Maps API.</span>
+        )}
+        {isLoaded ? (
+          <Autocomplete
+            onLoad={(ref) => (autoCompleteRef.current = ref)}
+            onPlaceChanged={handlePlaceChanged}
+          >
+            <input
+              type="text"
+              placeholder="Search a location"
+              className="!bg-[#FBFFE4] w-full flex justify-between p-2 rounded-md outline-0"
+            />
+          </Autocomplete>
+        ) : (
+          <input
+            type="text"
+            placeholder="Loading Google Maps..."
+            className="!bg-[#FBFFE4] w-full flex justify-between p-2 rounded-md outline-0"
+            disabled
+          />
+        )}
+        
         {errors.address && (
           <span className="text-red-500 text-xs">{errors.address}</span>
         )}
@@ -201,14 +210,34 @@ const LocationForm:FC<IProps> = ({role}) => {
         </Label>
         <Input
           value={province}
+          onChange={(e) => setProvince(e.target.value)}
           id="provinsi"
           placeholder="Province"
-          disabled
+          disabled={errors.province ? false : true}
           required
           className="!bg-[#FBFFE4]"
         />
         {errors.province && (
           <span className="text-red-500 text-xs">{errors.province}</span>
+        )}
+      </div>
+
+      {/* City */}
+      <div className="space-y-2">
+        <Label htmlFor="city">
+          City<span className="text-red-500">*</span>
+        </Label>
+        <Input
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          id="city"
+          placeholder="City"
+          disabled={errors.city ? false : true}
+          required
+          className="!bg-[#FBFFE4]"
+        />
+        {errors.city && (
+          <span className="text-red-500 text-xs">{errors.city}</span>
         )}
       </div>
 
@@ -219,9 +248,10 @@ const LocationForm:FC<IProps> = ({role}) => {
         </Label>
         <Input
           value={district}
+          onChange={(e) => setDistrict(e.target.value)}
           id="district"
           placeholder="District"
-          disabled
+          disabled={errors.district ? false : true}
           required
           className="!bg-[#FBFFE4]"
         />
@@ -237,9 +267,10 @@ const LocationForm:FC<IProps> = ({role}) => {
         </Label>
         <Input
           value={urbanVillage}
+          onChange={(e) => setUrbanVillage(e.target.value)}
           id="urban_village"
           placeholder="Urban Village"
-          disabled
+          disabled={errors.urbanVillage ? false : true}
           required
           className="!bg-[#FBFFE4]"
         />
@@ -255,7 +286,8 @@ const LocationForm:FC<IProps> = ({role}) => {
         </Label>
         <Input
           value={postalCode}
-          disabled
+          onChange={(e) => setPostalCode(e.target.value)}
+          disabled={errors.postalCode ? false : true}
           id="postal code"
           type="text"
           inputMode="numeric"

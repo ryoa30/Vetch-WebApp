@@ -42,6 +42,8 @@ type RegisterPeopleContextType = {
   setUrbanVillage: (urbanVillage: string) => void;
   district: string;
   setDistrict: (district: string) => void;
+  city: string;
+  setCity: (city: string) => void;
   province: string;
   setProvince: (province: string) => void;
   postalCode: string;
@@ -84,6 +86,7 @@ export function RegisterContextProvider({ children }: { children: ReactNode }) {
   const [addressNotes, setAddressNotes] = useState<string>('');
   const [urbanVillage, setUrbanVillage] = useState<string>('');
   const [district, setDistrict] = useState<string>('');
+  const [city, setCity] = useState<string>('');
   const [province, setProvince] = useState<string>('');
   const [postalCode, setPostalCode] = useState<string>('');
   const [locationCoordinates, setLocationCoordinates] = useState<string>("");
@@ -131,6 +134,8 @@ export function RegisterContextProvider({ children }: { children: ReactNode }) {
     setUrbanVillage,
     district,
     setDistrict,
+    city,
+    setCity,
     province,
     setProvince,
     postalCode,

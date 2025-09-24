@@ -17,6 +17,8 @@ router.get('/', userController.getAllUsers);
 
 router.get('/:id', userController.getUserById);
 
+router.get('/location/:userId', userController.getUserLocation);
+
 router.get('/email/:email', userController.getUserByEmail);
 
 router.post('/login', userController.validateLogin)

@@ -154,10 +154,13 @@ export default function LoginPage() {
               // Kalau dialog ditutup → redirect ke homepage
               if(role === "user") {
                 router.push('/');
+                // Ensure server components (layout) re-read session
+                router.refresh();
               }else if(role === "vet") {
                 
               }else if(role === "admin") {
                 router.push('/admin/dashboard');
+                router.refresh();
               }
               // router.push("/");
             }

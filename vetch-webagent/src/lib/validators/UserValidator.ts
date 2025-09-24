@@ -98,10 +98,21 @@ export class UserValidator {
     return { ok: true, data: email };
   }
 
-  validateLocation(address: string, addressNotes: string, urbanVillage: string, district: string, province: string, postalCode: string): ValidationResult<LocationInput> {
+  validateLocation(address: string, addressNotes: string, urbanVillage: string, district: string, city: string, province: string, postalCode: string): ValidationResult<LocationInput> {
     const errors: Record<string, string> = {};
 
     if (!address) errors.address = "Address is required";
+
+    if (!province) errors.province = "Province is required";
+
+    if (!city) errors.city = "City is required";
+    
+    if (!district) errors.district = "District is required";
+
+    if (!urbanVillage) errors.urbanVillage = "Urban Village is required";
+
+    if (!postalCode) errors.postalCode = "Postal Code is required";
+    else if (!/^\d{5}$/.test(postalCode)) errors.postalCode = "Postal Code must be 5 digits";
 
     if (Object.keys(errors).length) return { ok: false, errors: errors };
 
