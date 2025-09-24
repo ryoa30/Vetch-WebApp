@@ -1,6 +1,13 @@
 "use client";
 
-import { Star, QrCode, Building, Smartphone, ChevronDown, Dog, ClipboardPlus, List, ChevronRight } from "lucide-react";
+import {
+  Star,
+  BadgeQuestionMark,
+  ClipboardPlus,
+  List,
+  ChevronRight,
+  MapPin,
+} from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,17 +17,44 @@ import { VetService } from "@/lib/services/VetService";
 import { IVet } from "../types";
 import { ConcernDialog } from "./components/ConcernDialog";
 import { PetDialog } from "./components/PetDialog";
-import {capitalize} from "lodash"
+import { capitalize, snakeCase } from "lodash";
 import { UserService } from "@/lib/services/UserService";
 import { useSession } from "@/contexts/SessionContext";
+import PaymentDialog from "@/app/alert-dialog-box/PaymentConfirmDialogBox";
+import { BookingValidator } from "@/lib/validators/BookingValidator";
+import ErrorDialog from "@/app/alert-dialog-box/ErrorDialogBox";
+import { BookingService } from "@/lib/services/BookingService";
+import { PaymentService } from "@/lib/services/PaymentService";
+
+declare global {
+  interface Window {
+    snap?: {
+      pay: (
+        token: string,
+        opts?: {
+          onSuccess?: (res: any) => void;
+          onPending?: (res: any) => void;
+          onError?: (err: any) => void;
+          onClose?: () => void;
+        }
+      ) => void;
+    };
+  }
+}
 
 export default function ConfirmBookingPage() {
-  const [consultationType, setConsultationType] = useState("Homecare");
-  const [paymentMethod, setPaymentMethod] = useState("Gopay");
+  const [consultationType, setConsultationType] = useState("Online");
   const [selectedConcerns, setSelectedConcerns] = useState<any[]>([]);
   const [selectedPet, setSelectedPet] = useState<any>(null);
+  const [illnessDescription, setIllnessDesription] = useState<string>("");
   const [location, setLocation] = useState<any>(null);
-  const {user} = useSession();
+  const { user } = useSession();
+  const [errors, setErrors] = useState<any>({});
+  const [showError, setShowError] = useState(false);
+
+  const bookingValidator = new BookingValidator();
+  const bookingService = new BookingService();
+  const paymentService = new PaymentService();
 
   const [showConcern, setShowConcern] = useState(false);
   const [showPet, setShowPet] = useState(false);
@@ -44,12 +78,20 @@ export default function ConfirmBookingPage() {
         if (result.ok) {
           console.log(result);
           setVet(result.data);
-          if(consultationType === "Homecare"){
+          if (consultationType === "Homecare") {
             setConsultationPrice(result.data.price * 1.5);
-            setTotalPrice((result.data.price * 1.5) + (result.data.price * 1.5 * 0.1) + (result.data.price * 1.5 * 0.05));
-          }else{
+            setTotalPrice(
+              result.data.price * 1.5 +
+                result.data.price * 1.5 * 0.1 +
+                result.data.price * 1.5 * 0.05
+            );
+          } else {
             setConsultationPrice(result.data.price);
-            setTotalPrice(result.data.price + result.data.price * 0.1 + result.data.price * 0.05);
+            setTotalPrice(
+              result.data.price +
+                result.data.price * 0.1 +
+                result.data.price * 0.05
+            );
           }
         }
       } catch (error) {
@@ -62,34 +104,80 @@ export default function ConfirmBookingPage() {
   const loadLocation = async () => {
     try {
       const result = await userService.getUserLocationById(user?.id || "");
-      if(result.ok){
+      if (result.ok) {
         console.log(result);
         setLocation(result.data);
       }
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  
+  const handleConfirmBooking = async () => {
+    try {
+      const validation = bookingValidator.validateBookingInfo({
+        selectedPet: selectedPet,
+        illnessDescription: illnessDescription,
+        selectedConcerns: selectedConcerns.map((item) => item.value),
+      });
+      console.log(validation);
+      if (validation.ok) {
+        setErrors({});
+      } else {
+        setErrors(validation.errors);
+        setShowError(true);
+        return;
+      }
 
-  useEffect(() =>{
-    if(consultationPrice != 0){
-      if(consultationType === "Homecare"){
+      // const result = await bookingService.createBooking(selectedConcerns, illnessDescription, selectedPet.id, location.id, vet?.id || "", date || "", time || "", totalPrice, consultationType);
+      // console.log(result);
+      const result = await paymentService.getTransactionToken(user, totalPrice);
+      console.log(result);
+      window.snap?.pay(result.data, {
+        onSuccess: (result) => {
+          // TODO: verify on your backend (recommended)
+          console.log("Success:", result);
+        },
+        onPending: (result) => {
+          console.log("Pending:", result);
+        },
+        onError: (error) => {
+          console.error("Error:", error);
+        },
+        onClose: () => {
+          console.warn("Buyer closed the popup without finishing the payment");
+        },
+      });
+      // if(result.ok){
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (consultationPrice != 0) {
+      if (consultationType === "Homecare") {
         setConsultationPrice(vet?.price ? vet.price * 1.5 : 0);
-        setTotalPrice((vet?.price ? vet.price * 1.5 : 0) + (vet?.price ? vet.price * 1.5 * 0.1 : 0) + (vet?.price ? vet.price * 1.5 * 0.05 : 0));
-      }else{
+        setTotalPrice(
+          (vet?.price ? vet.price * 1.5 : 0) +
+            (vet?.price ? vet.price * 1.5 * 0.1 : 0) +
+            (vet?.price ? vet.price * 1.5 * 0.05 : 0)
+        );
+      } else {
         setConsultationPrice(vet?.price ? vet.price : 0);
-        setTotalPrice((vet?.price ? vet.price : 0) + (vet?.price ? vet.price * 0.1 : 0) + (vet?.price ? vet.price * 0.05 : 0));
+        setTotalPrice(
+          (vet?.price ? vet.price : 0) +
+            (vet?.price ? vet.price * 0.1 : 0) +
+            (vet?.price ? vet.price * 0.05 : 0)
+        );
       }
     }
-  }, [consultationType])
+  }, [consultationType]);
 
   useEffect(() => {
     loadVetDetails();
     loadLocation();
   }, []);
-
 
   return (
     <main className="bg-[#F5F5F5] dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -128,22 +216,23 @@ export default function ConfirmBookingPage() {
                 <h2 className="text-lg font-semibold">Dr. {vet?.fullName}</h2>
                 <div className="flex items-center text-sm text-gray-600">
                   <Star className="w-4 h-4 text-green-600 fill-green-600 mr-1 stroke-black" />
-                  <span className="dark:text-gray-200">{vet?.ratingAvg} | {vet?.ratingCount} Reviews</span>
+                  <span className="dark:text-gray-200">
+                    {vet?.ratingAvg} | {vet?.ratingCount} Reviews
+                  </span>
                 </div>
                 <p className="text-sm font-semibold mt-2 text-green-900 dark:text-gray-200">
                   Species
                 </p>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {vet?.speciesHandled && vet?.speciesHandled.map(
-                    (tag) => (
+                  {vet?.speciesHandled &&
+                    vet?.speciesHandled.map((tag) => (
                       <span
                         key={tag}
                         className="px-3 py-1 rounded-full bg-gray-100 dark:bg-black border text-sm"
                       >
                         {tag}
                       </span>
-                    )
-                  )}
+                    ))}
                 </div>
               </div>
             </div>
@@ -151,43 +240,78 @@ export default function ConfirmBookingPage() {
 
           <div className="space-y-6 h-full">
             <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
-              <button className="flex w-full cursor-pointer flex-row justify-between items-center border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-[#1e2923]" onClick={() => setShowPet(true)}>
+              <button
+                className="flex w-full cursor-pointer flex-row items-center border-gray-200 gap-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-[#1e2923]"
+                onClick={() => setShowPet(true)}
+              >
+                <div className="flex-shrink-0 w-12">
+                  {!selectedPet && (
+                    <BadgeQuestionMark className="w-10 h-10 text-black dark:text-white" />
+                  )}
+                  {selectedPet && (
+                    <Image
+                      className="dark:invert"
+                      src={`/img/pet-logo/${snakeCase(
+                        selectedPet.speciesName
+                      )}.png`}
+                      alt="pet icon"
+                      width={50}
+                      height={50}
+                    />
+                  )}
+                </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    {/* <Dog className="w-5 h-5 text-black" /> */}
                     <span className="font-medium">Pet</span>
                   </div>
-                  {!selectedPet && <span className="text-sm text-gray-500">Select a Pet</span>}
-                  {selectedPet && <span className="text-sm text-gray-500">{capitalize(selectedPet.petName)}</span>}
-                  
+                  {!selectedPet && (
+                    <span className="text-sm text-gray-500">Select a Pet</span>
+                  )}
+                  {selectedPet && (
+                    <span className="text-sm text-gray-500">
+                      {capitalize(selectedPet.petName)}
+                    </span>
+                  )}
                 </div>
-                <ChevronRight className="w-5 h-5 text-black" />
+                <ChevronRight className="w-5 h-5 text-black ml-auto" />
               </button>
 
               <div className="w-full bg-gray-300 h-[0.5px] my-2"></div>
 
-              <button onClick={()=>setShowConcern(true)} className="flex w-full cursor-pointer flex-row justify-between items-center">
+              <button
+                onClick={() => setShowConcern(true)}
+                className="flex w-full cursor-pointer flex-row items-center gap-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-[#1e2923]"
+              >
+                <div className="flex-shrink-0 w-12">
+                  <ClipboardPlus className="mx-auto w-10 h-10 text-black dark:text-white" />
+                </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    <div className="flex-shrink-0">
-                        <ClipboardPlus className="w-10 h-10 text-black dark:text-white" />
-                    </div>
                     <span className="font-medium">Concerns</span>
                   </div>
-                  <span className="text-sm text-gray-400">{selectedConcerns.length === 0? "Select Concerns" : selectedConcerns.map((item, index) => (`${item.label}${index<selectedConcerns.length-1 ? ", ": ""}`))}</span>
+                  <span className="text-sm text-gray-400">
+                    {selectedConcerns.length === 0
+                      ? "Select Concerns"
+                      : selectedConcerns.map(
+                          (item, index) =>
+                            `${item.label}${
+                              index < selectedConcerns.length - 1 ? ", " : ""
+                            }`
+                        )}
+                  </span>
                 </div>
-                <ChevronRight className="w-5 h-5 text-black" />
+                <ChevronRight className="w-5 h-5 text-black ml-auto" />
               </button>
 
               <div className="w-full bg-gray-300 h-[0.5px] my-2"></div>
 
               <div className="flex flex-col">
-                <button className="flex w-full cursor-pointer flex-row justify-between items-center">
+                <button className="flex w-full cursor-pointer flex-row gap-3 items-center ">
+                  <div className="flex-shrink-0 w-12">
+                    <List className="mx-auto w-10 h-10 text-black dark:text-white" />
+                  </div>
                   <div>
                     <div className="flex">
-                      <div className="flex-shrink-0">
-                          <List className="w-10 h-10 text-black dark:text-white" />
-                      </div>
                       <span className="font-medium">Illness Description</span>
                     </div>
                     <span className="text-sm text-gray-400">
@@ -198,6 +322,9 @@ export default function ConfirmBookingPage() {
                 <Textarea
                   placeholder="Enter Illness Description"
                   className="mt-2"
+                  spellCheck={false}
+                  value={illnessDescription}
+                  onChange={(e) => setIllnessDesription(e.target.value)}
                 />
               </div>
             </div>
@@ -206,7 +333,7 @@ export default function ConfirmBookingPage() {
 
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           <div className="space-y-6 h-full">
-            <div className="p-4 bg-white dark:bg-[#2D4236] rounded-xl shadow">
+            <div className="p-4 bg-white dark:bg-[#2D4236] rounded-xl shadow h-full">
               <p className="font-semibold mb-3 text-green-900 dark:text-gray-200">
                 Consultation Type
               </p>
@@ -234,108 +361,98 @@ export default function ConfirmBookingPage() {
               </div>
             </div>
           </div>
-          {consultationType === "Homecare" &&
-          <div className="space-y-6 h-full">
-            <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
-              <div className="p-4 flex items-start gap-3">
-                {/* <MapPin className="w-5 h-5 text-black mt-1" /> */}
-                <p className="text-sm text-gray-600 dark:text-gray-200">
-                  {location ? location.addressName : "No address found, please set your address in profile page."}
-                </p>
+          {consultationType === "Homecare" && (
+            <div className="space-y-6 h-full">
+              <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
+                <div className="p-4 flex items-center gap-3">
+                  <MapPin className="w-10 h-10 text-black mt-1" />
+                  <div className="flex flex-col">
+                    <div className="font-medium">Location</div>
+                    <p className="text-sm text-gray-600 dark:text-gray-200">
+                      {location
+                        ? location.addressName
+                        : "No address found, please set your address in profile page."}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          }
+          )}
         </div>
 
         {/* Price and Payment Section */}
         <div className="flex dark:text-gray-200 gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
           {/* Price Section */}
-          <div className="w-2/3 pr-4 border-r ">
+          <div className="w-full pr-4  ">
             <p className="font-semibold text-green-900 dark:text-gray-200 mb-3">
               Price
             </p>
             <div className="flex justify-between text-sm py-1">
               <span>Appointment Fee</span>
-              <span>IDR{" "}
-                    {new Intl.NumberFormat("id-ID").format(Number(consultationPrice))}</span>
+              <span>
+                IDR{" "}
+                {new Intl.NumberFormat("id-ID").format(
+                  Number(consultationPrice)
+                )}
+              </span>
             </div>
             <div className="flex justify-between text-sm py-1">
               <span>
                 Tax <sup>10%</sup>
               </span>
-              <span>IDR{" "}
-                    {new Intl.NumberFormat("id-ID").format(Number(consultationPrice )*0.1)}</span>
+              <span>
+                IDR{" "}
+                {new Intl.NumberFormat("id-ID").format(
+                  Number(consultationPrice) * 0.1
+                )}
+              </span>
             </div>
             <div className="flex justify-between text-sm py-1">
               <span>
                 Service <sup>5%</sup>
               </span>
-              <span>IDR{" "}
-                    {new Intl.NumberFormat("id-ID").format(Number(consultationPrice )*0.05)}</span>
+              <span>
+                IDR{" "}
+                {new Intl.NumberFormat("id-ID").format(
+                  Number(consultationPrice) * 0.05
+                )}
+              </span>
             </div>
             <hr className="my-2" />
             <div className="flex justify-between font-semibold text-green-900 dark:text-gray-200">
               <span>Grand Total</span>
-              <span>IDR {new Intl.NumberFormat("id-ID").format(Number(totalPrice))}</span>
+              <span>
+                IDR {new Intl.NumberFormat("id-ID").format(Number(totalPrice))}
+              </span>
             </div>
             <div className="flex justify-end mt-4">
-              <button className="px-6 py-2 rounded-full bg-green-700 text-white font-semibold hover:bg-green-800">
-                Confirm and Book
-              </button>
-            </div>
-          </div>
-
-          {/* Pay Using Section */}
-          <div className="w-1/3 pl-4 gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
-            <p className="font-semibold text-green-900 dark:text-gray-200 mb-3">
-              Pay Using
-            </p>
-            <div className="space-y-3">
-              {[
-                { label: "QRIS", icon: <QrCode className="w-5 h-5" /> },
-                {
-                  label: "Virtual Account",
-                  sub: "Only for BCA",
-                  icon: <Building className="w-5 h-5" />,
-                },
-                { label: "Gopay", icon: <Smartphone className="w-5 h-5" /> },
-              ].map(({ label, sub, icon }) => (
-                <label
-                  key={label}
-                  className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer ${
-                    paymentMethod === label
-                      ? "border-green-600 bg-green-50"
-                      : "hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    {icon}
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">{label}</span>
-                      {sub && (
-                        <span className="text-xs text-gray-500">{sub}</span>
-                      )}
-                    </div>
-                  </div>
-                  <input
-                    type="radio"
-                    name="payment"
-                    value={label}
-                    checked={paymentMethod === label}
-                    onChange={() => setPaymentMethod(label)}
-                    className="accent-green-600 w-4 h-4"
-                  />
-                </label>
-              ))}
+              <PaymentDialog handleConfirmBooking={handleConfirmBooking}>
+                <button className="px-6 py-2 rounded-full bg-green-700 text-white font-semibold hover:bg-green-800">
+                  Confirm and Book
+                </button>
+              </PaymentDialog>
             </div>
           </div>
         </div>
       </div>
 
-      <ConcernDialog show={showConcern} onClose={() => setShowConcern(false)} selected={selectedConcerns} setSelected={setSelectedConcerns}/>
-      <PetDialog show={showPet} onClose={() => setShowPet(false)} pet={selectedPet} setPet={setSelectedPet}/>
-
+      <ConcernDialog
+        show={showConcern}
+        onClose={() => setShowConcern(false)}
+        selected={selectedConcerns}
+        setSelected={setSelectedConcerns}
+      />
+      <PetDialog
+        show={showPet}
+        onClose={() => setShowPet(false)}
+        pet={selectedPet}
+        setPet={setSelectedPet}
+      />
+      <ErrorDialog
+        open={showError}
+        onOpenChange={() => setShowError(false)}
+        errors={(Object.values(errors) as string[]).filter((err) => err !== "")}
+      />
     </main>
   );
 }

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,8 +13,10 @@ import { AlertCircle } from "lucide-react";
 
 export function PaymentDialog({
   children,
+  handleConfirmBooking
 }: {
   children: React.ReactNode;
+  handleConfirmBooking: () => void;
 }) {
   return (
     <AlertDialog>
@@ -38,13 +39,8 @@ export function PaymentDialog({
 
         <AlertDialogFooter className="flex justify-end gap-3">
           {/* Yes button */}
-          <AlertDialogAction asChild>
-            <Link
-              href="#"
-              className="px-6 py-2 rounded-md border border-black bg-white !text-black hover:bg-transparent"
-            >
+          <AlertDialogAction className="px-6 py-2 rounded-md border border-black bg-white !text-black hover:bg-transparent" onClick={handleConfirmBooking}>
               Yes
-            </Link>
           </AlertDialogAction>
 
           {/* No button */}
