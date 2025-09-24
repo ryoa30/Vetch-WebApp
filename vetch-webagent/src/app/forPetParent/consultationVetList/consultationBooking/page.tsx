@@ -1,9 +1,8 @@
 "use client";
 
-import { Star, QrCode, Building, Smartphone, ChevronDown } from "lucide-react";
+import { Star, QrCode, Building, Smartphone, ChevronDown, Dog, ClipboardPlus, List, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ChevronRight } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useSearchParams } from "next/navigation";
 import { useLoading } from "@/contexts/LoadingContext";
@@ -152,7 +151,7 @@ export default function ConfirmBookingPage() {
 
           <div className="space-y-6 h-full">
             <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
-              <button className="flex w-full cursor-pointer flex-row justify-between items-center" onClick={() => setShowPet(true)}>
+              <button className="flex w-full cursor-pointer flex-row justify-between items-center border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-[#1e2923]" onClick={() => setShowPet(true)}>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
                     {/* <Dog className="w-5 h-5 text-black" /> */}
@@ -170,7 +169,9 @@ export default function ConfirmBookingPage() {
               <button onClick={()=>setShowConcern(true)} className="flex w-full cursor-pointer flex-row justify-between items-center">
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    {/* <PlusCircle className="w-5 h-5 text-black" /> */}
+                    <div className="flex-shrink-0">
+                        <ClipboardPlus className="w-10 h-10 text-black dark:text-white" />
+                    </div>
                     <span className="font-medium">Concerns</span>
                   </div>
                   <span className="text-sm text-gray-400">{selectedConcerns.length === 0? "Select Concerns" : selectedConcerns.map((item, index) => (`${item.label}${index<selectedConcerns.length-1 ? ", ": ""}`))}</span>
@@ -184,7 +185,9 @@ export default function ConfirmBookingPage() {
                 <button className="flex w-full cursor-pointer flex-row justify-between items-center">
                   <div>
                     <div className="flex">
-                      {/* <FileText className="w-5 h-5 text-black" /> */}
+                      <div className="flex-shrink-0">
+                          <List className="w-10 h-10 text-black dark:text-white" />
+                      </div>
                       <span className="font-medium">Illness Description</span>
                     </div>
                     <span className="text-sm text-gray-400">
@@ -333,31 +336,6 @@ export default function ConfirmBookingPage() {
       <ConcernDialog show={showConcern} onClose={() => setShowConcern(false)} selected={selectedConcerns} setSelected={setSelectedConcerns}/>
       <PetDialog show={showPet} onClose={() => setShowPet(false)} pet={selectedPet} setPet={setSelectedPet}/>
 
-
-      {/* Hero Section */}
-      {/* <section className="bg-[#A3D1C6] dark:bg-teal-800 flex flex-col md:flex-row items-center justify-between px-6 md:px-20 py-12 gap-8">
-            <div className="flex-1">
-            <h1 className="text-3xl md:text-4xl font-bold text-black dark:text-white">
-                Caring for Your Pets, <br />
-                <span className="italic font-normal text-gray-700 dark:text-gray-300">
-                Anytime, Anywhere
-                </span>
-            </h1>
-            <p className="mt-4 text-gray-700 dark:text-gray-300 max-w-md">
-                Connect with certified veterinarians for expert advice and treatment
-                for your pet's health.
-            </p>
-            </div>
-            <div className="flex-1 flex justify-center">
-            <Image
-                src="/img/about-us.png"
-                alt="Pet Hero"
-                width={300}
-                height={300}
-                className="rounded-lg"
-            />
-            </div>
-        </section> */}
     </main>
   );
 }
