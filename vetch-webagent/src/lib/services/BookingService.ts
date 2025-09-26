@@ -2,12 +2,23 @@
 import { HttpClient } from "../http/HttpClient";
 import { API_URL } from "@/constant/apiConstant";
 import { IResponse } from "../http/types";
+import { formatLocalDate } from "../utils/formatDate";
 
 export class BookingService {
   #http: HttpClient = new HttpClient({ baseUrl: API_URL.BOOKING });
 
+  async updateBookingStatus(bookingId: string, status: string) {
+    return await this.#http.put<IResponse>(`/status`, {id: bookingId, status });
+  }
+
   async getConcernTypes() {
     return await this.#http.get<IResponse>("/concern-types");
+  }
+
+  async getBookingByUserDateTime(userId: string, date: string, time: string) {
+    return await this.#http.get<IResponse>(
+      `/by-user-date-time?userId=${userId}&bookingDate=${date}&bookingTime=${time}`
+    );
   }
 
   async createBooking(
@@ -26,7 +37,7 @@ export class BookingService {
       petId,
       locationId,
       illnessDescription,
-      bookingDate: new Date(date).toISOString().split('T')[0],
+      bookingDate: formatLocalDate(new Date(date)),
       bookingTime: time,
       bookingPrice: totalPrice,
       bookingType: type,

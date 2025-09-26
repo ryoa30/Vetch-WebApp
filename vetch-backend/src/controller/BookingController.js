@@ -16,6 +16,8 @@ class BookingController {
 
         this.getConcernTypes = this.getConcernTypes.bind(this);
         this.createBooking = this.createBooking.bind(this);
+        this.getBookingByUserIdDateTime = this.getBookingByUserIdDateTime.bind(this);
+        this.updateBookingStatus = this.updateBookingStatus.bind(this);
     }
 
     async getConcernTypes(req, res) {
@@ -25,6 +27,17 @@ class BookingController {
         } catch (error) {
             console.log(error);
             res.status(500).json({ ok: false, message: 'Error fetching concern types', error: error.message });
+        }
+    }
+
+    async getBookingByUserIdDateTime(req, res) {
+        try {
+            const {userId, bookingDate, bookingTime} = req.query;
+            const booking = await this.#bookingRepository.retrieveBookingByUserIdDateTime(userId, bookingDate, bookingTime);
+            res.status(200).json({ok: true, data: booking, message: 'Bookings fetched successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching bookings', error: error.message });
         }
     }
 
@@ -62,6 +75,17 @@ class BookingController {
         } catch (error) {
             console.log(error);
             res.status(500).json({ok: false, message: 'Error creating booking', error: error.message });
+        }
+    }
+
+    async updateBookingStatus (req, res) { 
+        try {
+            const {id, status} = req.body;
+            const updatedBooking = await this.#bookingRepository.update(id, {bookingStatus: status});
+            res.status(200).json({ok: true, data: updatedBooking, message: 'Booking status updated successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ok: false, message: 'Error updating booking status', error: error.message });
         }
     }
 }

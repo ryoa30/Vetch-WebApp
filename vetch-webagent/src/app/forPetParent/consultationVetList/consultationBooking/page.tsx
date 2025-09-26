@@ -9,15 +9,15 @@ import {
   MapPin,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLoading } from "@/contexts/LoadingContext";
 import { VetService } from "@/lib/services/VetService";
 import { IVet } from "../types";
 import { ConcernDialog } from "./components/ConcernDialog";
 import { PetDialog } from "./components/PetDialog";
-import { capitalize, snakeCase } from "lodash";
+import { capitalize, result, set, snakeCase } from "lodash";
 import { UserService } from "@/lib/services/UserService";
 import { useSession } from "@/contexts/SessionContext";
 import PaymentDialog from "@/app/alert-dialog-box/PaymentConfirmDialogBox";
@@ -25,22 +25,7 @@ import { BookingValidator } from "@/lib/validators/BookingValidator";
 import ErrorDialog from "@/app/alert-dialog-box/ErrorDialogBox";
 import { BookingService } from "@/lib/services/BookingService";
 import { PaymentService } from "@/lib/services/PaymentService";
-
-declare global {
-  interface Window {
-    snap?: {
-      pay: (
-        token: string,
-        opts?: {
-          onSuccess?: (res: any) => void;
-          onPending?: (res: any) => void;
-          onError?: (err: any) => void;
-          onClose?: () => void;
-        }
-      ) => void;
-    };
-  }
-}
+import { showPaymentSnap } from "@/lib/utils/snapPayment";
 
 export default function ConfirmBookingPage() {
   const [consultationType, setConsultationType] = useState("Online");
@@ -51,10 +36,14 @@ export default function ConfirmBookingPage() {
   const { user } = useSession();
   const [errors, setErrors] = useState<any>({});
   const [showError, setShowError] = useState(false);
+  const [bookingId, setBookingId] = useState<string>("");
+  const [paymentToken, setPaymentToken] = useState<string>("");
+
+  const router = useRouter();
 
   const bookingValidator = new BookingValidator();
-  const bookingService = new BookingService();
-  const paymentService = new PaymentService();
+  const bookingService = useMemo(() => new BookingService(), []);
+  const paymentService = useMemo(() => new PaymentService(), []);
 
   const [showConcern, setShowConcern] = useState(false);
   const [showPet, setShowPet] = useState(false);
@@ -66,11 +55,11 @@ export default function ConfirmBookingPage() {
   const date = sp.get("date");
   const { setIsLoading } = useLoading();
 
-  const vetService = new VetService();
-  const userService = new UserService();
+  const vetService = useMemo(() => new VetService(), []);
+  const userService = useMemo(() => new UserService(), []);
   const [vet, setVet] = useState<IVet>();
 
-  const loadVetDetails = async () => {
+  const loadVetDetails = useCallback(async () => {
     setIsLoading(true);
     if (id) {
       try {
@@ -78,30 +67,15 @@ export default function ConfirmBookingPage() {
         if (result.ok) {
           console.log(result);
           setVet(result.data);
-          if (consultationType === "Homecare") {
-            setConsultationPrice(result.data.price * 1.5);
-            setTotalPrice(
-              result.data.price * 1.5 +
-                result.data.price * 1.5 * 0.1 +
-                result.data.price * 1.5 * 0.05
-            );
-          } else {
-            setConsultationPrice(result.data.price);
-            setTotalPrice(
-              result.data.price +
-                result.data.price * 0.1 +
-                result.data.price * 0.05
-            );
-          }
         }
       } catch (error) {
         console.log(error);
       }
     }
     setIsLoading(false);
-  };
+  }, [id, vetService, setIsLoading]);
 
-  const loadLocation = async () => {
+  const loadLocation = useCallback(async () => {
     try {
       const result = await userService.getUserLocationById(user?.id || "");
       if (result.ok) {
@@ -111,7 +85,9 @@ export default function ConfirmBookingPage() {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [user?.id, userService]);
+
+  // use showPaymentSnap(token, { ...callbacks }) from util
 
   const handleConfirmBooking = async () => {
     try {
@@ -129,55 +105,71 @@ export default function ConfirmBookingPage() {
         return;
       }
 
-      // const result = await bookingService.createBooking(selectedConcerns, illnessDescription, selectedPet.id, location.id, vet?.id || "", date || "", time || "", totalPrice, consultationType);
-      // console.log(result);
-      const result = await paymentService.getTransactionToken(user, totalPrice);
-      console.log(result);
-      window.snap?.pay(result.data, {
-        onSuccess: (result) => {
-          // TODO: verify on your backend (recommended)
-          console.log("Success:", result);
-        },
-        onPending: (result) => {
-          console.log("Pending:", result);
-        },
-        onError: (error) => {
-          console.error("Error:", error);
-        },
-        onClose: () => {
-          console.warn("Buyer closed the popup without finishing the payment");
-        },
-      });
+      const resultBooking = await bookingService.createBooking(
+        selectedConcerns,
+        illnessDescription,
+        selectedPet.id,
+        location.id,
+        vet?.id || "",
+        date || "",
+        time || "",
+        totalPrice,
+        consultationType
+      );
+      console.log(resultBooking);
+      if (!resultBooking.ok) {
+        throw new Error("Failed to create booking");
+      }
+      const resultPayment = await paymentService.getTransactionToken(
+        resultBooking.data.id,
+        user,
+        totalPrice,
+        consultationType,
+        consultationPrice
+      );
+      console.log(resultPayment);
+      if (!resultPayment.ok) {
+        throw new Error("Failed to get payment token");
+      }
+      setBookingId(resultBooking.data.id);
+      setPaymentToken(resultPayment.data);
+      showPaymentSnap(
+        resultPayment.data,
+        { bookingId: resultBooking.data.id },
+        {
+          onSuccess: () => {
+            console.log("masuk");
+            router.push("/forPetParent/orderHistory");
+          },
+        }
+      );
       // if(result.ok){
     } catch (error) {
       console.log(error);
+      setErrors({
+        general: "An error occurred while processing your booking.",
+      });
+      setShowError(true);
     }
   };
 
   useEffect(() => {
-    if (consultationPrice != 0) {
-      if (consultationType === "Homecare") {
-        setConsultationPrice(vet?.price ? vet.price * 1.5 : 0);
-        setTotalPrice(
-          (vet?.price ? vet.price * 1.5 : 0) +
-            (vet?.price ? vet.price * 1.5 * 0.1 : 0) +
-            (vet?.price ? vet.price * 1.5 * 0.05 : 0)
-        );
-      } else {
-        setConsultationPrice(vet?.price ? vet.price : 0);
-        setTotalPrice(
-          (vet?.price ? vet.price : 0) +
-            (vet?.price ? vet.price * 0.1 : 0) +
-            (vet?.price ? vet.price * 0.05 : 0)
-        );
-      }
+    const price = vet?.price ?? 0;
+    if (consultationType === "Homecare") {
+      const base = price * 1.5;
+      setConsultationPrice(base);
+      setTotalPrice(base + base * 0.1 + base * 0.05);
+    } else {
+      const base = price;
+      setConsultationPrice(base);
+      setTotalPrice(base + base * 0.1 + base * 0.05);
     }
-  }, [consultationType]);
+  }, [consultationType, vet?.price]);
 
   useEffect(() => {
     loadVetDetails();
     loadLocation();
-  }, []);
+  }, [loadVetDetails, loadLocation]);
 
   return (
     <main className="bg-[#F5F5F5] dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -241,6 +233,7 @@ export default function ConfirmBookingPage() {
           <div className="space-y-6 h-full">
             <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
               <button
+                disabled={bookingId != ""}
                 className="flex w-full cursor-pointer flex-row items-center border-gray-200 gap-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-[#1e2923]"
                 onClick={() => setShowPet(true)}
               >
@@ -279,6 +272,7 @@ export default function ConfirmBookingPage() {
               <div className="w-full bg-gray-300 h-[0.5px] my-2"></div>
 
               <button
+                disabled={bookingId != ""}
                 onClick={() => setShowConcern(true)}
                 className="flex w-full cursor-pointer flex-row items-center gap-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-[#1e2923]"
               >
@@ -320,6 +314,7 @@ export default function ConfirmBookingPage() {
                   </div>
                 </button>
                 <Textarea
+                  disabled={bookingId != ""}
                   placeholder="Enter Illness Description"
                   className="mt-2"
                   spellCheck={false}
@@ -339,6 +334,7 @@ export default function ConfirmBookingPage() {
               </p>
               <div className="flex gap-3">
                 <button
+                  disabled={bookingId != ""}
                   onClick={() => setConsultationType("Homecare")}
                   className={`flex-1 px-4 py-2 rounded-full font-medium ${
                     consultationType === "Homecare"
@@ -349,6 +345,7 @@ export default function ConfirmBookingPage() {
                   Homecare
                 </button>
                 <button
+                  disabled={bookingId != ""}
                   onClick={() => setConsultationType("Online")}
                   className={`flex-1 px-4 py-2 rounded-full font-medium ${
                     consultationType === "Online"
@@ -426,11 +423,32 @@ export default function ConfirmBookingPage() {
               </span>
             </div>
             <div className="flex justify-end mt-4">
-              <PaymentDialog handleConfirmBooking={handleConfirmBooking}>
-                <button className="px-6 py-2 rounded-full bg-green-700 text-white font-semibold hover:bg-green-800">
-                  Confirm and Book
+              {bookingId === "" && (
+                <PaymentDialog handleConfirmBooking={handleConfirmBooking}>
+                  <button className="px-6 py-2 rounded-full bg-green-700 text-white font-semibold hover:bg-green-800">
+                    Confirm and Book
+                  </button>
+                </PaymentDialog>
+              )}
+              {bookingId != "" && (
+                <button
+                  onClick={() =>
+                    showPaymentSnap(
+                      paymentToken,
+                      { bookingId: bookingId },
+                      {
+                        onSuccess: () => {
+                          console.log("masuk");
+                          router.push("/forPetParent/orderHistory");
+                        },
+                      }
+                    )
+                  }
+                  className="px-6 py-2 rounded-full bg-green-700 text-white font-semibold hover:bg-green-800"
+                >
+                  Continue Payment
                 </button>
-              </PaymentDialog>
+              )}
             </div>
           </div>
         </div>

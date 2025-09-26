@@ -7,7 +7,7 @@ const adminRoutes = require('./routes/AdminRoute');
 const bookingRoutes = require('./routes/BookingRoute');
 const petRoutes = require('./routes/PetRoute');
 const vetRoutes = require('./routes/VetRoute');
-const midtransRoutes = require('./routes/MidtransRoute');
+const paymentRoutes = require('./routes/PaymentRoute');
 const cookieParser = require('cookie-parser');
 const main = require('./utils/seeder');
 
@@ -28,7 +28,7 @@ app.use('/api/vet', vetRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/booking', bookingRoutes);
 app.use('/api/pet', petRoutes);
-app.use('/api/payment', midtransRoutes);
+app.use('/api/payment', paymentRoutes);
 
 app.use('/api/locations', locationRoutes);
 app.get('/', (req, res) => {

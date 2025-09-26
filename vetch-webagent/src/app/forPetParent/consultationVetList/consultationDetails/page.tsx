@@ -11,6 +11,10 @@ import { useEffect, useState } from "react";
 import { ISchedules, IVet } from "../types";
 import { useLoading } from "@/contexts/LoadingContext";
 import { useRouter, useSearchParams } from "next/navigation";
+import { BookingValidator } from "@/lib/validators/BookingValidator";
+import { useSession } from "@/contexts/SessionContext";
+import ErrorDialog from "@/app/alert-dialog-box/ErrorDialogBox";
+import { formatLocalDate } from "@/lib/utils/formatDate";
 
 export default function DoctorProfile() {
   const sp = useSearchParams();
@@ -20,11 +24,17 @@ export default function DoctorProfile() {
   const [ratings, setRatings] = useState([]);
   const [showAllRating, setShowAllRating] = useState(false);
   const [seeMore, setSeeMore] = useState<boolean>(false);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const {user} = useSession();
   const [selectedTime, setSelectedTime] = useState<string | null>(time);
   const [timeSlots, setTimeSlots] = useState<ISchedules[]>([]);
-  
+
+  const bookingValidator = new BookingValidator();
+
   const vetService = new VetService();
+  const [showError, setShowError] = useState(false);
   const [vet, setVet] = useState<IVet>();
   const router = useRouter();
 
@@ -58,13 +68,16 @@ export default function DoctorProfile() {
     }
   };
 
-  
   const loadTimeSlots = async () => {
     if (id && selectedDate) {
-      const day = selectedDate.getDay() === 0 ? 7: selectedDate.getDay();
-      console.log(day);
+      const day = selectedDate.getDay() === 0 ? 7 : selectedDate.getDay();
+      // console.log(selectedDate.toISOString().split("T")[0]);
       try {
-        const result = await vetService.getVetSchedules(id, day);
+        const result = await vetService.getVetSchedules(
+          id,
+          day,
+          formatLocalDate(selectedDate)
+        );
         if (result.ok) {
           console.log(result);
           setTimeSlots(result.data);
@@ -73,7 +86,7 @@ export default function DoctorProfile() {
         console.log(error);
       }
     }
-  }
+  };
 
   useEffect(() => {
     loadVetDetails();
@@ -81,11 +94,36 @@ export default function DoctorProfile() {
   }, []);
 
   useEffect(() => {
+    console.log(formatLocalDate(selectedDate!));
     loadTimeSlots();
-  }, [selectedDate])
+  }, [selectedDate]);
+
+  const handleContinueBooking = async () => {
+    if (vet){
+      const validation = await bookingValidator.validateBookingSelection({
+        userId: user?.id,
+        selectedDate: selectedDate || null,
+        selectedTime: selectedTime || "",
+      });
+      if(!validation.ok){
+        setShowError(true);
+        return;
+      }
+
+      router.push(
+        `/forPetParent/consultationVetList/consultationBooking?${new URLSearchParams(
+          {
+            id: vet.id,
+            time: selectedTime || "",
+            date: formattedDate,
+          }
+        ).toString()}`
+      );
+    }
+  } 
 
   const formattedDate = (() => {
-    if(selectedDate){
+    if (selectedDate) {
       const day = String(selectedDate.getDate()).padStart(2, "0");
       const months = [
         "Jan",
@@ -102,13 +140,11 @@ export default function DoctorProfile() {
         "Dec",
       ];
       const year = selectedDate.getFullYear();
-      return `${day} ${
-        months[selectedDate.getMonth()]
-      } ${year}`;
-    }else{
+      return `${day} ${months[selectedDate.getMonth()]} ${year}`;
+    } else {
       return "";
     }
-    })();
+  })();
 
   // console.log(selectedTime);
 
@@ -202,7 +238,10 @@ export default function DoctorProfile() {
                   );
                 }}
                 selected={selectedDate}
-                onSelect={(date)=>{setSelectedDate(date); setSelectedTime("")}}
+                onSelect={(date) => {
+                  setSelectedDate(date);
+                  setSelectedTime("");
+                }}
                 className="rounded-md bg-white dark:bg-[#2D4236] mx-auto w-[300px] sm:w-auto"
               />
             </div>
@@ -214,7 +253,7 @@ export default function DoctorProfile() {
                   Appointment Time
                 </h4>
                 <div className="flex overflow-x-scroll custom-scrollbar max-w-[1000px]">
-                  { timeSlots.map((time, index) => (
+                  {timeSlots.map((time, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedTime(time.timeOfDay)}
@@ -258,7 +297,7 @@ export default function DoctorProfile() {
                   You wont be charged yet
                 </p>
                 <Button
-                    onClick={() => {if(vet)router.push(`/forPetParent/consultationVetList/consultationBooking?${new URLSearchParams({ id: vet.id, time: selectedTime || "", date: formattedDate}).toString()}`)}} 
+                  onClick={handleContinueBooking}
                   className="bg-white text-black border px-7 py-5 rounded-xl text-lg hover:bg-red-500 hover:text-white"
                   disabled={!selectedDate || !selectedTime}
                 >
@@ -297,6 +336,7 @@ export default function DoctorProfile() {
           )}
         </div>
       </div>
+      <ErrorDialog open={showError} onOpenChange={() => setShowError(false)} errors={["You already have a booking at this date and time"]}/>
     </div>
   );
 }

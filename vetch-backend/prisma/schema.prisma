@@ -162,6 +162,7 @@ model Booking {
 model Payment {
   id            String   @id @default(cuid())
   bookingId     String   @unique @map("booking_id")
+  paymentToken  String   @map("payment_token") @db.Text
   paymentMethod String   @map("payment_method") @db.VarChar(65)
   paymentStatus String   @map("payment_status") @db.VarChar(65)
   paymentDate   DateTime @map("payment_date")

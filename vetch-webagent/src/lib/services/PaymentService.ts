@@ -6,14 +6,23 @@ import { IResponse } from "../http/types";
 export class PaymentService {
   #http: HttpClient = new HttpClient({ baseUrl: API_URL.PAYMENT });
 
+  async updatePaymentDetails(bookingId: string, status: string, paymentMethod: string){
+    return await this.#http.put<IResponse>(`/`, {bookingId, status, paymentMethod});
+  }
 
   async getTransactionToken(
-    user: any,
-    totalPrice: number,
+    bookingId: string,
+    user?: any,
+    totalPrice?: number,
+    serviceType?: string,
+    basePrice?: number,
   ) {
     const payload = {
       user,
-      totalPrice
+      totalPrice,
+      serviceType,
+      basePrice,
+      bookingId,
     };
 
     console.log(payload);

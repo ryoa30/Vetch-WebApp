@@ -74,8 +74,8 @@ class VetController {
     
     async getVetSchedulesByDayAndId(req, res) {
         try {
-            const {id, day} = req.query;
-            const schedules = await this.#scheduleRepository.findVetSchedulesByDayAndId(id, day);
+            const {id, day, bookingDate} = req.query;
+            const schedules = await this.#scheduleRepository.findVetSchedulesByDayAndId(id, day, bookingDate);
             res.status(200).json({ok: true, message: "Success fetching vet schedule", data: schedules})
         } catch (error) {
             console.log(error);

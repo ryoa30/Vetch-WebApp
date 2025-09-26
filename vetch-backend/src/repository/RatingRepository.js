@@ -57,7 +57,7 @@ class RatingRepository extends BaseRepository {
             user:undefined
         }
     })
-    console.log(ratings);
+    // console.log(ratings);
 
     return ratings;
   }
