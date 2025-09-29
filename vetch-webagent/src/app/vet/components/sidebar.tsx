@@ -5,10 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Home, Calendar, History, User, Menu, X,Contact } from "lucide-react";
+import { Home, Calendar, History, User, Menu, X, Contact, LogOutIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import ToggleTheme from "@/components/ToggleTheme";
+import LogoutConfirmDialog from "@/app/alert-dialog-box/LogoutConfirmDialogBox";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -23,7 +24,11 @@ export default function Sidebar() {
       icon: User,
     },
     { href: "/vet/history", label: "History", icon: History },
-    { href: "/vet/profile-and-schedules", label: "Profile & Schedules", icon: Contact },
+    {
+      href: "/vet/profile-and-schedules",
+      label: "Profile & Schedules",
+      icon: Contact,
+    },
   ];
 
   return (
@@ -79,13 +84,26 @@ export default function Sidebar() {
               </Link>
             );
           })}
+          <div>
+            <LogoutConfirmDialog>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-2 text-white hover:bg-white/20",
+                  ""
+                )}
+              >
+                <LogOutIcon className="h-4 w-4" />
+                {isOpen && "Logout"}
+              </Button>
+            </LogoutConfirmDialog>
+          </div>
           <div className="p-4 flex justify-center">
-            <ToggleTheme />
+            {/* ToggleTheme akan berubah berdasarkan state isOpen */}
+            <ToggleTheme variant={isOpen ? "full" : "icon"} />
           </div>
         </nav>
       </div>
-
-      {/* Footer */}
     </aside>
   );
 }
