@@ -24,9 +24,9 @@ export class VetService {
     )
   }
 
-  async getVetSchedules(id: string, day: number) {
+  async getVetSchedules(id: string, day: number, bookingDate: string) {
     return await this.#http.get<IResponse>(
-      `/schedule?id=${id}&day=${day}`
+      `/schedule?id=${id}&day=${day}&bookingDate=${bookingDate}`
     );
   }
 }

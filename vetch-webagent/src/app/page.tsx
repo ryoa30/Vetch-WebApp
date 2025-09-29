@@ -1,7 +1,8 @@
-import React from "react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
+
   return (
     <div className="min-h-screen w-full bg-[#3D8D7A] dark:bg-[#1F2D2A] text-white relative">
       {/* Hero Section */}
@@ -45,10 +46,12 @@ export default function Home() {
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
               Because Their{" "}
-              <span className="text-[#3D8D7A] dark:text-blue-600">Health Matters</span>
+              <span className="text-[#3D8D7A] dark:text-blue-600">
+                Health Matters
+              </span>
             </h2>
             <p className="text-gray-600 dark:text-white mb-12 max-w-2xl mx-auto">
-              Vetch ensures your pets receive the best medical 
+              Vetch ensures your pets receive the best medical
               <br />
               attention from verified experts.
             </p>
@@ -70,7 +73,7 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                Safe, Secure, and Reliable 
+                Safe, Secure, and Reliable
               </h3>
             </div>
 
@@ -126,7 +129,9 @@ export default function Home() {
                     <span className="text-lg font-bold text-gray-800 dark:text-white">
                       Dr. Raydawn
                     </span>
-                    <span className="text-gray-600 font-semibold dark:text-white">Fee</span>
+                    <span className="text-gray-600 font-semibold dark:text-white">
+                      Fee
+                    </span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs text-gray-600 dark:text-white">
@@ -162,7 +167,9 @@ export default function Home() {
                     <span className="text-lg font-bold text-gray-800 dark:text-white">
                       Dr. Taftian
                     </span>
-                    <span className="text-gray-600 font-semibold dark:text-white">Fee</span>
+                    <span className="text-gray-600 font-semibold dark:text-white">
+                      Fee
+                    </span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs text-gray-600 dark:text-white">

@@ -6,6 +6,7 @@ import { Footer } from "@/app/layout-component/footer/footer";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { useLoading } from "@/contexts/LoadingContext";
 import { SessionProvider } from "@/contexts/SessionContext";
+import { useEffect } from "react";
 
 type MinimalSession = {
   isAuthenticated: boolean;
@@ -41,6 +42,24 @@ export default function LayoutWrapper({ children, session }: { children: React.R
   const isNoLayout =
     noLayoutRoutes.includes(pathname) ||
     pathname.startsWith("/admin/blog/set-blog/");
+
+  useEffect(() => {
+    console.log("masuk ini kawan");
+    const midtransScriptUrl = "https://app.sandbox.midtrans.com/snap/snap.js";
+
+    const scriptTag = document.createElement("script");
+    scriptTag.src = midtransScriptUrl;
+
+    const myMidtransClientKey = process.env.MIDTRANS_CLIENT_ID || "";
+    scriptTag.setAttribute("data-client-key", myMidtransClientKey);
+    scriptTag.async = true;
+
+    document.body.appendChild(scriptTag);
+
+    return () => {
+      document.body.removeChild(scriptTag);
+    };
+  }, []);
 
   return (
     <>
