@@ -143,6 +143,7 @@ model Booking {
   locationId         String     @map("location_id")
   illnessDescription String     @map("illness_description") @db.Text
   bookingDate        DateTime   @map("booking_date")
+  bookingTime        DateTime   @db.Time(0) @map("booking_time")
   bookingPrice       Int        @map("booking_price")
   bookingStatus      String     @map("booking_status") @db.VarChar(20)
   bookingType        String     @map("booking_type") @db.VarChar(65)
@@ -161,6 +162,7 @@ model Booking {
 model Payment {
   id            String   @id @default(cuid())
   bookingId     String   @unique @map("booking_id")
+  paymentToken  String   @map("payment_token") @db.Text
   paymentMethod String   @map("payment_method") @db.VarChar(65)
   paymentStatus String   @map("payment_status") @db.VarChar(65)
   paymentDate   DateTime @map("payment_date")

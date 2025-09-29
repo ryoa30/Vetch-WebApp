@@ -1,11 +1,18 @@
 const { hhmmToUTCDate, nowForSchedule } = require("../utils/dateUtils");
 const BaseRepository = require("./BaseRepository");
+const BookingRepository = require("./BookingRepository");
 
 const MIN_PER_DAY = 1440;
 
 class ScheduleRepository extends BaseRepository {
+  #bookingRepository;
+
   constructor() {
     super("Schedule");
+
+    this.#bookingRepository = new BookingRepository();
+
+    this.findVetSchedulesByDayAndId = this.findVetSchedulesByDayAndId.bind(this);
   }
 
   toMins(hhmm) {
@@ -46,32 +53,42 @@ class ScheduleRepository extends BaseRepository {
     });
   }
 
-  async findVetSchedulesByDayAndId(vetId, day) {
+  async findVetSchedulesByDayAndId(vetId, day, bookingDate /* "YYYY-MM-DD" optional */) {
     const { weekday, timeOfDay } = nowForSchedule();
-    console.log(weekday);
 
-    const where = weekday === Number(day)? { dayNumber:Number(day), timeOfDay: {gt:timeOfDay}}:{ dayNumber: Number(day)};
+    // Build timeOfDay filter (hide past times if requesting today)
+    const timeOfDayFilter = {};
+    if (weekday === Number(day)) {
+      timeOfDayFilter.gt = timeOfDay;
+    }
 
-    console.log({
-        ...where,
-        vetId,
-        isDeleted: false,
-      });
+    // Collect booked times for the given calendar date (if provided)
+    let bookedTimes = [];
+    // console.log("Booking Date: ",bookingDate)
+    if (bookingDate) {
+      const bookings = await this.#bookingRepository.getBookingByVetIdAndDate(vetId, bookingDate);
+
+      console.log(bookings);
+
+      bookedTimes = bookings.map((b) => b.bookingTime);
+      if (bookedTimes.length) {
+        timeOfDayFilter.notIn = bookedTimes;
+      }
+    }
 
     const result = await this._model.findMany({
       where: {
-        ...where,
+        dayNumber: Number(day),
         vetId,
         isDeleted: false,
+        ...(Object.keys(timeOfDayFilter).length ? { timeOfDay: timeOfDayFilter } : {}),
       },
       orderBy: { timeOfDay: "asc" },
     });
 
-    // console.log(result);
-
     return result.map((schedule) => ({
       ...schedule,
-      timeOfDay: schedule.timeOfDay.toISOString().slice(11, 16)
+      timeOfDay: schedule.timeOfDay.toISOString().slice(11, 16),
     }));
   }
 }

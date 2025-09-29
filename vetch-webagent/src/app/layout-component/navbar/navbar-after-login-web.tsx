@@ -112,11 +112,22 @@ export function NavbarDesktop() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32 bg-[#B3D8A8]">
+              
               <DropdownMenuItem asChild className="p-2">
                   <Button variant="ghost" className="w-full justify-start">
                     Edit Profile
                   </Button>
               </DropdownMenuItem>
+              
+              <DropdownMenuItem asChild>
+                  <Link
+                  href="/forPetParent/orderHistory"
+                  className="w-full justify-start font-medium"
+                >
+                  Order History
+                </Link>
+              </DropdownMenuItem>
+
               <DropdownMenuItem asChild>
                 <LogoutConfirmDialog>
                   <Button variant="ghost" className="w-full justify-start">
@@ -124,6 +135,7 @@ export function NavbarDesktop() {
                   </Button>
                 </LogoutConfirmDialog>
               </DropdownMenuItem>
+
             </DropdownMenuContent>
           </DropdownMenu>
 

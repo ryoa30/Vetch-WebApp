@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "public"."blog" ALTER COLUMN "date" SET DEFAULT CURRENT_TIMESTAMP;

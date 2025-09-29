@@ -2,6 +2,7 @@
 import { HttpClient } from "../http/HttpClient";
 import { API_URL } from "@/constant/apiConstant";
 import { IResponse } from "../http/types";
+import { formatLocalDate } from "../utils/formatDate";
 // Do not import server-only session utilities in client-land
 
 
@@ -56,7 +57,7 @@ export class UserService {
 
     const petDobStr =
       context.petDob instanceof Date
-        ? context.petDob.toISOString().slice(0, 10)
+        ? formatLocalDate(context.petDob)
         : undefined;
 
     const formData = new FormData();

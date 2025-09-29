@@ -8,5 +8,6 @@ export const API_URL = {
     VET: `${API_BASE_URL}/api/vet`,
     BOOKING: `${API_BASE_URL}/api/booking`,
     PET: `${API_BASE_URL}/api/pet`,
-    
+    PAYMENT: `${API_BASE_URL}/api/payment`,
+    CHAT: `${API_BASE_URL}/api/chat`,
 }
