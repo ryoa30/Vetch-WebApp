@@ -3,11 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
   return (
-    <div className="min-h-screen w-full bg-[#3D8D7A] dark:bg-[#1F2D2A] text-white">
+    <div className="min-h-screen w-full bg-[#3D8D7A] dark:bg-[#1F2D2A] text-white relative">
       {/* Hero Section */}
       <div className="container mx-auto px-12 py-12">
-        <div className="flex flex-col lg:flex-row items-center justify-between">
-          <div className="lg:w-1/2 text-white mb-8 lg:mb-0">
+        <div className="flex flex-col lg:flex-row justify-between">
+          <div className="lg:w-1/2 text-white mb-8 lg:mb-0 text-center sm:text-left">
             <h1 className="text-4xl lg:text-6xl font-bold mb-4 leading-tight">
               Caring for Your Pets,
               <br />
@@ -25,12 +25,12 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="lg:w-1/2 flex justify-center">
-            <div className="relative">
+          <div className="relative w-full lg:w-1/2">
+            <div className="h-80">
               <img
                 src="/img/dog.png"
                 alt="dog"
-                className="w- h-80 translate-y-2"
+                className="absolute left-1/2 -translate-x-1/2 bottom-0 lg:h-100 h-80 translate-y-20"
               />
             </div>
           </div>

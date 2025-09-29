@@ -20,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import LoginConfirmDialog from "@/app/alert-dialog-box/LoginConfirmDialogBox";
+import LogoutConfirmDialog from "@/app/alert-dialog-box/LogoutConfirmDialogBox";
 
 export function NavbarDesktop() {
   return (
@@ -47,7 +47,7 @@ export function NavbarDesktop() {
               <NavigationMenuContent className="bg-[#B3D8A8]">
                 <div className="p-4 w-48 flex flex-col gap-2">
                   <NavigationMenuLink asChild>
-                    <Link href="#" className="text-base">
+                    <Link href="/forPetParent/consultationVetList" className="text-base">
                       Consultation
                     </Link>
                   </NavigationMenuLink>
@@ -63,18 +63,6 @@ export function NavbarDesktop() {
                   </NavigationMenuLink>
                 </div>
               </NavigationMenuContent>
-            </NavigationMenuItem>
-
-            {/* Other Links */}
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  href="#"
-                  className="bg-transparent text-white hover:underline font-bold text-base"
-                >
-                  Become a Vet
-                </Link>
-              </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
@@ -124,12 +112,17 @@ export function NavbarDesktop() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32 bg-[#B3D8A8]">
-              <DropdownMenuItem asChild>
-                <LoginConfirmDialog>
+              <DropdownMenuItem asChild className="p-2">
                   <Button variant="ghost" className="w-full justify-start">
-                    Login
+                    Edit Profile
                   </Button>
-                </LoginConfirmDialog>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <LogoutConfirmDialog>
+                  <Button variant="ghost" className="w-full justify-start">
+                    Logout
+                  </Button>
+                </LogoutConfirmDialog>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

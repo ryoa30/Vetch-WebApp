@@ -3,9 +3,18 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/app/layout-component/navbar/Navbar";
 import { Footer } from "@/app/layout-component/footer/footer";
+import LoadingOverlay from "@/components/LoadingOverlay";
+import { useLoading } from "@/contexts/LoadingContext";
+import { SessionProvider } from "@/contexts/SessionContext";
 
-export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
+type MinimalSession = {
+  isAuthenticated: boolean;
+  user: { id: string; role: string; fullName: string; email: string } | null;
+};
+
+export default function LayoutWrapper({ children, session }: { children: React.ReactNode; session: MinimalSession }) {
   const pathname = usePathname();
+  const {loading} = useLoading();
 
   const noLayoutRoutes = [
     "/login",
@@ -25,23 +34,27 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     "/vet/schedule",
     "/vet/profile-and-schedules",
 
+    "/admin/blog/set-blog",
   ];
 
   // cek exact match atau prefix match untuk edit-blog/[id]
   const isNoLayout =
     noLayoutRoutes.includes(pathname) ||
-    pathname.startsWith("/admin/blog/edit-blog/");
+    pathname.startsWith("/admin/blog/set-blog/");
 
   return (
     <>
       {isNoLayout ? (
-        <main>{children}</main>
+        <SessionProvider value={session}>
+          <main>{children}</main>
+        </SessionProvider>
       ) : (
-        <>
-          <Navbar />
+        <SessionProvider value={session}>
+          <Navbar session={session} />
           <main>{children}</main>
           <Footer />
-        </>
+          <LoadingOverlay show={loading}/>
+        </SessionProvider>
       )}
     </>
   );

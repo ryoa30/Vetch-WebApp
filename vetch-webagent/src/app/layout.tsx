@@ -4,6 +4,8 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import LayoutWrapper from "@/app/layout-component/LayoutWrapper";
+import { LoadingContextProvider } from "@/contexts/LoadingContext";
+import { getSession } from "@/lib/utils/session";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,7 +26,16 @@ interface RootLayoutProps {
   children: ReactNode;
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
+  // Read iron-session on the server
+  const session = await getSession();
+  const minimalSession = {
+    isAuthenticated: Boolean(session.accessToken),
+    user: session.user ?? null,
+  };
+
+  console.log(minimalSession);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -35,7 +46,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
           enableSystem
           disableTransitionOnChange
         >
-          <LayoutWrapper>{children}</LayoutWrapper>
+          <LoadingContextProvider>
+            <LayoutWrapper session={minimalSession}>{children}</LayoutWrapper>
+          </LoadingContextProvider>
         </ThemeProvider>
       </body>
     </html>

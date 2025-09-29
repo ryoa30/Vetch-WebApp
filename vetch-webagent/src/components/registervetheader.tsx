@@ -33,16 +33,12 @@ const RegisterHeader = () => {
           className="absolute top-0"
         />
         <div className="flex justify-between w-full max-w-[300px] z-10 text-white text-sm font-semibold mt-10">
-          <Link href="/register/vet/account">
-            <div className="flex flex-col items-center">
-              <span className={isAccountPage ? "border-b-2 border-white" : ""}>Account Info</span>
-            </div>
-          </Link>
-          <Link href="/register/vet/location">
-            <div className="flex flex-col items-center">
-              <span className={isLocationPage ? "border-b-2 border-white" : ""}>Location</span>
-            </div>
-          </Link>
+          <div className="flex flex-col items-center">
+            <span className={isAccountPage ? "border-b-2 border-white" : ""}>Account Info</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className={isLocationPage ? "border-b-2 border-white" : ""}>Location</span>
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,10 @@
+const BaseRepository = require('./BaseRepository');
+
+class CategoryRepository extends BaseRepository {
+    constructor() {
+        super('Category');
+    }
+
+}
+
+module.exports = CategoryRepository;

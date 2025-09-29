@@ -4,45 +4,101 @@ import Image from "next/image";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Pencil, Trash2 } from "lucide-react";
+import AppPaginationClient from "@/components/app-pagination-client";
+import { useEffect, useState } from "react";
+import { BlogService } from "@/lib/services/BlogService";
+import { formatIsoJakarta } from "@/lib/utils/formatDate";
+import DeleteBlogDialogBox from "@/app/alert-dialog-box/DeleteBlogDialogBlox";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
-const blogs = [
-  {
-    id: 1,
-    date: "20 May 2025",
-    title: "How to Care Your Cat",
-    category: "Daily Care",
-    image: "/img/placeholder.png",
-  },
-  {
-    id: 2,
-    date: "18 May 2025",
-    title: "Dog Nutrition Tips",
-    category: "Daily Care",
-    image: "/img/placeholder.png",
-  },
-  {
-    id: 3,
-    date: "15 May 2025",
-    title: "Rabbit Grooming Guide",
-    category: "Daily Care",
-    image: "/img/placeholder.png",
-  },
-  {
-    id: 4,
-    date: "10 May 2025",
-    title: "Exotic Pets Basics",
-    category: "Daily Care",
-    image: "/img/placeholder.png",
-  },
-];
+// const blogs = [
+//   {
+//     id: 1,
+//     date: "20 May 2025",
+//     title: "How to Care Your Cat",
+//     category: "Daily Care",
+//     image: "/img/placeholder.png",
+//   },
+//   {
+//     id: 2,
+//     date: "18 May 2025",
+//     title: "Dog Nutrition Tips",
+//     category: "Daily Care",
+//     image: "/img/placeholder.png",
+//   },
+//   {
+//     id: 3,
+//     date: "15 May 2025",
+//     title: "Rabbit Grooming Guide",
+//     category: "Daily Care",
+//     image: "/img/placeholder.png",
+//   },
+//   {
+//     id: 4,
+//     date: "10 May 2025",
+//     title: "Exotic Pets Basics",
+//     category: "Daily Care",
+//     image: "/img/placeholder.png",
+//   },
+// ];
+
+interface IBlog {
+  id: number;
+  title: string;
+  picture: string;
+  date: string;
+  categoryId: string;
+  categoryName: string;
+}
 
 export default function BlogPage() {
+  const [pageNumber, setPageNumber] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [volume, setVolume] = useState(5);
+  const [query, setQuery] = useState("");
+  const [blogs, setBlogs] = useState<IBlog[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [selectedBlogId, setSelectedBlogId] = useState<number | null>(null);
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+  const blogService = new BlogService();
+
+  const loadBlogs = async () => {
+    try {
+      const response = await blogService.getBlogs(pageNumber, volume, query);
+      console.log(response);
+      if (response.ok) {
+        setBlogs(response.data.blogs);
+        setTotalPages(response.data.totalPages);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    loadBlogs();
+  }, [pageNumber, volume, query]);
+
+  const handleDeleteBlog = async () => {
+    setIsLoading(true);
+    if(selectedBlogId === null){
+      setOpenDeleteDialog(false);
+      setIsLoading(false);
+      return;
+    }
+    const result = await blogService.deleteBlog(selectedBlogId.toString());
+    if(result.ok){
+      loadBlogs();
+      setOpenDeleteDialog(false);
+    }
+    setIsLoading(false);
+  }
   return (
     <div className="p-6">
       {/* Header */}
@@ -50,6 +106,8 @@ export default function BlogPage() {
         <h1 className="text-3xl font-bold text-white">Blog</h1>
         <Input
           placeholder="Search for blog"
+          onChange={(e) => setQuery(e.target.value)}
+          value={query}
           className="w-full md:w-64 mt-3 md:mt-0 rounded-full bg-white dark:bg-white"
         />
       </div>
@@ -67,8 +125,11 @@ export default function BlogPage() {
 
       {/* Add Blog Button */}
       <div className="flex justify-end mb-4">
-        <Link href="/admin/blog/add-blog">
-          <Button variant="outline" className="rounded-full bg-white dark:bg-white text-black dark:text-black">
+        <Link href="/admin/blog/set-blog/add">
+          <Button
+            variant="outline"
+            className="rounded-full bg-white dark:bg-white text-black dark:text-black"
+          >
             + Add Blog
           </Button>
         </Link>
@@ -83,7 +144,7 @@ export default function BlogPage() {
           >
             <CardHeader className="p-0">
               <Image
-                src={blog.image}
+                src={blog.picture}
                 alt={blog.title}
                 width={400}
                 height={200}
@@ -93,11 +154,13 @@ export default function BlogPage() {
             <CardContent className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <p className="text-sm text-gray-500">{blog.date}</p>
+                  <p className="text-sm text-gray-500">
+                    {formatIsoJakarta(blog.date)}
+                  </p>
                   <h2 className="text-lg font-bold">{blog.title}</h2>
                 </div>
                 <span className="ml-2 px-3 py-1 text-xs font-semibold bg-black text-white rounded-full whitespace-nowrap">
-                  {blog.category}
+                  {blog.categoryName}
                 </span>
               </div>
 
@@ -107,7 +170,7 @@ export default function BlogPage() {
                   Read More
                 </Button>
                 <div className="flex gap-2">
-                  <Link href={`/admin/blog/edit-blog/${blog.id}`}>
+                  <Link href={`/admin/blog/set-blog/${blog.id}`}>
                     <Button
                       variant="outline"
                       size="icon"
@@ -120,6 +183,10 @@ export default function BlogPage() {
                     variant="outline"
                     size="icon"
                     className="rounded-full"
+                    onClick={() => {
+                      setSelectedBlogId(blog.id);
+                      setOpenDeleteDialog(true);
+                    }}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -129,6 +196,21 @@ export default function BlogPage() {
           </Card>
         ))}
       </div>
+
+      <AppPaginationClient
+        className="mt-6 flex justify-center"
+        currentPage={pageNumber}
+        totalPages={totalPages}
+        onPageChange={(page) => {
+          setIsLoading(true);
+          setPageNumber(page);
+        }}
+        pageSize={volume}
+        onPageSizeChange={(size) => setVolume(size)}
+        resetToPage1OnSizeChange={true}
+      />
+      <LoadingOverlay show={isLoading} />
+      <DeleteBlogDialogBox open={openDeleteDialog} onConfirm={handleDeleteBlog} onCancel={() => setOpenDeleteDialog(false)}/>
     </div>
   );
 }
