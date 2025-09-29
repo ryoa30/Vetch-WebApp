@@ -18,6 +18,7 @@ class BookingController {
         this.createBooking = this.createBooking.bind(this);
         this.getBookingByUserIdDateTime = this.getBookingByUserIdDateTime.bind(this);
         this.updateBookingStatus = this.updateBookingStatus.bind(this);
+        this.getBookingsByUserId = this.getBookingsByUserId.bind(this);
     }
 
     async getConcernTypes(req, res) {
@@ -35,6 +36,17 @@ class BookingController {
             const {userId, bookingDate, bookingTime} = req.query;
             const booking = await this.#bookingRepository.retrieveBookingByUserIdDateTime(userId, bookingDate, bookingTime);
             res.status(200).json({ok: true, data: booking, message: 'Bookings fetched successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching bookings', error: error.message });
+        }
+    }
+
+    async getBookingsByUserId(req, res) {
+        try {
+            const {userId, status, type} = req.query;
+            const bookings = await this.#bookingRepository.getBookingsByUserId(userId, status, type);
+            res.status(200).json({ok: true, data: bookings, message: 'Bookings fetched successfully'});
         } catch (error) {
             console.log(error);
             res.status(500).json({ ok: false, message: 'Error fetching bookings', error: error.message });

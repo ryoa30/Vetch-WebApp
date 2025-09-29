@@ -5,16 +5,6 @@ import { BookingService } from "@/lib/services/BookingService";
 import {snakeCase} from "lodash"
 import Image from "next/image";
 
-// const concerns = [
-//   { label: "Flea and Tick", icon: "🪲" },
-//   { label: "Skin or Ear Infection", icon: "🦠" },
-//   { label: "Diarrhea or Vomiting", icon: "🤢" },
-//   { label: "Eye Issues", icon: "👁️" },
-//   { label: "Urinary Problems", icon: "💧" },
-//   { label: "Trauma / Injury", icon: "💥" },
-//   { label: "Toxin Ingestion", icon: "☣️" },
-//   { label: "Other", icon: "➕" },
-// ];
 
 interface IConcernType {
     id: number;

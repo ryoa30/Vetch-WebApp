@@ -29,13 +29,31 @@ class BookingRepository extends BaseRepository {
 
   async getBookingsByUserId(userId, status, type) {
     const where = {
-      userId,
+      pet: {
+        userId: userId,
+      },
       isDeleted: false,
       bookingStatus: status
         ? status
-        : { in: ["Pending", "Confirmed", "Completed", "Cancelled"] },
-      bookingType: type ? type : { in: ["Consultation", "Hospitalization"] },
+        : { in: ["PAYMENT", "PENDING", "ACCEPTED", "ONGOING", "DONE", "CANCELLED"] },
+      bookingType: type ? type : { in: ["Online", "Homecare"] },
     };
+
+    const bookings = await this._model.findMany({
+      where,
+      orderBy: [ {bookingDate: "desc"}, {bookingTime: "desc"} ],
+      include: {
+        pet: true,
+        vet: {
+          include: {
+            user: true,
+          }
+        },
+      }
+    });
+
+    return bookings;
+
   }
 
   async getBookingByVetIdAndDate(vetId, bookingDate) {

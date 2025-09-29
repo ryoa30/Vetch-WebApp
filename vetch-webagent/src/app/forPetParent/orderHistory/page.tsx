@@ -1,20 +1,57 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import OrderCard from "./components/OrderCard";
 import { Headset, House } from "lucide-react";
+import { BookingService } from "@/lib/services/BookingService";
+import { useSession } from "@/contexts/SessionContext";
+import { useLoading } from "@/contexts/LoadingContext";
+import ChatDialogBox from "@/app/alert-dialog-box/ChatDialogBox";
 
 const tabList = [
-    { id: "payment", label: "Payment" },
-    { id: "pending", label: "Pending" },
-    { id: "accepted", label: "Accepted" },
-    { id: "ongoing", label: "Ongoing" },
-    { id: "done", label: "Done" },
+    { id: "PAYMENT", label: "Payment" },
+    { id: "PENDING", label: "Pending" },
+    { id: "ACCEPTED", label: "Accepted" },
+    { id: "ONGOING", label: "Ongoing" },
+    { id: "DONE", label: "Done" },
+    { id: "CANCELLED", label: "Cancelled" },
 ]
 
 const OrderHistory: React.FC = () => {
-    const [selectedTab, setSelectedTab] = useState("payment");
+    const [selectedTab, setSelectedTab] = useState("PAYMENT");
+    const {user} = useSession();
+    const {setIsLoading} = useLoading();
+
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    // const [isChatOpen, setIsChatOpen] = useState(true);
+
+    const [selectedBooking, setSelectedBooking] = useState(null);
+
+    const [reload, setReload] = useState(false);
+
+    const [onlineConsultations, setOnlineConsultations] = useState<any[]>([]);
+    const [homecareConsultations, setHomecareConsultations] = useState<any[]>([]);
+
+    const bookingService = new BookingService();
+
+    const loadBookings = async () => {
+      setIsLoading(true);
+      if(!user) return;
+      const bookings = await bookingService.getBookingConsultationHomecare(user.id, selectedTab);
+      if(bookings.online) setOnlineConsultations(bookings.online);
+      else setOnlineConsultations([]);
+      if(bookings.homecare) setHomecareConsultations(bookings.homecare);
+      else setHomecareConsultations([]);
+      console.log(bookings);
+      setIsLoading(false);
+      setReload(false);
+    }
+
+    useEffect(()=>{
+      loadBookings();
+    }, [selectedTab, reload])
+
   return (
     <div className="bg-gradient-to-br from-yellow-50 to-green-50 p-4 flex flex-col items-center">
         {/* Header */}
@@ -53,8 +90,19 @@ const OrderHistory: React.FC = () => {
             </div>
             <Headset className="w-6 h-6 text-[#3D8D7A]" />
           </div>
-
-          <OrderCard />
+            {
+              onlineConsultations.length === 0 && (
+                <p className="text-gray-500 italic">No consultation orders found.</p>
+              )
+            }
+            {
+              onlineConsultations.map((consultation, index) => (
+                <div key={consultation.id}>
+                  <OrderCard booking={consultation} setReload={setReload} setIsChatOpen={setIsChatOpen} setSelectedBooking={setSelectedBooking}/>
+                  {index != onlineConsultations.length-1 && <div className="w-full my-4 h-[1px] bg-gray-200"></div>}
+                </div>
+              ))
+            }
         </div>
 
         {/* Homecare Card */}
@@ -69,8 +117,11 @@ const OrderHistory: React.FC = () => {
             <House className="w-6 h-6 text-[#3D8D7A]" />
           </div>
 
-          <OrderCard />
+          {/* <OrderCard /> */}
         </div>
+
+        <ChatDialogBox isOpen={isChatOpen} setIsOpen={setIsChatOpen} booking={selectedBooking} />
+        {/* <ChatDialogBox isOpen={isChatOpen} setIsOpen={setIsChatOpen} booking={{id:"default", vet:{user:{profilePicture:null, fullName: "testing"}}}} /> */}
     </div>
   );
 };

@@ -21,6 +21,18 @@ export class BookingService {
     );
   }
 
+  async getBookingConsultationHomecare(userId: string, status: string){
+    const resultOnline =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Online&status=${status}`);
+    const resultHomecare =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Homecare&status=${status}`);
+
+    console.log(resultOnline, resultHomecare);
+
+    return {
+      online: resultOnline.ok? resultOnline.data: undefined,
+      homecare: resultHomecare.ok ? resultHomecare.data : undefined
+    }
+  }
+
   async createBooking(
     selectedConcerns: any[],
     illnessDescription: string,
