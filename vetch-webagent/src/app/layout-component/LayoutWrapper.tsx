@@ -19,6 +19,12 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     "/admin/approval-history",
     "/admin/blog",
     "/admin/blog/add-blog",
+    "/vet/dashboard",
+    "/vet/history",
+    "/vet/patients",
+    "/vet/schedule",
+    "/vet/profile-and-schedules",
+
   ];
 
   // cek exact match atau prefix match untuk edit-blog/[id]
