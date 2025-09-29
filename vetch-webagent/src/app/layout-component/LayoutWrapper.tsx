@@ -28,6 +28,13 @@ export default function LayoutWrapper({ children, session }: { children: React.R
     "/admin/certificates",
     "/admin/approval-history",
     "/admin/blog",
+    "/admin/blog/add-blog",
+    "/vet/dashboard",
+    "/vet/history",
+    "/vet/patients",
+    "/vet/schedule",
+    "/vet/profile-and-schedules",
+
     "/admin/blog/set-blog",
   ];
 
