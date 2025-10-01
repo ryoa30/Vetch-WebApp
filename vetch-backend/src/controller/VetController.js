@@ -41,8 +41,8 @@ class VetController {
 
     async getVetListConsultation(req, res) {
         try {
-            const { page, volume, query} = req.query;
-            const vets = await this.#vetRepository.findVetListConsultation(Number(page), Number(volume), query);
+            const { page, volume, query, filters} = req.body;
+            const vets = await this.#vetRepository.findVetListConsultation(Number(page), Number(volume), query, filters);
             res.status(200).json({ok: true, data: vets, message: 'Vet list fetched successfully'});
         } catch (error) {
             console.log(error);
@@ -64,7 +64,7 @@ class VetController {
     async getVetRatings(req,res){
         try {
             const {id} = req.params;
-            const vet = await this.#ratingRepository.getVetRatings(id);
+            const vet = await this.#ratingRepository.findVetRatings(id);
             res.status(200).json({ok: true, data: vet, message: 'Vet ratings fetched successfully'});
         } catch (error) {
             console.log(error);

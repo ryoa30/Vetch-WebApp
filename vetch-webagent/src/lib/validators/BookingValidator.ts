@@ -25,7 +25,7 @@ export class BookingValidator {
   async validateBookingSelection(input: Partial<BookingSelectionInput>) {
     const errors: Record<string, string> = {};
 
-    const booking = await this.bookingService.getBookingByUserDateTime(input.userId!, formatLocalDate(input.selectedDate!), input.selectedTime!);
+    const booking = await this.bookingService.fetchBookingByUserDateTime(input.userId!, formatLocalDate(input.selectedDate!), input.selectedTime!);
     console.log(booking);
 
     if(booking.data){

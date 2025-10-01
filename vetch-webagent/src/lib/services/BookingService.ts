@@ -7,21 +7,21 @@ import { formatLocalDate } from "../utils/formatDate";
 export class BookingService {
   #http: HttpClient = new HttpClient({ baseUrl: API_URL.BOOKING });
 
-  async updateBookingStatus(bookingId: string, status: string) {
+  async changeBookingStatus(bookingId: string, status: string) {
     return await this.#http.put<IResponse>(`/status`, {id: bookingId, status });
   }
 
-  async getConcernTypes() {
+  async fetchConcernTypes() {
     return await this.#http.get<IResponse>("/concern-types");
   }
 
-  async getBookingByUserDateTime(userId: string, date: string, time: string) {
+  async fetchBookingByUserDateTime(userId: string, date: string, time: string) {
     return await this.#http.get<IResponse>(
       `/by-user-date-time?userId=${userId}&bookingDate=${date}&bookingTime=${time}`
     );
   }
 
-  async getBookingConsultationHomecare(userId: string, status: string){
+  async fetchBookingConsultationHomecare(userId: string, status: string){
     const resultOnline =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Online&status=${status}`);
     const resultHomecare =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Homecare&status=${status}`);
 

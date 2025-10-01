@@ -6,16 +6,16 @@ class ChatController {
     this.#chatRepository = new ChatRepository();
 
     // bind methods for route handlers
-    this.fetchMessages = this.fetchMessages.bind(this);
+    this.getMessages = this.getMessages.bind(this);
     this.postMessage = this.postMessage.bind(this);
   }
 
-  async fetchMessages(req, res) {
+  async getMessages(req, res) {
     try {
       const { roomId, limit, before } = req.body ?? {};
       if (!roomId) return res.status(400).json({ error: "roomId is required" });
 
-      const messages = await this.#chatRepository.getMessages({
+      const messages = await this.#chatRepository.findMessages({
         roomId,
         limit: Number(limit) || 100,
         before,
@@ -24,7 +24,7 @@ class ChatController {
       res.status(200).json({ok: true, data: messages, message: 'messages fetched successfully'});
 
     } catch (error) {
-      console.error("fetchMessages error:", error);
+      console.error("getMessages error:", error);
       res.status(500).json({ ok: false, message: 'Error fetching Messages', error: error.message });
     }
   }

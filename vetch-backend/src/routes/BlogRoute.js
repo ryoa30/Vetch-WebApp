@@ -7,7 +7,7 @@ const blogController = new BlogController();
 
 router.get('/categories', blogController.getBlogCategories);
 
-router.put('/', upload.single("file"), blogController.updateBlog);
+router.put('/', upload.single("file"), blogController.putBlog);
 router.post('/', upload.single("file"), blogController.createBlog);
 
 router.get('/', blogController.getAllBlogs);

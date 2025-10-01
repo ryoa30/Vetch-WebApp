@@ -5,7 +5,7 @@ class BookingRepository extends BaseRepository {
     super("Booking");
   }
 
-  async retrieveBookingByUserIdDateTime(userId, bookingDate, bookingTime) {
+  async findBookingByUserIdDateTime(userId, bookingDate, bookingTime) {
     const start = new Date(`${bookingDate}T00:00:00.000Z`);
     const end = new Date(`${bookingDate}T23:59:59.999Z`);
     const bookingTimeDate = new Date(`1970-01-01T${bookingTime}:00.000Z`);
@@ -27,7 +27,7 @@ class BookingRepository extends BaseRepository {
   }
 
 
-  async getBookingsByUserId(userId, status, type) {
+  async findBookingsByUserId(userId, status, type) {
     const where = {
       pet: {
         userId: userId,
@@ -56,7 +56,7 @@ class BookingRepository extends BaseRepository {
 
   }
 
-  async getBookingByVetIdAndDate(vetId, bookingDate) {
+  async findBookingByVetIdAndDate(vetId, bookingDate) {
     const start = new Date(`${bookingDate}T00:00:00.000Z`);
     const end = new Date(`${bookingDate}T23:59:59.999Z`);
 

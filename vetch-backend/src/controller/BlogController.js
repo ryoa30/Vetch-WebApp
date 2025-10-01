@@ -11,7 +11,7 @@ class BlogController {
     this.#categoryRepository = new CategoryRepository();
 
     this.createBlog = this.createBlog.bind(this);
-    this.updateBlog = this.updateBlog.bind(this);
+    this.putBlog = this.putBlog.bind(this);
     this.getBlogCategories = this.getBlogCategories.bind(this);
     this.getAllBlogs = this.getAllBlogs.bind(this);
     this.getBlogById = this.getBlogById.bind(this);
@@ -45,7 +45,7 @@ class BlogController {
       .json({ ok: true, message: "Blog created", data: createdBlog });
   }
 
-  async updateBlog(req, res) {
+  async putBlog(req, res) {
     const blog = req.body.data ? JSON.parse(req.body.data) : req.body;
 
     if (req.file) {

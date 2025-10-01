@@ -44,7 +44,6 @@ export default function LayoutWrapper({ children, session }: { children: React.R
     pathname.startsWith("/admin/blog/set-blog/");
 
   useEffect(() => {
-    console.log("masuk ini kawan");
     const midtransScriptUrl = "https://app.sandbox.midtrans.com/snap/snap.js";
 
     const scriptTag = document.createElement("script");

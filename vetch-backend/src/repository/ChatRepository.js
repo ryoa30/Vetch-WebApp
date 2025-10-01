@@ -4,7 +4,7 @@ const { newMessage } = require("../models/MessageModel.js");
 
 class ChatRepository {
 
-  async getMessages({ roomId, limit = 100, before }) {
+  async findMessages({ roomId, limit = 100, before }) {
     const db = await getDb();
     const query = { room_id: roomId };
     if (before) query.inserted_at = { $lt: new Date(before) };
@@ -22,7 +22,7 @@ class ChatRepository {
     return { ...doc, _id: insertedId };
   }
 
-  async getMessageById(id) {
+  async findMessageById(id) {
     const db = await getDb();
     return db.collection("chat_collection").findOne({ _id: new ObjectId(id) });
   }

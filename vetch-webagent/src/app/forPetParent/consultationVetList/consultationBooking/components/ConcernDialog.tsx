@@ -24,7 +24,7 @@ export function ConcernDialog({ show, onClose, selected, setSelected }: { show: 
     console.log("load concerns");
 
     try {
-        const results = await bookingService.getConcernTypes();
+        const results = await bookingService.fetchConcernTypes();
         console.log(results);
         setConcerns(results.data.map((item: any) => ({
             id: item.id,

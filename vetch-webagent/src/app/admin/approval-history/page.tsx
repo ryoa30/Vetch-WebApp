@@ -58,7 +58,7 @@ export default function ApprovalHistoryPage() {
   
   const loadCertificates = async () =>{
     try {
-      const response = await adminService.getComfirmedVetCertificates(pageNumber,volume, query);
+      const response = await adminService.fetchComfirmedVetCertificates(pageNumber,volume, query);
       console.log(response);
       if(response.ok){
         setHistoryData(response.data.flattened);

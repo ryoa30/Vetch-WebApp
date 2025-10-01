@@ -49,7 +49,7 @@ class UserController {
         try {
             const { userId } = req.params;
             // console.log("userId",userId);
-            const location = await this.#locationRepository.getLocationByUserId(userId);
+            const location = await this.#locationRepository.findLocationByUserId(userId);
             res.status(200).json({ok: true, message: "User Location found", data:location});
         } catch (error) {
             console.log(error);

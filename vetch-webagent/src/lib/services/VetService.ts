@@ -6,25 +6,34 @@ import { IResponse } from "../http/types";
 export class VetService {
   #http: HttpClient = new HttpClient({ baseUrl: API_URL.VET });
 
-  async getVets(page: number, volume: number, query: string = "") {
-    return await this.#http.get<IResponse>(
-      `/?page=${page}&volume=${volume}&query=${query}`
+  async fetchVets(page: number, volume: number, query: string = "", filters: any = {}) {
+    const payload = {
+      page,
+      volume,
+      query,
+      filters
+    }
+
+    console.log("filters: ",filters);
+
+    return await this.#http.post<IResponse>(
+      `/`, payload
     );
   }
 
-  async getVetDetails(id: string){
+  async fetchVetDetails(id: string){
     return await this.#http.get<IResponse>(
       `/${id}`
     )
   }
 
-  async getVetRatings(id: string){
+  async fetchVetRatings(id: string){
     return await this.#http.get<IResponse>(
       `/ratings/${id}`
     )
   }
 
-  async getVetSchedules(id: string, day: number, bookingDate: string) {
+  async fetchVetSchedules(id: string, day: number, bookingDate: string) {
     return await this.#http.get<IResponse>(
       `/schedule?id=${id}&day=${day}&bookingDate=${bookingDate}`
     );

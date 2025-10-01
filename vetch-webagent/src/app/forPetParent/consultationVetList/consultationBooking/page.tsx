@@ -63,7 +63,7 @@ export default function ConfirmBookingPage() {
     setIsLoading(true);
     if (id) {
       try {
-        const result = await vetService.getVetDetails(id);
+        const result = await vetService.fetchVetDetails(id);
         if (result.ok) {
           console.log(result);
           setVet(result.data);
@@ -77,7 +77,7 @@ export default function ConfirmBookingPage() {
 
   const loadLocation = useCallback(async () => {
     try {
-      const result = await userService.getUserLocationById(user?.id || "");
+      const result = await userService.fetchUserLocationById(user?.id || "");
       if (result.ok) {
         console.log(result);
         setLocation(result.data);
@@ -120,7 +120,7 @@ export default function ConfirmBookingPage() {
       if (!resultBooking.ok) {
         throw new Error("Failed to create booking");
       }
-      const resultPayment = await paymentService.getTransactionToken(
+      const resultPayment = await paymentService.fetchTransactionToken(
         resultBooking.data.id,
         user,
         totalPrice,

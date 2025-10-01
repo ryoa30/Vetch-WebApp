@@ -9,7 +9,7 @@ class AdminController {
 
         this.getUncomfirmedVetCertificates = this.getUncomfirmedVetCertificates.bind(this);
         this.getComfirmedVetCertificates = this.getComfirmedVetCertificates.bind(this);
-        this.changeVetCertificateStatus = this.changeVetCertificateStatus.bind(this);
+        this.putVetCertificateStatus = this.putVetCertificateStatus.bind(this);
     
     }
 
@@ -35,7 +35,7 @@ class AdminController {
     
     }
 
-    async changeVetCertificateStatus(req, res) {
+    async putVetCertificateStatus(req, res) {
         const {vetId, status} = req.body;
 
         console.log(vetId, status);

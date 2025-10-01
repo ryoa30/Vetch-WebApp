@@ -7,6 +7,6 @@ const adminController = new AdminController();
 router.get('/vet-certificates', adminController.getUncomfirmedVetCertificates);
 router.get('/vet-confirmed-certificates', adminController.getComfirmedVetCertificates);
 
-router.put('/vet-certificates/status', adminController.changeVetCertificateStatus);
+router.put('/vet-certificates/status', adminController.putVetCertificateStatus);
 
 module.exports = router;

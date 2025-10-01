@@ -40,7 +40,7 @@ export default function CertificatesPage() {
 
   const loadCertificates = async () =>{
     try {
-      const response = await adminService.getUncomfirmedVetCertificates(pageNumber,volume, query);
+      const response = await adminService.fetchUncomfirmedVetCertificates(pageNumber,volume, query);
       console.log(response);
       if(response.ok){
         setCertificates(response.data.flattened);

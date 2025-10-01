@@ -70,7 +70,7 @@ export default function AddBlogPage() {
       setErrors({});
       let result: any;
       if(id !== "add") {
-        result = await blogService.updateBlog(id, categoryId, title, content, image);
+        result = await blogService.changeBlog(id, categoryId, title, content, image);
       }else{
         result = await blogService.createBlog(categoryId, title, content, image as File);
       }
@@ -92,14 +92,14 @@ export default function AddBlogPage() {
   }
 
   const loadCategories = async () => {
-    const result = await blogService.getAllCategories();
+    const result = await blogService.fetchAllCategories();
     if(result.ok){
       setCategories(result.data);
     }
   }
 
   const loadBlogDetails = async () => {
-    const result = await blogService.getBlogById(id);
+    const result = await blogService.fetchBlogById(id);
     if(result.ok){
       const blog = result.data;
       setTitle(blog.title);

@@ -11,6 +11,7 @@ import { useState } from "react";
 import Calendar from "./components/Calendar"; 
 import OverlayPetDetail from "../components/overlay/OverlayPetDetail";
 import OverlayLiveChat from "../components/overlay/OverlayLiveChat";
+import ChatDialogBox from "@/app/alert-dialog-box/ChatDialogBox";
 
 // Definisikan tipe data untuk konsistensi
 interface HistoryItem {
@@ -213,11 +214,13 @@ export default function DashboardPage() {
         onStartAppointment={handleStartAppointment}
       />
 
-      <OverlayLiveChat
+      {/* <OverlayLiveChat
         open={isChatOpen}
         onClose={handleCloseAll}
         vetName="Aryo"
-      />
+      /> */}
+
+      <ChatDialogBox booking={undefined} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>
     </div>
   );
 }

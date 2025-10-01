@@ -69,7 +69,7 @@ export default function BlogPage() {
 
   const loadBlogs = async () => {
     try {
-      const response = await blogService.getBlogs(pageNumber, volume, query);
+      const response = await blogService.fetchBlogs(pageNumber, volume, query);
       console.log(response);
       if (response.ok) {
         setBlogs(response.data.blogs);

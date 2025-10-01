@@ -9,6 +9,6 @@ router.get('/concern-types', bookingController.getConcernTypes);
 router.get('/by-user-date-time', bookingController.getBookingByUserIdDateTime);
 
 router.post('/', bookingController.createBooking);
-router.put('/status', bookingController.updateBookingStatus);
+router.put('/status', bookingController.putBookingStatus);
 
 module.exports = router;

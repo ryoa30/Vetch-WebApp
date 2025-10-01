@@ -66,7 +66,7 @@ class ScheduleRepository extends BaseRepository {
     let bookedTimes = [];
     // console.log("Booking Date: ",bookingDate)
     if (bookingDate) {
-      const bookings = await this.#bookingRepository.getBookingByVetIdAndDate(vetId, bookingDate);
+      const bookings = await this.#bookingRepository.findBookingByVetIdAndDate(vetId, bookingDate);
 
       console.log(bookings);
 
