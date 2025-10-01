@@ -38,14 +38,20 @@ export function EditPetDialog({
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg rounded-xl">
-        <DialogHeader className="flex items-center justify-between">
-          <DialogTitle className="text-xl font-semibold text-green-900">
+      <DialogContent className="sm:max-w-1/2 bg-white text-black rounded-lg shadow-lg [&>button:last-child]:hidden">
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute left-4 top-4 text-gray-600 hover:text-black"
+        >
+          <X size={20} />
+        </button>
+
+        <DialogHeader>
+          <DialogTitle className="mt-4 text-2xl text-[#0F5544] font-semibold">
             Edit Pet Details
           </DialogTitle>
-          <button onClick={onClose}>
-            <X className="w-5 h-5 text-gray-600" />
-          </button>
         </DialogHeader>
 
         <div className="mt-4 space-y-4">

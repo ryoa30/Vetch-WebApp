@@ -58,7 +58,7 @@ export function PetDialog({ show, onClose, onSubmit }: PetDialogProps) {
         </button>
 
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-[#0F5544]">
+          <DialogTitle className="mt-4 text-xl font-semibold text-[#0F5544]">
             Add new pet
           </DialogTitle>
         </DialogHeader>

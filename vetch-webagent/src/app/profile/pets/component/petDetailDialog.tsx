@@ -63,7 +63,7 @@ export function PetDetailsDialog({ show, onClose, onSave, onDelete, data }: PetD
         </button>
 
         <DialogHeader>
-          <DialogTitle className="text-2xl text-[#0F5544] font-semibold">
+          <DialogTitle className="mt-4 text-2xl text-[#0F5544] font-semibold">
             Pet Details
           </DialogTitle>
         </DialogHeader>
