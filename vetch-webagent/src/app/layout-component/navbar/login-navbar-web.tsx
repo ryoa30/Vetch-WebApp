@@ -69,7 +69,7 @@ export function NavbarDesktop() {
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <Link
-                  href="#"
+                  href="/blog"
                   className="bg-transparent text-white hover:underline font-bold text-base"
                 >
                   Become a Vet
