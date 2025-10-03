@@ -9,11 +9,11 @@ import { formatLocalDate } from "../utils/formatDate";
 export class UserService {
   #http: HttpClient = new HttpClient({baseUrl: API_URL.USER});
 
-  async getUserLocationById (userId: string){
+  async fetchUserLocationById (userId: string){
     return await this.#http.get<IResponse>('/location/' + userId);
   }
 
-  async getUserByEmail(email: string) {
+  async fetchUserByEmail(email: string) {
     return await this.#http.getCatch<IResponse>('/email/' + email);
   }
 

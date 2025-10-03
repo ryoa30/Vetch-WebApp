@@ -19,7 +19,7 @@ export function PetDialog({ show, onClose, pet, setPet }: { show: boolean; onClo
     console.log("load concerns");
 
     try {
-        const results = await petService.getPetsByUserId(user?.id || "");
+        const results = await petService.fetchPetsByUserId(user?.id || "");
         console.log(results);
         setPets(results.data);
     } catch (error) {

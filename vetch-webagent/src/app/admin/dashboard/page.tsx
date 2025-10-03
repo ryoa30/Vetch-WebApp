@@ -16,7 +16,7 @@ export default function DashboardPage() {
 
   const loadCertificates = async () =>{
     try {
-      const response = await adminService.getUncomfirmedVetCertificates(1,10);
+      const response = await adminService.fetchUncomfirmedVetCertificates(1,10);
       console.log(response);
       if(response.ok){
         setCertificates(response.data.flattened);

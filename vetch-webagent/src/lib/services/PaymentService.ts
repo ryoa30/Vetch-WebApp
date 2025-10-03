@@ -10,7 +10,7 @@ export class PaymentService {
     return await this.#http.put<IResponse>(`/`, {bookingId, status, paymentMethod});
   }
 
-  async getTransactionToken(
+  async fetchTransactionToken(
     bookingId: string,
     user?: any,
     totalPrice?: number,

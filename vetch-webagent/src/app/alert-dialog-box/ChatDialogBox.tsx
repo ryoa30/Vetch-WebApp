@@ -2,11 +2,15 @@ import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import {
   Send,
-  Camera,
   Image as ImageIcon,
   FileText,
   Video,
   X,
+  NotebookText,
+  CalendarDays,
+  Syringe,
+  Stethoscope,
+  Save,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChatService } from "@/lib/services/ChatService";
@@ -31,7 +35,7 @@ export default function ChatDialogBox({ isOpen, setIsOpen, booking }) {
   const loadChatDetails = async () => {
     try {
       if (booking) {
-        const messages = await chatService.getMessages(booking.id, 100);
+        const messages = await chatService.fetchMessages(booking.id, 100);
         console.log(messages);
         if (messages.ok) {
           setMessages(messages.data);
@@ -91,9 +95,43 @@ export default function ChatDialogBox({ isOpen, setIsOpen, booking }) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent
         showCloseButton={false}
-        className="sm:max-w-lg bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden"
+        className={`${user?.role === "vet"?"sm:max-w-4xl":"sm:max-w-lg"} flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
       >
-        <div className="flex flex-col h-[600px]">
+        {user?.role === "vet" && <div className="w-2/3 bg-gray-50 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700">
+          <div className="mb-6">
+            <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-2">
+              <NotebookText className="w-5 h-5" />
+              Conclusion
+            </h3>
+            <textarea
+              className="w-full h-32 p-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
+              placeholder="Write conclusion here..."
+            ></textarea>
+          </div>
+          <div className="mb-6">
+            <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-3">
+              <CalendarDays className="w-5 h-5" />
+              Assign Schedule
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                 <Syringe className="w-5 h-5 text-gray-500" />
+                 <input type="date" className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]" />
+              </div>
+              <div className="flex items-center gap-3">
+                 <Stethoscope className="w-5 h-5 text-gray-500" />
+                 <input type="date" className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]" />
+              </div>
+            </div>
+          </div>
+          <div className="mt-auto">
+             <button className="w-full bg-[#3D8D7A] hover:bg-[#327566] text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2">
+                <Save className="w-5 h-5" />
+                Save
+             </button>
+          </div>
+        </div>}
+        <div className="flex flex-col h-[600px] w-full">
           {/* Header */}
           <DialogTitle>
             <div className="bg-teal-600 text-white px-4 py-3 flex items-center justify-between">

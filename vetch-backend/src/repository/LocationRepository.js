@@ -5,7 +5,7 @@ class LocationRepository extends BaseRepository {
         super('Location');
     }
 
-    async getLocationByUserId(userId) {
+    async findLocationByUserId(userId) {
         return this._model.findFirst({ where: { userId, isDeleted: false } });
     }
 

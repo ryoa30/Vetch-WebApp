@@ -17,11 +17,6 @@ const io = new Server(server, {
 const sockets = new SocketManager(io);
 sockets.init();
 
-// app.listen(PORT, async () => {
-//   await getDb();
-//   console.log(`Server is running on port ${PORT}`);
-// });
-
 server.listen(PORT, async () => {
   await getDb();
   console.log(`Server is running on port ${PORT}`);

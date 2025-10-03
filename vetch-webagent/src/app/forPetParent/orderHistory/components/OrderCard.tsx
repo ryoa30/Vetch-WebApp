@@ -11,7 +11,7 @@ const OrderCard = ({booking, setReload, setIsChatOpen, setSelectedBooking}) => {
   const paymentService = new PaymentService();
   const handlePaymentClick = async () => {
     try {
-      const resultPayment = await paymentService.getTransactionToken(
+      const resultPayment = await paymentService.fetchTransactionToken(
         booking.id,
       );
       if(!resultPayment.ok){

@@ -1,4 +1,8 @@
-const { nowForSchedule } = require("../utils/dateUtils");
+const {
+  nowForSchedule,
+  daysForPresetDb,
+  hourToTime,
+} = require("../utils/dateUtils");
 const BaseRepository = require("./BaseRepository");
 const RatingRepository = require("./RatingRepository");
 
@@ -15,11 +19,38 @@ class VetRepository extends BaseRepository {
     return this._model.findMany(options);
   }
 
-  async findVetListConsultation(page = 1, volume = 10, query = "") {
+  async findVetListConsultation(page = 1, volume = 10, query = "", filters) {
     const offset = (page - 1) * volume;
-    const { weekday, timeOfDay } = nowForSchedule();
+    const { weekday, timeOfDay } = nowForSchedule(); // current day + current time
     const q = query?.trim();
 
+    console.log(filters);
+
+    // --------- derive filters ---------
+    const petTypes = filters.petTypes?.length ? filters.petTypes : undefined;
+
+    // fee in DB = rupiah; UI dalam ribuan
+    const feeMin = filters.feeRange ? filters.feeRange[0] * 1_000 : undefined;
+    const feeMax = filters.feeRange ? filters.feeRange[1] * 1_000 : undefined;
+
+    const wantHomecare = filters.homecareAble ?? false;
+
+    const schedule = filters.schedule;
+    const haveScheduleFilter = !!schedule;
+    const scheduleDays = haveScheduleFilter
+      ? daysForPresetDb(
+          schedule.preset,
+          schedule.date ? new Date(schedule.date) : new Date()
+        )
+      : undefined;
+    const scheduleStart = haveScheduleFilter
+      ? hourToTime(schedule.startHour)
+      : undefined;
+    const scheduleEnd = haveScheduleFilter
+      ? hourToTime(schedule.endHour)
+      : undefined;
+
+    // --------- base WHERE (verified, non-deleted, future slots) ---------
     const where = {
       user: {
         is: {
@@ -30,32 +61,89 @@ class VetRepository extends BaseRepository {
       NOT: { price: 0, description: "" },
       verified: true,
       verifiedDate: { not: null },
+      ...(feeMin != null || feeMax != null
+        ? {
+            price: {
+              ...(feeMin != null ? { gte: feeMin } : {}),
+              ...(feeMax != null ? { lte: feeMax } : {}),
+            },
+          }
+        : {}),
+      ...(wantHomecare ? { isAvailHomecare: true } : {}),
+
+      // Pet types (via Species -> SpeciesType)
+      ...(petTypes
+        ? {
+            speciesHandled: {
+              some: {
+                speciesType: {
+                  speciesName: {
+                    in: petTypes,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          }
+        : {}),
+
+      // Schedules: tetap hanya masa depan
       schedules: {
         some: {
           isDeleted: false,
-          OR: [
-            { dayNumber: weekday, timeOfDay: { gt: timeOfDay } }, // later today
-            { dayNumber: { gt: weekday } }, // any future day
+          AND: [
+            {
+              OR: [
+                { dayNumber: weekday, timeOfDay: { gt: timeOfDay } }, // sisa hari ini
+                { dayNumber: { gt: weekday } }, // hari-hari berikutnya
+              ],
+            },
+            // tambahan filter schedule dari user (optional)
+            ...(haveScheduleFilter
+              ? [
+                  {
+                    dayNumber: { in: scheduleDays },
+                  },
+                  {
+                    // time range:  start <= timeOfDay < end
+                    timeOfDay: {
+                      gte: scheduleStart,
+                      lt: scheduleEnd,
+                    },
+                  },
+                ]
+              : []),
           ],
         },
       },
     };
 
-    // 1) fetch vets + next 3 slots (unsorted by next slot)
+    // 1) fetch vets + next 3 slots (unsorted)
     const rows = await this._model.findMany({
       select: {
         id: true,
         userId: true,
         price: true,
+        isAvailHomecare: true,
         user: { select: { profilePicture: true, fullName: true } },
         schedules: {
           take: 3,
           where: {
-            OR: [
-              { dayNumber: weekday, timeOfDay: { gt: timeOfDay } }, // later today
-              { dayNumber: { gt: weekday } }, // any future day
-            ],
             isDeleted: false,
+            AND: [
+              {
+                OR: [
+                  { dayNumber: weekday, timeOfDay: { gt: timeOfDay } },
+                  { dayNumber: { gt: weekday } },
+                ],
+              },
+              ...(haveScheduleFilter
+                ? [
+                    { dayNumber: { in: scheduleDays } },
+                    { timeOfDay: { gte: scheduleStart, lt: scheduleEnd } },
+                  ]
+                : []),
+            ],
           },
           orderBy: [{ dayNumber: "asc" }, { timeOfDay: "asc" }],
           select: { id: true, dayNumber: true, timeOfDay: true },
@@ -64,7 +152,7 @@ class VetRepository extends BaseRepository {
       where,
     });
 
-    // 2) sort by soonest upcoming slot (same logic you had)
+    // 2) sort by soonest upcoming slot
     rows.sort((a, b) => {
       const A = a.schedules[0];
       const B = b.schedules[0];
@@ -75,14 +163,11 @@ class VetRepository extends BaseRepository {
       return A.timeOfDay.getTime() - B.timeOfDay.getTime();
     });
 
-    // 3) paginate AFTER sort
-    const pageRows = rows.slice(offset, offset + volume);
-
-    // 4) aggregate ratings for the vets on this page
-    const vetIds = pageRows.map((v) => v.id);
-    const ratingAgg = await this.#ratingRepository.getAverageRatingVets(vetIds);
-
-    // build a map: vetId -> { avg, count }
+    // (optional) filter by minRating AFTER we know ratings
+    const candidateIds = rows.map((v) => v.id);
+    const ratingAgg = await this.#ratingRepository.findAverageRatingVets(
+      candidateIds
+    );
     const ratingMap = new Map(
       ratingAgg.map((r) => [
         r.vetId,
@@ -93,11 +178,21 @@ class VetRepository extends BaseRepository {
       ])
     );
 
-    // 5) total for pagination
-    const total = await this._model.count({ where });
-    const totalPages = total === 0 ? 0 : Math.ceil(total / volume);
+    const minRating = filters.minRating ?? undefined;
+    const rowsAfterRating = minRating
+      ? rows.filter((v) => {
+          const agg = ratingMap.get(v.id);
+          const avg = agg ? agg.ratingAvg : 0;
+          return avg >= minRating;
+        })
+      : rows;
 
-    // 6) shape response + format time to "HH:mm"
+    // 3) paginate AFTER sort (+ after rating filter)
+    const totalItems = rowsAfterRating.length;
+    const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / volume);
+    const pageRows = rowsAfterRating.slice(offset, offset + volume);
+
+    // 4) shape response
     const vets = pageRows.map((vet) => {
       const agg = ratingMap.get(vet.id) ?? { ratingAvg: 0, ratingCount: 0 };
       return {
@@ -108,16 +203,127 @@ class VetRepository extends BaseRepository {
           "https://res.cloudinary.com/daimddpvp/image/upload/v1758101764/default-profile-pic_lppjro.jpg",
         user: undefined,
         ratingCount: agg.ratingCount,
-        ratingAvg: Math.round(agg.ratingAvg * 10) / 10, // 1 decimal (e.g., 4.3)
+        ratingAvg: Math.round((agg.ratingAvg ?? 0) * 10) / 10,
         schedules: vet.schedules.map((s) => ({
           ...s,
-          timeOfDay: s.timeOfDay.toISOString().slice(11, 16),
+          timeOfDay: s.timeOfDay.toISOString().slice(11, 16), // "HH:mm"
         })),
       };
     });
 
-    return { vets, totalPages, totalItems: total };
+    return { vets, totalPages, totalItems };
   }
+
+  // async findVetListConsultation(
+  //   page = 1,
+  //   volume = 10,
+  //   query = "",
+  //   filters = {}
+  // ) {
+  //   const offset = (page - 1) * volume;
+  //   const { weekday, timeOfDay } = nowForSchedule();
+  //   const q = query?.trim();
+
+  //   const where = {
+  //     user: {
+  //       is: {
+  //         isDeleted: false,
+  //         ...(q ? { fullName: { contains: q, mode: "insensitive" } } : {}),
+  //       },
+  //     },
+  //     NOT: { price: 0, description: "" },
+  //     verified: true,
+  //     verifiedDate: { not: null },
+  //     schedules: {
+  //       some: {
+  //         isDeleted: false,
+  //         OR: [
+  //           { dayNumber: weekday, timeOfDay: { gt: timeOfDay } }, // later today
+  //           { dayNumber: { gt: weekday } }, // any future day
+  //         ],
+  //       },
+  //     },
+  //   };
+
+  //   // 1) fetch vets + next 3 slots (unsorted by next slot)
+  //   const rows = await this._model.findMany({
+  //     select: {
+  //       id: true,
+  //       userId: true,
+  //       price: true,
+  //       user: { select: { profilePicture: true, fullName: true } },
+  //       schedules: {
+  //         take: 3,
+  //         where: {
+  //           OR: [
+  //             { dayNumber: weekday, timeOfDay: { gt: timeOfDay } }, // later today
+  //             { dayNumber: { gt: weekday } }, // any future day
+  //           ],
+  //           isDeleted: false,
+  //         },
+  //         orderBy: [{ dayNumber: "asc" }, { timeOfDay: "asc" }],
+  //         select: { id: true, dayNumber: true, timeOfDay: true },
+  //       },
+  //     },
+  //     where,
+  //   });
+
+  //   // 2) sort by soonest upcoming slot (same logic you had)
+  //   rows.sort((a, b) => {
+  //     const A = a.schedules[0];
+  //     const B = b.schedules[0];
+  //     if (!A && !B) return 0;
+  //     if (!A) return 1;
+  //     if (!B) return -1;
+  //     if (A.dayNumber !== B.dayNumber) return A.dayNumber - B.dayNumber;
+  //     return A.timeOfDay.getTime() - B.timeOfDay.getTime();
+  //   });
+
+  //   // 3) paginate AFTER sort
+  //   const pageRows = rows.slice(offset, offset + volume);
+
+  //   // 4) aggregate ratings for the vets on this page
+  //   const vetIds = pageRows.map((v) => v.id);
+  //   const ratingAgg = await this.#ratingRepository.findAverageRatingVets(
+  //     vetIds
+  //   );
+
+  //   // build a map: vetId -> { avg, count }
+  //   const ratingMap = new Map(
+  //     ratingAgg.map((r) => [
+  //       r.vetId,
+  //       {
+  //         ratingAvg: r._avg.rating ?? 0,
+  //         ratingCount: r._count._all,
+  //       },
+  //     ])
+  //   );
+
+  //   // 5) total for pagination
+  //   const total = await this._model.count({ where });
+  //   const totalPages = total === 0 ? 0 : Math.ceil(total / volume);
+
+  //   // 6) shape response + format time to "HH:mm"
+  //   const vets = pageRows.map((vet) => {
+  //     const agg = ratingMap.get(vet.id) ?? { ratingAvg: 0, ratingCount: 0 };
+  //     return {
+  //       ...vet,
+  //       ...vet.user,
+  //       profilePicture:
+  //         vet.user.profilePicture ||
+  //         "https://res.cloudinary.com/daimddpvp/image/upload/v1758101764/default-profile-pic_lppjro.jpg",
+  //       user: undefined,
+  //       ratingCount: agg.ratingCount,
+  //       ratingAvg: Math.round(agg.ratingAvg * 10) / 10, // 1 decimal (e.g., 4.3)
+  //       schedules: vet.schedules.map((s) => ({
+  //         ...s,
+  //         timeOfDay: s.timeOfDay.toISOString().slice(11, 16),
+  //       })),
+  //     };
+  //   });
+
+  //   return { vets, totalPages, totalItems: total };
+  // }
 
   async findVetById(id) {
     const row = await this._model.findUnique({
@@ -148,7 +354,7 @@ class VetRepository extends BaseRepository {
       },
     });
 
-    const rating = await this.#ratingRepository.getAverageRatingVet(id);
+    const rating = await this.#ratingRepository.findAverageRatingVet(id);
 
     console.log(rating);
 

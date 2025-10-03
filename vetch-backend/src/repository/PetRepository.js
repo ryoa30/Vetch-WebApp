@@ -5,7 +5,7 @@ class PetRepository extends BaseRepository {
         super('Pet');
     }
 
-    async getPetsByUserId(userId) {
+    async findPetsByUserId(userId) {
         return this._model.findMany({ where: { userId, isDeleted: false } });
     }
 

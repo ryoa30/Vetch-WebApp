@@ -20,19 +20,19 @@ export class BlogService {
         return await this.#http.postForm<IResponse>("/", formData);
     }
 
-    async getBlogs(page: number, volume: number, query: string = '') {
+    async fetchBlogs(page: number, volume: number, query: string = '') {
     return await this.#http.get<IResponse>(`/?page=${page}&volume=${volume}&query=${query}`);
   }
 
-    async getAllCategories() {
+    async fetchAllCategories() {
         return await this.#http.get<IResponse>("/categories");
     }
 
-    async getBlogById(id: string) {
+    async fetchBlogById(id: string) {
         return await this.#http.get<IResponse>(`/${id}`);
     }
   
-    async updateBlog(id: string, categoryId: string, title: string, content: string, image: File | null) {
+    async changeBlog(id: string, categoryId: string, title: string, content: string, image: File | null) {
         const formData = new FormData();
         const payload = {
             id,

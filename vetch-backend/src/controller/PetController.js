@@ -13,7 +13,7 @@ class PetController {
     async getPetsByUserId(req, res) {
         try {
             const {userId} = req.params;
-            const pets = await this.#petRepository.getPetsByUserId(userId);
+            const pets = await this.#petRepository.findPetsByUserId(userId);
             res.status(200).json({ok: true, data: pets, message: 'Pets fetched successfully'});
         } catch (error) {
             console.log(error);

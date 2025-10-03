@@ -41,8 +41,47 @@ function nowForSchedule(zone = BUSINESS_TZ) {
   return { weekday: Number(weekday), timeOfDay };
 }
 
+const hourToTime = (h) => {
+  const hh = String(Math.floor(h)).padStart(2, "0");
+  // gunakan UTC agar konsisten dengan kolom time tanpa zona
+  return new Date(`1970-01-01T${hh}:00:00.000Z`);
+};
+
+// ===== NEW: mapping JS <-> DB day =====
+const jsDayToDbDay = (js) => ((js + 6) % 7) + 1; // 0(Sun)->7, 1(Mon)->1, ... 6(Sat)->6
+const normalizeWeekdayToDb = (w) =>
+  w >= 0 && w <= 6 ? jsDayToDbDay(w) : w; // kalau sudah 1..7, biarkan
+
+// ubah helper preset agar hasilnya 1..7 (DB)
+function daysForPresetDb(preset, baseDate ) {
+  const todayJs = baseDate.getDay();     // 0..6
+  const todayDb = jsDayToDbDay(todayJs); // 1..7
+
+  switch (preset) {
+    case "Today":
+      return [todayDb];
+    case "Tomorrow": {
+      const tmrDb = todayDb === 7 ? 1 : todayDb + 1;
+      return [tmrDb];
+    }
+    case "This Week":
+      // dari hari ini s/d Minggu (wrap ke 7)
+      return Array.from({ length: 7 }, (_, i) => {
+        const d = todayDb + i;
+        return d > 7 ? d - 7 : d;
+      });
+    case "Custom":
+    default:
+      return [jsDayToDbDay((baseDate ?? new Date()).getDay())];
+  }
+}
+
+
 module.exports = {
   hhmmToUTCDate,
+  hourToTime,
+  daysForPresetDb,
+  normalizeWeekdayToDb,
   dateToHHMM,
   nowForSchedule
 };

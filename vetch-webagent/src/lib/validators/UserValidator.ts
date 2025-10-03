@@ -88,7 +88,7 @@ export class UserValidator {
 
   async validateEmail(email: string): Promise<ValidationResult<string>> {
 
-    const getEmail = await this.#userService.getUserByEmail(email);
+    const getEmail = await this.#userService.fetchUserByEmail(email);
     console.log(getEmail);
 
     if(getEmail){

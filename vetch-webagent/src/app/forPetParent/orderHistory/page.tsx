@@ -38,7 +38,7 @@ const OrderHistory: React.FC = () => {
     const loadBookings = async () => {
       setIsLoading(true);
       if(!user) return;
-      const bookings = await bookingService.getBookingConsultationHomecare(user.id, selectedTab);
+      const bookings = await bookingService.fetchBookingConsultationHomecare(user.id, selectedTab);
       if(bookings.online) setOnlineConsultations(bookings.online);
       else setOnlineConsultations([]);
       if(bookings.homecare) setHomecareConsultations(bookings.homecare);

@@ -12,13 +12,15 @@ import { VetService } from "@/lib/services/VetService";
 import AppPaginationClient from "@/components/app-pagination-client";
 import { useLoading } from "@/contexts/LoadingContext";
 import { Input } from "@/components/ui/input";
+import VetFilters from "@/components/filters";
 
 export default function HomePage() {
   const [doctors, setDoctors] = useState<IVet[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [volume, setVolume] = useState(6);
+  const [volume, setVolume] = useState(12);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState({});
 
   const {setIsLoading} = useLoading();
 
@@ -27,7 +29,8 @@ export default function HomePage() {
   const loadVets = async () => {
     setIsLoading(true);
     try {
-      const result = await vetService.getVets(pageNumber, volume, query);
+      const result = await vetService.fetchVets(pageNumber, volume, query, filters);
+      console.log(result);
       if (result.ok) {
         setTotalPages(result.data.totalPages);
         setDoctors(result.data.vets);
@@ -54,29 +57,31 @@ export default function HomePage() {
     <div className="min-h-screen w-full bg-[#FBFFE4] dark:bg-[#2E4F4A] text-white pb-4">
       <div className="flex flex-1">
         <div className="flex-1 p-8 bg-[#FBFFE4] dark:bg-[#2E4F4A]">
-          <div className="flex gap-10 pb-10">
-            <PetTypeButton />
+          <div className="flex gap-10 pb-10 flex-col-reverse md:flex-row">
+            {/* <PetTypeButton />
             <ScheduleButton />
-            <FilterButton />
+            <FilterButton /> */}
+            <VetFilters onChange={(f) => setFilters(f)}  onApply={() => loadVets()}/>
             <Input
               placeholder="Search for Vet"
               onChange={(e) => setQuery(e.target.value)}
               value={query}
-              className="w-[50%] text-black px-4 py-2 rounded-full bg-white dark:bg-white"
+              className="md:w-[50%] w-full text-black px-4 py-2 rounded-full bg-white dark:bg-white"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+          {doctors.length>0 && <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:w-[90%] gap-6 justify-items-center mx-auto">
             {doctors.map((doctor, index) => (
               <DoctorScheduleCard key={index} doctor={doctor} />
             ))}
-          </div>
+          </div>}
+          {doctors.length===0 && <div className="text-black dark:text-white text-center font-semibold">No vets found</div>}
         </div>
       </div>
       <AppPaginationClient
         className="mt-6 flex justify-center"
         currentPage={pageNumber}
-        pageSizeOptions={[6, 12, 18, 24]}
+        pageSizeOptions={[12, 18, 24]}
         totalPages={totalPages}
         onPageChange={(page) => {
           // setIsLoading(true);

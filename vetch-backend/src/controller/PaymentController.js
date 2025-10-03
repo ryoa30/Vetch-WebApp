@@ -17,10 +17,10 @@ class PaymentController {
         this.#paymentRepository = new PaymentRepository();
 
         this.getTransactionToken = this.getTransactionToken.bind(this);
-        this.updatePaymentDetails = this.updatePaymentDetails.bind(this);
+        this.putPaymentDetails = this.putPaymentDetails.bind(this);
     }
 
-    async updatePaymentDetails (req, res) { 
+    async putPaymentDetails (req, res) { 
         try {
             const {bookingId, status, paymentMethod} = req.body;
             const updatedBooking = await this.#paymentRepository.updatePaymentByBookingId(bookingId, {paymentStatus: status, paymentMethod: paymentMethod});
@@ -36,7 +36,7 @@ class PaymentController {
         try {
             const { bookingId } = req.body;
             
-            const paymentData = await this.#paymentRepository.getPaymentByBookingId(bookingId);
+            const paymentData = await this.#paymentRepository.findaymentByBookingId(bookingId);
             
             if(paymentData) {
                 return res.status(200).json({ok: true, data: paymentData.paymentToken, message: 'Midtrans Token successfully retrieved'});

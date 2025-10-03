@@ -5,7 +5,7 @@ class RatingRepository extends BaseRepository {
     super("Rating");
   }
 
-  async getAverageRatingVets(vetIds) {
+  async findAverageRatingVets(vetIds) {
     const ratingAgg = await this._model.groupBy({
       by: ["vetId"],
       where: { vetId: { in: vetIds } },
@@ -16,7 +16,7 @@ class RatingRepository extends BaseRepository {
     return ratingAgg;
   }
 
-  async getAverageRatingVet(vetId){
+  async findAverageRatingVet(vetId){
     const ratingAgg = await this._model.groupBy({
       by: ["vetId"],
       where: { vetId: vetId },
@@ -27,7 +27,7 @@ class RatingRepository extends BaseRepository {
     return ratingAgg
   }
 
-  async getVetRatings(vetId){
+  async findVetRatings(vetId){
     const rows = await this._model.findMany({
         where: {
             vetId: vetId

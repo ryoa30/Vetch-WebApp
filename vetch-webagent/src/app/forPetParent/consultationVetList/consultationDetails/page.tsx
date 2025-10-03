@@ -42,7 +42,7 @@ export default function DoctorProfile() {
     setIsLoading(true);
     if (id) {
       try {
-        const result = await vetService.getVetDetails(id);
+        const result = await vetService.fetchVetDetails(id);
         if (result.ok) {
           console.log(result);
           setVet(result.data);
@@ -57,7 +57,7 @@ export default function DoctorProfile() {
   const loadRatings = async () => {
     if (id) {
       try {
-        const result = await vetService.getVetRatings(id);
+        const result = await vetService.fetchVetRatings(id);
         if (result.ok) {
           console.log(result);
           setRatings(result.data);
@@ -73,7 +73,7 @@ export default function DoctorProfile() {
       const day = selectedDate.getDay() === 0 ? 7 : selectedDate.getDay();
       // console.log(selectedDate.toISOString().split("T")[0]);
       try {
-        const result = await vetService.getVetSchedules(
+        const result = await vetService.fetchVetSchedules(
           id,
           day,
           formatLocalDate(selectedDate)

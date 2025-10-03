@@ -6,6 +6,6 @@ const paymentController = new PaymentController();
 
 router.post('/midtrans', paymentController.getTransactionToken);
 
-router.put('/', paymentController.updatePaymentDetails);
+router.put('/', paymentController.putPaymentDetails);
 
 module.exports = router;

@@ -73,7 +73,7 @@ export default function AddBlogPage() {
 
   useEffect(() => {
     const loadCategories = async () => {
-      const result = await blogService.getAllCategories();
+      const result = await blogService.fetchAllCategories();
       if(result.ok){
         setCategories(result.data);
       }
