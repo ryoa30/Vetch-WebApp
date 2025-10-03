@@ -1,4 +1,5 @@
-// components/BlogSection.tsx
+"use client";
+
 import { useState } from "react";
 
 const categories = ["All", "Daily Care", "Nutrition", "Disease", "Prevention"];
@@ -28,6 +29,14 @@ const blogs = [
     category: "Daily Care",
     image: "/placeholder3.png",
   },
+  {
+    id: 4,
+    title: "Judul Blog",
+    date: "Sep 28, 2025",
+    summary: "How to prevent common pet issues effectively...",
+    category: "Daily Care",
+    image: "/placeholder4.png",
+  },
 ];
 
 export default function BlogSection() {
@@ -39,62 +48,76 @@ export default function BlogSection() {
       : blogs.filter((blog) => blog.category === activeCategory);
 
   return (
-    <section className="bg-[#fcffe5] py-10 px-6">
-      {/* Category Filter */}
-      <div className="flex flex-wrap gap-3 justify-center mb-8">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-full border transition 
-              ${
-                activeCategory === cat
-                  ? "bg-black text-white"
-                  : "border-gray-400 text-gray-700 hover:bg-gray-200"
-              }`}
-          >
-            {cat}
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <div className="relative h-64 bg-gray-800 overflow-hidden">
+        <img
+          src="/img/Blog.jpg"
+          alt="Pet Blog"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute top-4 left-4">
+          <button className="px-6 py-2 bg-[#a08981] text-white rounded-full text-sm font-medium">
+            All
           </button>
-        ))}
+        </div>
       </div>
 
-      {/* Section Title */}
-      <h2 className="text-xl font-bold mb-6">Recent Blog Posts</h2>
+      {/* Main Content */}
+      <section className="bg-[#fcffe5] py-8 px-6 min-h-screen">
+        {/* Category Filter */}
+        <div className="flex flex-wrap gap-3 mb-8">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-6 py-2 rounded-full border transition font-medium text-sm
+                ${
+                  activeCategory === cat
+                    ? "bg-black text-white border-black"
+                    : "border-gray-800 text-gray-800 hover:bg-gray-200"
+                }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-      {/* Blog Grid */}
-      <div className="grid md:grid-cols-2 gap-8">
-        {filteredBlogs.map((blog) => (
-          <div
-            key={blog.id}
-            className="flex flex-col md:flex-row bg-white shadow rounded-lg overflow-hidden"
-          >
-            {/* Blog Image */}
-            <img
-              src={blog.image}
-              alt={blog.title}
-              className="w-full md:w-1/3 h-40 object-cover"
-            />
+        {/* Section Title */}
+        <h2 className="text-2xl font-bold mb-6">Recent Blog Posts</h2>
 
-            {/* Blog Content */}
-            <div className="p-4 flex flex-col justify-between">
-              <div>
-                <p className="text-sm text-gray-500">{blog.date}</p>
-                <h3 className="text-lg font-semibold">{blog.title}</h3>
-                <p className="text-gray-600">{blog.summary}</p>
-              </div>
+        {/* Blog Masonry Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {filteredBlogs.map((blog, index) => (
+            <div
+              key={blog.id}
+              className={`bg-[#fcffe5] rounded-lg flex flex-col ${
+                index === 0 ? "md:row-span-2" : ""
+              }`}
+            >
+              {/* Blog Image */}
+              <div className="bg-gray-200 rounded-lg h-48 mb-4"></div>
 
-              <div className="mt-3 flex items-center gap-2">
-                <span className="px-3 py-1 text-sm rounded-full bg-black text-white">
-                  {blog.category}
-                </span>
-                <button className="ml-auto px-4 py-1 rounded-full bg-[#926d66] text-white">
-                  Read More
-                </button>
+              {/* Blog Content */}
+              <div className="flex flex-col flex-grow">
+                <p className="text-sm text-gray-600 mb-1">Date</p>
+                <h3 className="text-lg font-semibold mb-1">Judul Blog</h3>
+                <p className="text-gray-700 mb-4">Summary</p>
+
+                {/* Tags + Read More */}
+                <div className="flex items-center justify-between mt-auto">
+                  <span className="px-4 py-1.5 text-sm rounded-full bg-black text-white font-medium">
+                    {blog.category}
+                  </span>
+                  <button className="px-6 py-1.5 rounded-full bg-[#926d66] text-white text-sm font-medium hover:bg-[#7d5b55] transition">
+                    Read More
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </section>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
