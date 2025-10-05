@@ -157,7 +157,7 @@ export default function LoginPage() {
                 // Ensure server components (layout) re-read session
                 router.refresh();
               }else if(role === "vet") {
-                
+                router.push('/vet/dashboard');
               }else if(role === "admin") {
                 router.push('/admin/dashboard');
                 router.refresh();

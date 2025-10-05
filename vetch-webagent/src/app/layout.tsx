@@ -34,7 +34,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     user: session.user ?? null,
   };
 
-  console.log(minimalSession);
 
   return (
     <html lang="en" suppressHydrationWarning>

@@ -1,5 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
-import { io } from "socket.io-client";
+"use client";
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { SignalData } from "simple-peer";
+import Peer, { type Instance } from "simple-peer";
+import { io, type Socket } from "socket.io-client";
 import {
   Send,
   Image as ImageIcon,
@@ -11,225 +15,665 @@ import {
   Syringe,
   Stethoscope,
   Save,
+  Mic,
+  MicOff,
+  Video as VideoIcon,
+  VideoOff,
+  PhoneOff,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChatService } from "@/lib/services/ChatService";
 import { useSession } from "@/contexts/SessionContext";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import IncomingCallDialog from "./IncomingCallDialog";
+import { clear } from "console";
 
-const socket = io(
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
-);
+// ---------- socket singleton (prevents duplicates in Next dev/HMR) ----------
+let _socket: Socket | null = null;
+function getSocket(): Socket | null {
+  if (typeof window === "undefined") return null;
+  if (!_socket) {
+    _socket = io(
+      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000",
+      { transports: ["websocket"] }
+    );
+  }
+  return _socket;
+}
 
-export default function ChatDialogBox({ isOpen, setIsOpen, booking }) {
+// ---------- ICE servers (add TURN for production reliability) ----------
+// Use STUN only (ok for testing)
+const ICE_SERVERS: RTCIceServer[] = [
+  {
+    urls: ["stun:stun.l.google.com:19302", "stun:global.stun.twilio.com:3478"],
+  },
+];
+
+// For production, add TURN (replace with your real TURN host/creds)
+const ICE_SERVERS_WITH_TURN: RTCIceServer[] = [
+  {
+    urls: ["stun:stun.l.google.com:19302", "stun:global.stun.twilio.com:3478"],
+  },
+  {
+    urls: "turn:turn.your-domain.com:3478?transport=udp",
+    username: "USER",
+    credential: "PASS",
+  },
+  {
+    urls: "turn:turn.your-domain.com:3478?transport=tcp",
+    username: "USER",
+    credential: "PASS",
+  },
+];
+
+export default function ChatDialogBox({
+  isOpen,
+  setIsOpen,
+  booking,
+}: {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  booking: any;
+}) {
+  const socket = useMemo(() => getSocket(), []);
+  const { user } = useSession();
+
+  // chat state
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any[]>([]);
-  const [me, setMe] = useState("");
 
+  const [conclussion, setConclussion] = useState("");
+
+
+  // call state
+  const [isVideoCall, setIsVideoCall] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+
+  const [receivingCall, setReceivingCall] = useState(false);
+  const [caller, setCaller] = useState(""); // caller socket id
+  const [callerSignal, setCallerSignal] = useState<SignalData | null>(null);
+  const [callAccepted, setCallAccepted] = useState(false);
+  const [callEnded, setCallEnded] = useState(false);
+
+  const myVideo = useRef<HTMLVideoElement | null>(null);
+  const userVideo = useRef<HTMLVideoElement | null>(null);
+  const connectionRef = useRef<Instance | null>(null);
   const joinedRef = useRef<Set<string>>(new Set());
 
-  const { user } = useSession();
+  const endRef = useRef<HTMLDivElement | null>(null);
 
   const chatService = new ChatService();
 
-  const loadChatDetails = async () => {
+  // helper
+  function destroyPeer() {
     try {
-      if (booking) {
-        const messages = await chatService.fetchMessages(booking.id, 100);
-        console.log(messages);
-        if (messages.ok) {
-          setMessages(messages.data);
-        } else {
-          throw new Error("Failed to load messages");
-        }
+      connectionRef.current?.removeAllListeners?.();
+    } catch {}
+    try {
+      connectionRef.current?.destroy?.();
+    } catch {}
+    connectionRef.current = null;
+  }
+
+  function clearVideoEls() {
+    if (myVideo.current) (myVideo.current as any).srcObject = null;
+    if (userVideo.current) (userVideo.current as any).srcObject = null;
+  }
+
+  // -------- load chat messages when dialog opens ----------
+  useEffect(() => {
+    if (!isOpen || !booking) return;
+    (async () => {
+      try {
+        const res = await chatService.fetchMessages(booking.id, 100);
+        if (res.ok) setMessages(res.data);
+      } catch (e) {
+        console.warn(e);
       }
-    } catch (error) {
-      console.log(error);
-    }
+    })();
+  }, [isOpen, booking]);
+
+  const onLeaveCall = () => {
+    destroyPeer();
+    stream?.getTracks().forEach((t) => t.stop());
+    console.log("call ended by remote");
+    setStream(null);
+    setRemoteStream(null);
+    setCallEnded(true);
+    setCallAccepted(false);
+    setReceivingCall(false);
+    clearVideoEls();
+    setCaller("");
+    setCallerSignal(null);
+    setIsVideoCall(false);
   };
 
+  const endCall = () => {
+    if (!socket || !booking?.id) return;
+
+    // tell the other side
+    socket.emit("leaveCall", { roomId: booking.id });
+
+    // local cleanup
+    destroyPeer();
+    stream?.getTracks().forEach((t) => t.stop());
+    setStream(null);
+    setRemoteStream(null);
+
+    setCallEnded(true);
+    setCallAccepted(false);
+    setReceivingCall(false);
+    setCaller("");
+    clearVideoEls();
+    setCallerSignal(null);
+    setIsVideoCall(false);
+  };
+
+  // -------- join room + minimal listeners tied to the room ----------
   useEffect(() => {
+    if (!socket) return;
     const roomId = booking?.id;
     if (!roomId) return;
 
-    const onReceive = (msg: any) => setMessages((prev) => [...prev, msg]);
-    const onMe = (id: string) => setMe(id);
-
-    // prevent duplicate join in dev StrictMode / remounts
+    // join once (dev StrictMode safe)
     if (!joinedRef.current.has(roomId)) {
       socket.emit("join_room", { roomId });
       joinedRef.current.add(roomId);
     }
 
+    const onReceive = (msg: any) => setMessages((prev) => [...prev, msg]);
+    const onIncomingCall = (data: {
+      signal: SignalData;
+      from: string;
+      roomId: string;
+      name?: string;
+    }) => {
+      console.log("receivingCall");
+      setReceivingCall(true);
+      setCaller(data.from);
+      setCallerSignal(data.signal);
+    };
+
+    socket.off("receive_message", onReceive);
     socket.on("receive_message", onReceive);
-    socket.on("me", onMe);
+
+    socket.off("callUser", onIncomingCall);
+    socket.on("callUser", onIncomingCall);
+
+    socket.off("leaveCall"); // clear any prior handler
+    socket.on("leaveCall", onLeaveCall);  
 
     return () => {
       socket.off("receive_message", onReceive);
-      socket.off("me", onMe);
+      socket.off("callUser", onIncomingCall);
+      socket.off("leaveCall", onLeaveCall);
       socket.emit("leave_room", { roomId });
       joinedRef.current.delete(roomId);
     };
-  }, [booking?.id]);
+  }, [socket, booking?.id]);
 
+  // -------- listen for callAccepted globally (not inside callUser) ----------
   useEffect(() => {
-    if (isOpen && booking) {
-      loadChatDetails();
-    }
-  }, [isOpen]);
+    if (!socket) return;
+    const onCallAccepted = (signal: SignalData) => {
+      if (connectionRef.current) {
+        connectionRef.current.signal(signal);
+        setCallAccepted(true);
+      }
+    };
+    socket.off("callAccepted", onCallAccepted);
+    socket.on("callAccepted", onCallAccepted);
+    return () => {
+      socket.off("callAccepted", onCallAccepted);
+    };
+  }, [socket]);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      const data = {
-        roomId: booking.id,
-        senderId: user?.id,
-        senderRole: user?.role,
-        message: message,
-      };
-      socket.emit("send_message", data);
-      setMessage("");
+  // -------- bind local video whenever stream is ready & call UI is open ----------
+  useEffect(() => {
+    if (!isVideoCall || !stream || !myVideo.current) return;
+    try {
+      myVideo.current.srcObject = stream;
+      myVideo.current.muted = true;
+      myVideo.current.playsInline = true;
+      void myVideo.current.play();
+    } catch (e) {
+      console.warn("attach local stream failed", e);
     }
+  }, [isVideoCall, stream, isOpen]);
+
+  // -------- bind remote video whenever remoteStream arrives ----------
+  useEffect(() => {
+    if (!isVideoCall || !remoteStream || !userVideo.current) return;
+    try {
+      userVideo.current.srcObject = remoteStream;
+      userVideo.current.playsInline = true;
+      void userVideo.current.play();
+    } catch (e) {
+      console.warn("attach remote stream failed", e);
+    }
+  }, [isVideoCall, remoteStream, isOpen]);
+
+  // -------- helpers ----------
+  const ensureLocalStream = async () => {
+    if (stream && stream.getTracks().some((t) => t.readyState === "live")) {
+      return stream;
+    }
+    // previous stream was stopped or missing → request a new one
+    const s = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+    setStream(s);
+    return s;
   };
 
+  const createPeer = (initiator: boolean, s: MediaStream) =>
+    new Peer({
+      initiator,
+      trickle: false,
+      stream: s,
+      config: { iceServers: ICE_SERVERS },
+    });
+
+  // -------- chat send ----------
+  const handleSend = () => {
+    if (!message.trim() || !socket || !booking) return;
+    socket.emit("send_message", {
+      roomId: booking.id,
+      senderId: user?.id,
+      senderRole: user?.role,
+      message,
+    });
+    setMessage("");
+  };
+
+
+  const wirePeer = (peer: Instance) => {
+    peer.on("stream", (remote) => {console.log("setRemoteStream", remote);setRemoteStream(remote)});
+    peer.on("error", (e) => console.error("[peer] error", e));
+    peer.on("close", () => {
+      // remote hung up or peer destroyed → local cleanup
+      destroyPeer();
+      stream?.getTracks().forEach((t) => t.stop());
+      setStream(null);
+      clearVideoEls();
+      setIsVideoCall(false);
+    });
+  };
+
+  // caller
+  const startCall = async () => {
+    if (!socket || !booking?.id) return;
+    setIsVideoCall(true);
+    setCallEnded(false);
+    const s = await ensureLocalStream();
+    const peer = createPeer(true, s);
+
+    peer.on("signal", (signalData) => {
+      socket.emit("callUser", {
+        roomId: booking.id,
+        signalData,
+        from: socket.id,
+        name: user?.fullName,
+      });
+    });
+
+    wirePeer(peer);
+    connectionRef.current = peer;
+  };
+
+  // callee
+  const answerCall = async () => {
+    if (!socket || !callerSignal) return;
+    setIsVideoCall(true);
+    setCallAccepted(true);
+    setCallEnded(false);
+
+    const s = await ensureLocalStream();
+    const peer = createPeer(false, s);
+
+    peer.on("signal", (signalData) => {
+      socket.emit("answerCall", { to: caller, signal: signalData });
+    });
+
+    wirePeer(peer);
+    peer.signal(callerSignal);
+    connectionRef.current = peer;
+  };
+
+
+  // camera/mic toggles
+  const [cameraOn, setCameraOn] = useState(true);
+  const [micOn, setMicOn] = useState(true);
+
+  const toggleCamera = () => {
+    setCameraOn((prev) => {
+      const next = !prev;
+      stream?.getVideoTracks().forEach((t) => (t.enabled = next));
+      return next;
+    });
+  };
+
+  const toggleMic = () => {
+    setMicOn((prev) => {
+      const next = !prev;
+      stream?.getAudioTracks().forEach((t) => (t.enabled = next));
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!isVideoCall && isOpen) {
+      endRef.current?.scrollIntoView({ behavior: "instant" });
+    }
+  }, [messages, isOpen]);
+
+  // ===================== RENDER =====================
+
+  if (!isVideoCall) {
+    return (
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent
+          showCloseButton={false}
+          className={`${
+            user?.role === "vet" ? "sm:max-w-4xl" : "sm:max-w-lg"
+          } flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
+        >
+          {user?.role === "vet" && (
+            <div className="w-2/3 bg-gray-50 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700">
+              <div className="mb-6">
+                <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-2">
+                  <NotebookText className="w-5 h-5" />
+                  Conclusion
+                </h3>
+                <textarea
+                  className="w-full h-32 p-2 border rounded-md min-h-[100px] bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
+                  placeholder="Write conclusion here..."
+                  value={conclussion}
+                  onChange={(e) => setConclussion(e.target.value)}
+                />
+              </div>
+              <div className="mb-6">
+                <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-3">
+                  <CalendarDays className="w-5 h-5" />
+                  Assign Schedule
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 justify-between">
+                    <div className="flex gap-2">
+                      <Syringe className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">Vacccination</span>
+                    </div>
+                    <input
+                      type="date"
+                      className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex gap-2">
+                      <Stethoscope className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">Consultation</span>
+                    </div>
+                    <input
+                      type="date"
+                      className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-auto">
+                <button className="w-full bg-[#3D8D7A] hover:bg-[#327566] text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2">
+                  <Save className="w-5 h-5" />
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col h-[600px] w-full">
+            <DialogTitle>
+              <div className="bg-teal-600 dark:bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="hover:bg-teal-700 rounded-full p-1 transition"
+                  >
+                    <X size={24} />
+                  </button>
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                    <Image
+                      src={
+                        booking
+                          ? booking.vet.user.profilePicture ||
+                            "https://res.cloudinary.com/daimddpvp/image/upload/v1758101764/default-profile-pic_lppjro.jpg"
+                          : ""
+                      }
+                      alt="chat bubble icon"
+                      width={40}
+                      height={40}
+                      className="rounded-lg"
+                    />
+                  </div>
+                  <span className="font-semibold text-lg">
+                    {booking &&
+                      (user?.role === "vet"
+                        ? `${booking.pet.user.fullName} (${booking.pet.petName})`
+                        : `dr. ${booking ? booking.vet.user.fullName : ""}`)}
+                  </span>
+                </div>
+
+                <button
+                  className="hover:bg-teal-700 rounded-full p-2 transition"
+                  onClick={startCall}
+                >
+                  <Video size={24} />
+                </button>
+              </div>
+            </DialogTitle>
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-700">
+              {messages.map((msg) => (
+                <div
+                  key={msg._id}
+                  className={`flex ${
+                    msg.sender_id !== user?.id
+                      ? "justify-end flex-row-reverse"
+                      : "justify-end"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[75%] ${
+                      msg.sender_id !== user?.id ? "order-1" : "order-2"
+                    }`}
+                  >
+                    <div
+                      className={`rounded-2xl px-4 py-2.5 shadow-lg ${
+                        msg.sender_id !== user?.id
+                          ? "bg-yellow-50 text-gray-800 rounded-bl-none"
+                          : "bg-blue-300 text-gray-800 rounded-br-none"
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed">{msg.content}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-end gap-1 mt-1 px-1">
+                    <span className="text-xs text-gray-500">
+                      {new Date(msg.inserted_at).toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              <div ref={endRef} />
+            </div>
+
+            {/* Input Area */}
+            <div className="bg-white dark:bg-gray-800 border-t border-gray-200 p-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                  placeholder="Ketik pesan di sini"
+                  className="flex-1 dark:text-black bg-gray-100 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+                <button
+                  onClick={handleSend}
+                  className="bg-white hover:bg-gray-50 text-teal-600 rounded-full p-2.5 transition border border-gray-300"
+                >
+                  <Send size={20} />
+                </button>
+                <button className="bg-white hover:bg-gray-50 text-teal-600 rounded-full p-2.5 transition border border-gray-300">
+                  <ImageIcon size={20} />
+                </button>
+                <button className="bg-white hover:bg-gray-50 text-teal-600 rounded-full p-2.5 transition border border-gray-300">
+                  <FileText size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+          <IncomingCallDialog
+            open={receivingCall}
+            callerName="testuser"
+            onAccept={answerCall}
+            onDecline={() => console.log("decline")}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // ======= VIDEO CALL UI =======
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent
         showCloseButton={false}
-        className={`${user?.role === "vet"?"sm:max-w-4xl":"sm:max-w-lg"} flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
+        className="w-screen h-screen max-w-[100vw] sm:max-w-[100vw] p-0 rounded-none bg-black overflow-hidden flex flex-col"
       >
-        {user?.role === "vet" && <div className="w-2/3 bg-gray-50 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700">
-          <div className="mb-6">
-            <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-2">
-              <NotebookText className="w-5 h-5" />
-              Conclusion
-            </h3>
-            <textarea
-              className="w-full h-32 p-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
-              placeholder="Write conclusion here..."
-            ></textarea>
-          </div>
-          <div className="mb-6">
-            <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-3">
-              <CalendarDays className="w-5 h-5" />
-              Assign Schedule
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                 <Syringe className="w-5 h-5 text-gray-500" />
-                 <input type="date" className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]" />
-              </div>
-              <div className="flex items-center gap-3">
-                 <Stethoscope className="w-5 h-5 text-gray-500" />
-                 <input type="date" className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]" />
-              </div>
-            </div>
-          </div>
-          <div className="mt-auto">
-             <button className="w-full bg-[#3D8D7A] hover:bg-[#327566] text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2">
-                <Save className="w-5 h-5" />
-                Save
-             </button>
-          </div>
-        </div>}
-        <div className="flex flex-col h-[600px] w-full">
-          {/* Header */}
-          <DialogTitle>
-            <div className="bg-teal-600 text-white px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="hover:bg-teal-700 rounded-full p-1 transition"
-                >
-                  <X size={24} />
-                </button>
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                  <Image
-                    src={
-                      booking
-                        ? booking.vet.user.profilePicture ||
-                          "https://res.cloudinary.com/daimddpvp/image/upload/v1758101764/default-profile-pic_lppjro.jpg"
-                        : ""
-                    }
-                    alt="chat bubble icon"
-                    width={40}
-                    height={40}
-                    className="rounded-lg"
-                  />
-                </div>
-                <span className="font-semibold text-lg">
-                  dr. {booking ? booking.vet.user.fullName : ""}
-                </span>
-              </div>
-              <button className="hover:bg-teal-700 rounded-full p-2 transition">
-                <Video size={24} />
-              </button>
-            </div>
-          </DialogTitle>
+        {/* Top bar */}
+        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3">
+          <div className="text-white/80 text-sm">Video Call</div>
+          <button
+            onClick={endCall}
+            className="inline-flex items-center justify-center rounded-full p-2 hover:bg-white/10 transition"
+            aria-label="Close"
+          >
+            <X className="h-6 w-6 text-white" />
+          </button>
+        </div>
 
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
-            {messages.map((msg) => (
-              <div
-                key={msg._id}
-                className={`flex ${
-                msg.sender_id !== user?.id
-                    ? "justify-end flex-row-reverse"
-                    : "justify-end"
-                }`}
-              >
-                <div
-                  className={`max-w-[75%] ${
-                    msg.sender_id !== user?.id
-                      ? "order-1"
-                      : "order-2"
-                  }`}
-                >
-                  <div
-                    className={`rounded-2xl px-4 py-2.5 shadow-lg ${
-                    msg.sender_id !== user?.id
-                        ? "bg-yellow-50 text-gray-800 rounded-bl-none"
-                        : "bg-blue-300 text-gray-800 rounded-br-none"
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
+        {/* Video area */}
+        <div className="relative h-full w-full pt-12 pb-20">
+          <div className="grid h-full w-full grid-cols-1 md:grid-cols-2">
+            {/* Local (You) */}
+            <div className="relative bg-black">
+              {stream ? (
+                <video
+                  ref={myVideo}
+                  muted
+                  playsInline
+                  autoPlay
+                  className="h-full w-full object-cover [transform:scaleX(-1)]"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <div className="rounded-2xl border-2 border-dashed border-white/20 px-8 py-10 text-center">
+                    <VideoIcon className="mx-auto mb-3 h-10 w-10 text-white/60" />
+                    <p className="text-white/90 font-medium">
+                      Camera not ready
+                    </p>
+                    <p className="text-white/60 text-sm">
+                      Grant permission or turn camera on.
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-end gap-1 mt-1 px-1">
-                  <span className="text-xs text-gray-500">
-                    {new Date(msg.inserted_at).toLocaleTimeString("id-ID", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Input Area */}
-          <div className="bg-white border-t border-gray-200 p-3">
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Ketik pesan di sini"
-                className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-              <button
-                onClick={handleSend}
-                className="bg-white hover:bg-gray-50 text-teal-600 rounded-full p-2.5 transition border border-gray-300"
-              >
-                <Send size={20} />
-              </button>
-              <button className="bg-white hover:bg-gray-50 text-teal-600 rounded-full p-2.5 transition border border-gray-300">
-                <ImageIcon size={20} />
-              </button>
-              <button className="bg-white hover:bg-gray-50 text-teal-600 rounded-full p-2.5 transition border border-gray-300">
-                <FileText size={20} />
-              </button>
+              )}
+              <span className="absolute bottom-3 left-3 rounded-md bg-black/50 px-2 py-1 text-xs text-white/90">
+                You
+              </span>
             </div>
+
+            {/* Remote (Callee) */}
+            <div className="relative bg-black">
+              {callAccepted && !callEnded && remoteStream ? (
+                <video
+                  ref={userVideo}
+                  playsInline
+                  autoPlay
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center px-6">
+                  <div className="w-full max-w-md rounded-2xl border-2 border-dashed border-white/20 px-8 py-10 text-center">
+                    <VideoIcon className="mx-auto mb-3 h-10 w-10 text-white/60" />
+                    <p className="text-white/90 font-medium">
+                      {receivingCall && !callAccepted
+                        ? "Incoming call — tap Answer to connect."
+                        : "Waiting for the other participant…"}
+                    </p>
+                    {receivingCall && !callAccepted && (
+                      <div className="mt-4">
+                        <Button variant="secondary" onClick={answerCall}>
+                          Answer
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              <span className="absolute bottom-3 left-3 rounded-md bg-black/50 px-2 py-1 text-xs text-white/90">
+                Remote
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom controls */}
+        <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-center p-4">
+          <div className="flex items-center gap-3 rounded-full bg-white/10 backdrop-blur-md p-2">
+            <Button
+              size="icon"
+              variant={cameraOn ? "secondary" : "destructive"}
+              className="rounded-full"
+              onClick={toggleCamera}
+              aria-label={cameraOn ? "Turn camera off" : "Turn camera on"}
+            >
+              {cameraOn ? (
+                <VideoIcon className="h-5 w-5" />
+              ) : (
+                <VideoOff className="h-5 w-5" />
+              )}
+            </Button>
+
+            <Button
+              size="icon"
+              variant={micOn ? "secondary" : "destructive"}
+              className="rounded-full"
+              onClick={toggleMic}
+              aria-label={micOn ? "Mute microphone" : "Unmute microphone"}
+            >
+              {micOn ? (
+                <Mic className="h-5 w-5" />
+              ) : (
+                <MicOff className="h-5 w-5" />
+              )}
+            </Button>
+
+            <Button
+              size="icon"
+              variant="destructive"
+              className="rounded-full"
+              onClick={endCall}
+              aria-label="End call"
+            >
+              <PhoneOff className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       </DialogContent>

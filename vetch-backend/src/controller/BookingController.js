@@ -19,6 +19,8 @@ class BookingController {
         this.getBookingByUserIdDateTime = this.getBookingByUserIdDateTime.bind(this);
         this.putBookingStatus = this.putBookingStatus.bind(this);
         this.getBookingsByUserId = this.getBookingsByUserId.bind(this);
+        this.getBookingByVetId = this.getBookingByVetId.bind(this);
+        this.getPastBookingsByPetId = this.getPastBookingsByPetId.bind(this);
     }
 
     async getConcernTypes(req, res) {
@@ -46,6 +48,28 @@ class BookingController {
         try {
             const {userId, status, type} = req.query;
             const bookings = await this.#bookingRepository.findBookingsByUserId(userId, status, type);
+            res.status(200).json({ok: true, data: bookings, message: 'Bookings fetched successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching bookings', error: error.message });
+        }
+    }
+
+    async getBookingByVetId(req, res) {
+        try {
+            const {userId, status, type, date} = req.query;
+            const bookings = await this.#bookingRepository.findBookingByVetId(userId, status.split(","), type, date);
+            res.status(200).json({ok: true, data: bookings, message: 'Bookings fetched successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching bookings', error: error.message });
+        }
+    }
+
+    async getPastBookingsByPetId(req, res){
+        try {
+            const {petId, vetId} = req.query;
+            const bookings = await this.#bookingRepository.findPastBookingsByPetId(petId, vetId);
             res.status(200).json({ok: true, data: bookings, message: 'Bookings fetched successfully'});
         } catch (error) {
             console.log(error);

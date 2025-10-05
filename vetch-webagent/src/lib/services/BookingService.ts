@@ -32,7 +32,19 @@ export class BookingService {
       homecare: resultHomecare.ok ? resultHomecare.data : undefined
     }
   }
+  
+  async fetchVetBookings(userId: string, status: string[], date: string){
+    const result =  await this.#http.get<IResponse>(`/vet/?userId=${userId}&status=${status}${date?`&date=${date}`:""}`);
 
+    // console.log(result);
+
+    return result;
+  }
+
+  async fetchPetMedicalHistory(petId: string, vetId?: string){
+    return await this.#http.get<IResponse>(`/past-booking?petId=${petId}${vetId?`&vetId=${vetId}`:""}`);
+  }
+  
   async createBooking(
     selectedConcerns: any[],
     illnessDescription: string,

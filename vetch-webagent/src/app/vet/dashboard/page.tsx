@@ -7,37 +7,14 @@ import {
   CalendarCheck,
   Clock,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Calendar from "./components/Calendar"; 
 import OverlayPetDetail from "../components/overlay/OverlayPetDetail";
-import OverlayLiveChat from "../components/overlay/OverlayLiveChat";
 import ChatDialogBox from "@/app/alert-dialog-box/ChatDialogBox";
+import { BookingService } from "@/lib/services/BookingService";
+import { useSession } from "@/contexts/SessionContext";
+import { formatIsoJakarta, formatLocalDate } from "@/lib/utils/formatDate";
 
-// Definisikan tipe data untuk konsistensi
-interface HistoryItem {
-  date: string;
-  desc: string;
-  type: string;
-}
-
-interface PetData {
-  name: string;
-  gender: string;
-  species: string;
-  neuter: string; // Dipisah dari species
-  age: string;
-  weight: string;
-  color: string;
-  medicalHistory?: HistoryItem[];
-  myHistory?: HistoryItem[]; // 'myHistory' seringkali juga opsional
-}
-
-interface Appointment {
-  pet: string;
-  time: string;
-  type: string;
-  details: PetData;
-}
 
 const stats = [
   { title: "Registered Patient", value: "25", icon: Users },
@@ -46,57 +23,23 @@ const stats = [
   { title: "Pending Appointment", value: "2", icon: Clock },
 ];
 
-// Perbaiki struktur data agar sesuai dengan interface PetData
-const appointments: Appointment[] = [
-  {
-    pet: "Dog - Aryo",
-    time: "10:00 AM",
-    type: "Online Consultation",
-    details: {
-      name: "Aryo",
-      gender: "Male",
-      species: "Dog", // Diperbaiki
-      neuter: "Neutered", // Diperbaiki
-      age: "5 years old",
-      weight: "12 Kg",
-      color: "Brown",
-      medicalHistory: [
-        { date: "23 Apr 2025 08:00", desc: "Skin Allergy", type: "Online Consultation" },
-        { date: "20 Apr 2025 22:00", desc: "Injury", type: "Homecare" },
-      ],
-    },
-  },
-  {
-    pet: "Cat - Lorensius",
-    time: "12:00 PM",
-    type: "Online Consultation",
-    details: {
-      name: "Lorensius",
-      gender: "Female",
-      species: "Cat", // Diperbaiki
-      neuter: "Not Neutered", // Diperbaiki
-      age: "3 years old",
-      weight: "3 Kg",
-      color: "Black",
-      medicalHistory: [
-        { date: "22 Apr 2025 10:00", desc: "Diarrhea", type: "Homecare" },
-        { date: "20 Apr 2025 22:00", desc: "Trauma/Injury", type: "Online Consultation" },
-        { date: "19 Apr 2025 16:00", desc: "Flea and Tick, Ear Infection", type: "Online Consultation" },
-      ],
-    },
-  },
-];
 
 export default function DashboardPage() {
   // ✅ 1. State management diperbaiki
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  // ✅ 2. Gunakan tipe PetData, bukan 'any'
-  const [selectedPet, setSelectedPet] = useState<PetData | null>(null);
 
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
+  // ✅ 2. Gunakan tipe PetData, bukan 'any'
+
+  const [appointments, setAppointments] = useState<any[]>([]);
+
+  const {user} = useSession();
+
+  const bookingService = new BookingService();
   // ✅ 3. Fungsi-fungsi handler ditambahkan
-  const handleOpenDetail = (petData: PetData) => {
-    setSelectedPet(petData);
+  const handleOpenDetail = (data: any) => {
+    setSelectedBooking(data);
     setIsDetailOpen(true);
   };
 
@@ -110,12 +53,30 @@ export default function DashboardPage() {
     setIsChatOpen(true); // Buka chat
   };
 
+  const loadTodayAppointments = async () =>{
+    try {
+      if(user){
+        const result = await bookingService.fetchVetBookings(user?.id, ["ACCEPTED", "ONGOING"], formatLocalDate(new Date()));
+        console.log(result.data);
+        if(result.ok){
+          setAppointments(result.data);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(()=>{
+    loadTodayAppointments();
+  }, [])
+
   return (
     <div className="w-full">
       {/* Header Welcome */}
       <div className="w-full bg-[#F7FBEF] dark:bg-[#2E4F4A] py-6 px-6">
         <h1 className="text-2xl font-bold text-black dark:text-white">
-          Welcome Back Dr.Seemore
+          Welcome Back Dr.{user?.fullName}
         </h1>
       </div>
 
@@ -162,19 +123,25 @@ export default function DashboardPage() {
             <div
               key={i}
               className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-              // ✅ 4. Panggil handler yang benar
-              onClick={() => handleOpenDetail(item.details)}
+              onClick={() => handleOpenDetail(item)}
             >
               <div>
-                <p className="font-semibold">{item.pet}</p>
-                <p className="text-sm text-gray-500">{item.time}</p>
+                <p className="font-semibold">{item.pet.petName}</p>
+                <p className="text-sm text-gray-500">{formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
               <div className="flex items-center gap-2">
-                <p className="text-sm">{item.type}</p>
+                <p className="text-sm">{item.bookingType}</p>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </div>
             </div>
           ))}
+          {
+            appointments.length === 0 && (
+              <div className="p-4 text-center text-gray-500">
+                No appointments for today yet.
+              </div>
+            )
+          }
         </div>
       </div>
 
@@ -186,7 +153,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2">
           <Calendar />
           <div className="divide-y">
-            {appointments.map((item, i) => (
+            {/* {appointments.map((item, i) => (
               <div
                 key={i}
                 className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -201,7 +168,7 @@ export default function DashboardPage() {
                   <ChevronRight className="w-5 h-5 text-gray-400" />
                 </div>
               </div>
-            ))}
+            ))} */}
           </div>
         </div>
       </div>
@@ -210,17 +177,11 @@ export default function DashboardPage() {
       <OverlayPetDetail
         open={isDetailOpen}
         onClose={handleCloseAll}
-        data={selectedPet}
+        data={selectedBooking}
         onStartAppointment={handleStartAppointment}
       />
 
-      {/* <OverlayLiveChat
-        open={isChatOpen}
-        onClose={handleCloseAll}
-        vetName="Aryo"
-      /> */}
-
-      <ChatDialogBox booking={undefined} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>
+      <ChatDialogBox booking={selectedBooking} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>
     </div>
   );
 }

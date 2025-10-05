@@ -1,6 +1,19 @@
 export function formatIsoJakarta(iso: string) {
-  console.log("date format",iso)
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  console.log("date format", iso);
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
   const parts = new Intl.DateTimeFormat("id-ID", {
     timeZone: "Asia/Jakarta",
@@ -17,18 +30,31 @@ export function formatIsoJakarta(iso: string) {
       return acc;
     }, {});
 
-  const day = parts.day;                     // "15"
+  const day = parts.day; // "15"
   const mon = months[Number(parts.month) - 1]; // "Sep"
-  const year = parts.year;                   // "2025"
-  const hh = parts.hour;                     // "11"
-  const mm = parts.minute;  
-  
+  const year = parts.year; // "2025"
+  const hh = parts.hour; // "11"
+  const mm = parts.minute;
+
   console.log(hh);
 
   return `${day} ${mon} ${year} at ${hh}:${mm}`;
 }
 export function formatIsoJakartaShort(iso: string) {
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Jakarta",
@@ -45,16 +71,65 @@ export function formatIsoJakartaShort(iso: string) {
       return acc;
     }, {});
 
-  const day = parts.day;                     // "15"
+  const day = parts.day; // "15"
   const mon = months[Number(parts.month) - 1]; // "Sep"
-  const year = parts.year;               // "07"
+  const year = parts.year; // "07"
 
   return `${day} ${mon} ${year}`;
 }
 
 export const formatLocalDate = (d: Date) => {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}-${String(d.getDate()).padStart(2, "0")}`;
-  };
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+/**
+ * Calculate age (years + months) from a date of birth.
+ * - Uses UTC to avoid timezone/DST edge cases.
+ * - Accepts Date or ISO string for both dob and asOf.
+ */
+export function ageFromDob(
+  dob: Date | string,
+  asOf: Date | string = new Date()
+): { years: number; months: number; totalMonths: number } {
+  const d0 = toUTCDate(dob);
+  const d1 = toUTCDate(asOf);
+
+  if (isNaN(d0.getTime())) throw new Error("Invalid DOB");
+  if (isNaN(d1.getTime())) throw new Error("Invalid asOf date");
+  if (d1 < d0) return { years: 0, months: 0, totalMonths: 0 };
+
+  // Raw differences
+  let years = d1.getUTCFullYear() - d0.getUTCFullYear();
+  let months = d1.getUTCMonth() - d0.getUTCMonth();
+
+  // If day-of-month hasn't reached yet this month, borrow 1 month
+  const dayDiff = d1.getUTCDate() - d0.getUTCDate();
+  if (dayDiff < 0) months -= 1;
+
+  // Normalize negatives
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+
+  return { years, months, totalMonths: years * 12 + months };
+}
+
+function toUTCDate(d: Date | string): Date {
+  const dt = typeof d === "string" ? new Date(d) : d;
+  // Normalize to a UTC date (strip local time component if you pass a date-only string)
+  return new Date(
+    Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate())
+  );
+}
+
+/** Optional: pretty printer like "2y 3m" or "7 months" */
+export function formatAge(age: { years: number; months: number }) {
+  const parts = [];
+  if (age.years) parts.push(`${age.years}y`);
+  if (age.months) parts.push(`${age.months}m`);
+  return parts.length ? parts.join(" ") : "0m";
+}

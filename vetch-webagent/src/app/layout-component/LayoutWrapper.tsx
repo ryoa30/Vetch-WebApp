@@ -5,7 +5,7 @@ import Navbar from "@/app/layout-component/navbar/Navbar";
 import { Footer } from "@/app/layout-component/footer/footer";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { useLoading } from "@/contexts/LoadingContext";
-import { SessionProvider } from "@/contexts/SessionContext";
+import { SessionProvider, useSession } from "@/contexts/SessionContext";
 import { useEffect } from "react";
 
 type MinimalSession = {
@@ -16,6 +16,7 @@ type MinimalSession = {
 export default function LayoutWrapper({ children, session }: { children: React.ReactNode; session: MinimalSession }) {
   const pathname = usePathname();
   const {loading} = useLoading();
+  const {isAuthenticated, user} = session;
 
   const noLayoutRoutes = [
     "/login",
@@ -59,6 +60,21 @@ export default function LayoutWrapper({ children, session }: { children: React.R
       document.body.removeChild(scriptTag);
     };
   }, []);
+
+  useEffect(() => {
+    console.log("session: ",session);
+    if(isAuthenticated){
+      if(user?.role === "vet" && !pathname.startsWith("/vet")){
+        window.location.href = "/vet/dashboard";
+      }else if(user?.role === "admin" && !pathname.startsWith("/admin")){
+        window.location.href = "/admin/dashboard";
+      }
+    }else{
+      if(pathname.startsWith("/vet") || pathname.startsWith("/admin") || pathname.startsWith("/forPetParent/orderHistory") || pathname.startsWith("/forPetParent/consultationVetList/")){
+        window.location.href = "/login";
+      }
+    }
+  }, [])
 
   return (
     <>

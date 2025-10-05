@@ -50,17 +50,35 @@ class SocketManager {
       );
 
       // WebRTC signaling passthrough
-      socket.on("callUser", (data) => {
-        this.io.to(data.userToCall).emit("callUser", {
-          signal: data.signalData,
-          from: data.from,
-          name: data.name,
-          roomId: data.roomId,
+      socket.on("callUser", ({ roomId, signalData, from, name }) => {
+        if (!roomId) return;
+        // ensure the caller is actually in the room (optional safety)
+        if (!socket.rooms.has(roomId)) return;
+        console.log(`callUser from ${from} to room ${roomId}`);
+
+        socket.to(roomId).emit("callUser", {
+          signal: signalData, // offer
+          from, // caller socket id
+          name,
+          roomId,
         });
       });
 
-      socket.on("answerCall", (data) => {
-        this.io.to(data.to).emit("callAccepted", data.signal);
+      socket.on("leaveCall", ({ roomId }) => {
+        if (!roomId) return;
+        // ensure the caller is actually in the room (optional safety)
+        if (!socket.rooms.has(roomId)) return;
+        console.log(`leaveCall from room ${roomId}`);
+
+        socket.to(roomId).emit("leaveCall", {
+          roomId,
+        });
+      });
+
+      // Answer goes directly to the caller socket id
+      socket.on("answerCall", ({ to, signal }) => {
+        if (!to) return;
+        this.io.to(to).emit("callAccepted", signal); // answer
       });
 
       socket.on("disconnect", () => {
