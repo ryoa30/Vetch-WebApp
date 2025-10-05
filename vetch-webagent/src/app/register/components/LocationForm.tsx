@@ -3,31 +3,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FC, useEffect, useRef, useState } from "react";
 import { useRegister } from "@/contexts/RegisterContext";
-import { LocationService } from "@/lib/services/LocationService";
-import { SearchableDropdown } from "@/components/SearchableDropdown";
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 import { UserValidator } from "@/lib/validators/UserValidator";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/lib/services/UserService";
 import { setWithExpiry } from "@/lib/utils/localStorage";
-
-interface IOptions {
-  value: string;
-  label: string;
-}
-
-interface ILocationResponse {
-  index: string;
-  formattedAddress: string;
-  addressLabel: string;
-  postalCode: string;
-  urbanVillalges: string;
-  district: string;
-  city: string;
-  province: string;
-  latitude: string;
-  longitude: string;
-}
 
 interface IErrors {
   address?: string;

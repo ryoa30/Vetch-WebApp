@@ -128,7 +128,7 @@ function toUTCDate(d: Date | string): Date {
 
 /** Optional: pretty printer like "2y 3m" or "7 months" */
 export function formatAge(age: { years: number; months: number }) {
-  const parts = [];
+  const parts: string[] = [];
   if (age.years) parts.push(`${age.years}y`);
   if (age.months) parts.push(`${age.months}m`);
   return parts.length ? parts.join(" ") : "0m";
