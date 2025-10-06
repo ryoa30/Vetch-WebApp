@@ -6,7 +6,7 @@ let _db;
 async function getDb() {
   if (_db) return _db;
 
-  console.log("Connecting to MongoDB...", process.env.APPSETTING_MONGODB_URI);
+  console.log("Connecting to MongoDB...", process.env.MONGODB_URI, process.env);
 
   // Reuse a single client across hot reloads in dev (optional)
   if (!global._mongoClientPromise) {
