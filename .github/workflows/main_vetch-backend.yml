@@ -51,7 +51,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: vetch-backend
-          path: .
+          path: ./deploy
+
+      - name: List files
+        run: |
+          pwd
+          ls -la
+          ls -la ./deploy
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -65,4 +71,6 @@ jobs:
         with:
           app-name: "vetch-backend"
           slot-name: "Production"
-          package: "vetch-backend"   # deploy only this folder
+          package: ./deploy    # deploy only this folder
+
+
