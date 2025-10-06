@@ -1,0 +1,68 @@
+name: Build and deploy Node.js app to Azure Web App - vetch-backend
+
+on:
+  push:
+    branches: [main]
+    # optional: trigger only when backend changes
+    # paths:
+    #   - "vetch-backend/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    defaults:
+      run:
+        working-directory: vetch-backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.x"
+
+      - name: Install / Build / Test
+        run: |
+          npm ci
+          npm run build --if-present
+          npm test --if-present
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vetch-backend
+          # Upload only the backend folder (including node_modules if needed)
+          path: vetch-backend
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vetch-backend
+          path: .
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5E7F1B3DE39041EC8E10C5664C5B033D }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_930620DB184A444F9AD2D30E23F256A4 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2631285508E1491BA9B336DC8FBACE65 }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "vetch-backend"
+          slot-name: "Production"
+          package: "vetch-backend"   # deploy only this folder
