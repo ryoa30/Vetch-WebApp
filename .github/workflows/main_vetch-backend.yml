@@ -71,5 +71,6 @@ jobs:
         with:
           app-name: "vetch-backend"
           slot-name: "Production"
-          package: "vetch-backend"   # deploy only this folder
+          package: ./deploy    # deploy only this folder
+
 
