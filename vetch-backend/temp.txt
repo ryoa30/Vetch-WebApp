@@ -1,0 +1,123 @@
+[
+  {
+    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+    "value": "InstrumentationKey=10802266-48d1-4271-adbc-0f697567617e;IngestionEndpoint=https://indonesiacentral-0.in.applicationinsights.azure.com/;LiveEndpoint=https://indonesiacentral.livediagnostics.monitor.azure.com/;ApplicationId=c9a64a86-d7e1-45c5-a40c-c8beff29193d",
+    "slotSetting": false
+  },
+  {
+    "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+    "value": "~3",
+    "slotSetting": false
+  },
+  {
+    "name": "XDT_MicrosoftApplicationInsights_Mode",
+    "value": "default",
+    "slotSetting": false
+  },
+  {
+    "name": "DATABASE_URL",
+    "value": "postgresql://postgres.bnbdhwkaxroammigqlpc:s7UZoKMWag2LjeBd@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true",
+    "slotSetting": false
+  },
+  {
+    "name": "MONGODB_DB",
+    "value": "vetch_live_chat",
+    "slotSetting": false
+  },
+  {
+    "name": "DIRECT_URL",
+    "value": "postgresql://postgres.bnbdhwkaxroammigqlpc:s7UZoKMWag2LjeBd@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres",
+    "slotSetting": false
+  },
+  {
+    "name": "PORT",
+    "value": "5000",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_URL",
+    "value": "redis://localhost:6379",
+    "slotSetting": false
+  },
+  {
+    "name": "JWT_SECRET",
+    "value": "disinisenangdisanasenangdimanamanahatikusenangtralalalalalalalalalalalalalalalalatralalalalalalalalalalalalalalala",
+    "slotSetting": false
+  },{
+    "name": "EMAIL_HOST",
+    "value": "smtp.mailtrap.io",
+    "slotSetting": false
+  },{
+    "name": "EMAIL_PORT",
+    "value": "2525",
+    "slotSetting": false
+  },{
+    "name": "MAIL_USERNAME",
+    "value": "vetch.petservice@gmail.com",
+    "slotSetting": false
+  },
+  {
+    "name": "MAIL_PASSWORD",
+    "value": "skripsisukses2025!",
+    "slotSetting": false
+  },{
+    "name": "OAUTH_CLIENTID",
+    "value": "608783255666-hst3qr076atuqa81nuk20q6fjkmhaq34.apps.googleusercontent.com",
+    "slotSetting": false
+  },
+  {
+    "name": "OAUTH_CLIENT_SECRET",
+    "value": "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",
+    "slotSetting": false
+  },
+  {
+    "name": "OAUTH_REFRESH_TOKEN",
+    "value": "1//04k_9PHuSuKYhCgYIARAAGAQSNwF-L9IrNfrtbNPwm_RnUpgLCSpHptdHrZv-EkuybFI8QzPpHx3jEm3n5MnPeprvvm0a6e02w8A",
+    "slotSetting": false
+  },
+  {
+    "name": "GOOGLE_MAPS_API_KEY",
+    "value": "AIzaSyB28XEbwW1c0g0mhGr5j-bpqQSFslThxJM",
+    "slotSetting": false
+  },
+  {
+    "name": "REDIS_URL",
+    "value": "rediss://default:ARhXAAImcDE3MjJmZWUyNTM2MzI0NWY5YWRlZDc0NDYwMTZiNGY0N3AxNjIzMQ@rested-muskox-6231.upstash.io:6379",
+    "slotSetting": false
+  },
+  {
+    "name": "CLOUDINARY_CLOUD_NAME",
+    "value": "daimddpvp",
+    "slotSetting": false
+  },
+  {
+    "name": "CLOUDINARY_API_KEY",
+    "value": "648179764429243",
+    "slotSetting": false
+  },
+  {
+    "name": "CLOUDINARY_API_SECRET",
+    "value": "x79V8JGGPUS-61CGcrxA3TWAMBo",
+    "slotSetting": false
+  },
+  {
+    "name": "MIDTRANS_MERCHANT_ID",
+    "value": "G667594414",
+    "slotSetting": false
+  },
+  {
+    "name": "MIDTRANS_CLIENT_ID",
+    "value": "Mid-client-AIwg945t4eKO5ATO",
+    "slotSetting": false
+  },
+  {
+    "name": "MIDTRANS_SERVER_KEY",
+    "value": "Mid-server-m_jJgFtyfe1IWzi302znanZ-",
+    "slotSetting": false
+  },
+  {
+    "name": "CORS_URL",
+    "value": "https://vetch-webagent.vercel.app",
+    "slotSetting": false
+  }
+]
