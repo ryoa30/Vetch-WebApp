@@ -14,6 +14,8 @@ import ChatDialogBox from "@/app/alert-dialog-box/ChatDialogBox";
 import { BookingService } from "@/lib/services/BookingService";
 import { useSession } from "@/contexts/SessionContext";
 import { formatIsoJakarta, formatLocalDate } from "@/lib/utils/formatDate";
+import { useLoading } from "@/contexts/LoadingContext";
+import { set } from "lodash";
 
 
 const stats = [
@@ -28,6 +30,7 @@ export default function DashboardPage() {
   // ✅ 1. State management diperbaiki
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const {setIsLoading} = useLoading();;
 
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
   // ✅ 2. Gunakan tipe PetData, bukan 'any'
@@ -54,6 +57,7 @@ export default function DashboardPage() {
   };
 
   const loadTodayAppointments = async () =>{
+    setIsLoading(true);
     try {
       if(user){
         const result = await bookingService.fetchVetBookings(user?.id, ["ACCEPTED", "ONGOING"], formatLocalDate(new Date()));
@@ -65,6 +69,7 @@ export default function DashboardPage() {
     } catch (error) {
       console.log(error);
     }
+    setIsLoading(false);
   }
 
   useEffect(()=>{

@@ -138,16 +138,16 @@ export default function ChatDialogBox({
   const onLeaveCall = () => {
     destroyPeer();
     stream?.getTracks().forEach((t) => t.stop());
-    console.log("call ended by remote");
     setStream(null);
     setRemoteStream(null);
     setCallEnded(true);
     setCallAccepted(false);
     setReceivingCall(false);
-    clearVideoEls();
     setCaller("");
+    clearVideoEls();
     setCallerSignal(null);
     setIsVideoCall(false);
+    console.log("call ended by remote");
   };
 
   const endCall = () => {
@@ -542,7 +542,7 @@ export default function ChatDialogBox({
             open={receivingCall}
             callerName="testuser"
             onAccept={answerCall}
-            onDecline={() => console.log("decline")}
+            onDecline={endCall}
           />
         </DialogContent>
       </Dialog>
