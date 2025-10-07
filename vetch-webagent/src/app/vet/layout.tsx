@@ -1,5 +1,5 @@
 import Sidebar from "./components/sidebar";
-import { Footer } from "@/app/layout-component/footer/footer";
+import { Footer } from "@/app/layout-component/footer/footer-admin-vet";
 
 export default function AdminLayout({
   children,

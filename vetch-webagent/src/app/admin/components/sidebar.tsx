@@ -94,12 +94,11 @@ export default function Sidebar() {
             </LogoutConfirmDialog>
           </div>
           <div className="p-4 flex justify-center">
-            <ToggleTheme />
+            {/* ToggleTheme akan berubah berdasarkan state isOpen */}
+            <ToggleTheme variant={isOpen ? "full" : "icon"} />
           </div>
         </nav>
       </div>
-
-      {/* Footer */}
     </aside>
   );
 }

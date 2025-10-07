@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Calendar() {
   const today = new Date();
@@ -8,8 +9,18 @@ export default function Calendar() {
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
   const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -34,11 +45,13 @@ export default function Calendar() {
           }}
           className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-[#3D6F64] rounded transition-colors"
         >
-          ◀
+          <ChevronLeft className="h-5 w-5 text-gray-800 dark:text-white" />
         </button>
+
         <h2 className="text-base font-bold text-gray-800 dark:text-white">
           {monthNames[currentMonth]} {currentYear}
         </h2>
+
         <button
           onClick={() => {
             if (currentMonth === 11) {
@@ -50,14 +63,19 @@ export default function Calendar() {
           }}
           className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-[#3D6F64] rounded transition-colors"
         >
-          ▶
+          <ChevronRight className="h-5 w-5 text-gray-800 dark:text-white" />
         </button>
       </div>
 
       {/* Hari */}
       <div className="grid grid-cols-7 text-center text-xs font-semibold mb-2 text-gray-700 dark:text-gray-200">
-        <div>Su</div><div>Mo</div><div>Tu</div>
-        <div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        <div>Su</div>
+        <div>Mo</div>
+        <div>Tu</div>
+        <div>We</div>
+        <div>Th</div>
+        <div>Fr</div>
+        <div>Sa</div>
       </div>
 
       {/* Tanggal */}

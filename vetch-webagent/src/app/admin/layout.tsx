@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Sidebar from "./components/sidebar";
-import { Footer } from "@/app/layout-component/footer/footer";
+import { Footer } from "@/app/layout-component/footer/footer-admin-vet";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/contexts/SessionContext";
 

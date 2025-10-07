@@ -113,10 +113,18 @@ export function NavbarDesktop() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32 bg-[#B3D8A8]">
               
-              <DropdownMenuItem asChild className="p-2">
-                  <Button variant="ghost" className="w-full justify-start">
-                    Edit Profile
-                  </Button>
+              <DropdownMenuItem asChild>
+                  <Link href="/profile/myProfile"
+                      className="w-full justify-start font-medium">
+                      Edit Profile
+                  </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                  <Link href="/profile/pets"
+                      className="w-full justify-start font-medium">
+                      Pets
+                  </Link>
               </DropdownMenuItem>
               
               <DropdownMenuItem asChild>

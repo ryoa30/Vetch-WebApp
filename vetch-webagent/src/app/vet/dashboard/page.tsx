@@ -86,7 +86,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Dashboard Title */}
-      <h1 className="text-3xl font-bold text-white p-6">Dashboard</h1>
+      <h1 className="text-4xl font-bold text-white p-6">Dashboard</h1>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-6">
