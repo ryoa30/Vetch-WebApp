@@ -1,61 +1,74 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Cat, Dog, Plus, ChevronRight } from "lucide-react";
-import { PetDialog, PetFormData } from "./component/newPetDialog";
-import { PetDetailsDialog, PetDetailsData } from "./component/petDetailDialog";
+import { PetDialog } from "./component/newPetDialog";
+import { useSession } from "@/contexts/SessionContext";
+import { PetService } from "@/lib/services/PetService";
+import { snakeCase } from "lodash";
+import { ageFromDob, formatAge } from "@/lib/utils/formatDate";
+import OverlayPetDetail from "./component/OverlayPetDetail";
+import { useLoading } from "@/contexts/LoadingContext";
 
 export default function PetsPage() {
   const [showPetDialog, setShowPetDialog] = useState(false);
   const [showPetDetails, setShowPetDetails] = useState(false);
-  const [selectedPet, setSelectedPet] = useState<PetDetailsData | null>(null);
+  const [selectedPet, setSelectedPet] = useState<any | null>(null);
 
   // Store pets in local state
-  const [pets, setPets] = useState<PetDetailsData[]>([
-    {
-      name: "Lorensius",
-      gender: "female",
-      species: "Cat",
-      neutered: false,
-      age: "3 years old",
-      weight: "3 Kg",
-      color: "Black",
-      medicalHistory: [
-        { date: "23 Apr 2025 at 08:00", issue: "Flea and Tick, Ear Infection", type: "Online Consultation" },
-        { date: "22 Apr 2025 at 10:00", issue: "Diarrhea", type: "Homecare" },
-      ],
-      schedule: [
-        { description: "Constant Checkup", vet: "Dr. Seemore", interval: "Every 6 Month" },
-      ],
-    },
-    {
-      name: "Seemore",
-      gender: "male",
-      species: "Dog",
-      neutered: true,
-      age: "4 years old",
-      weight: "10 Kg",
-      color: "Brown",
-      medicalHistory: [],
-      schedule: [],
-    },
-  ]);
+  // const [pets, setPets] = useState<PetDetailsData[]>([
+  //   {
+  //     name: "Lorensius",
+  //     gender: "female",
+  //     species: "Cat",
+  //     neutered: false,
+  //     age: "3 years old",
+  //     weight: "3 Kg",
+  //     color: "Black",
+  //     medicalHistory: [
+  //       { date: "23 Apr 2025 at 08:00", issue: "Flea and Tick, Ear Infection", type: "Online Consultation" },
+  //       { date: "22 Apr 2025 at 10:00", issue: "Diarrhea", type: "Homecare" },
+  //     ],
+  //     schedule: [
+  //       { description: "Constant Checkup", vet: "Dr. Seemore", interval: "Every 6 Month" },
+  //     ],
+  //   },
+  //   {
+  //     name: "Seemore",
+  //     gender: "male",
+  //     species: "Dog",
+  //     neutered: true,
+  //     age: "4 years old",
+  //     weight: "10 Kg",
+  //     color: "Brown",
+  //     medicalHistory: [],
+  //     schedule: [],
+  //   },
+  // ]);
 
-  const handleAddPet = (data: PetFormData) => {
-    const newPet: PetDetailsData = {
-      ...data,
-      age: "0 years old", // TODO: calculate from dob if needed
-      weight: `${data.weight} Kg`,
-      medicalHistory: [],
-      schedule: [],
-    };
+  const [pets, setPets] = useState<any[]>([]);
+  const { user } = useSession();
+  const petService = new PetService();
+  const {setIsLoading} = useLoading();
 
-    setPets((prev) => [...prev, newPet]);
-    setShowPetDialog(false);
+  const loadPets = async () => {
+    setIsLoading(true);
+    try {
+      const results = await petService.fetchPetsByUserId(user?.id || "");
+      console.log(results);
+      setPets(results.data);
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
   };
 
-  const handleShowDetails = (pet: PetDetailsData) => {
+  useEffect(() => {
+    loadPets();
+  }, []);
+
+  const handleShowDetails = (pet: any) => {
     setSelectedPet(pet);
     setShowPetDetails(true);
   };
@@ -85,22 +98,30 @@ export default function PetsPage() {
             onClick={() => handleShowDetails(pet)}
           >
             <div className="flex items-center gap-3">
-              {pet.species.toLowerCase() === "cat" ? (
-                <Cat className="w-8 h-8 text-gray-700" />
-              ) : (
-                <Dog className="w-8 h-8 text-gray-700" />
-              )}
+              <img
+                src={`/img/pet-logo/${snakeCase(pet.speciesName)}.png`}
+                alt="Pet"
+                className="rounded-xl w-[60px] h-[60px] mr-2"
+              />
               <div>
                 <p className="font-semibold">
-                  {pet.name}{" "}
-                  <span className="font-normal text-gray-600">| {pet.species}</span>
+                  {pet.petName}{" "}
+                  <span className="font-normal text-gray-600">
+                    | {pet.speciesName}
+                  </span>
                 </p>
-                <p className="text-sm text-gray-500">{pet.age}</p>
+                <p className="text-sm text-gray-500">
+                  {formatAge(ageFromDob(pet.petDob))}
+                </p>
               </div>
             </div>
             <ChevronRight className="w-6 h-6 text-gray-500" />
           </div>
         ))}
+
+        {pets.length === 0 && (
+          <p className="text-center text-gray-500">You have no pets added yet.</p>
+        )}
 
         {/* Add Pet */}
         <button
@@ -116,17 +137,15 @@ export default function PetsPage() {
       <PetDialog
         show={showPetDialog}
         onClose={() => setShowPetDialog(false)}
-        onSubmit={handleAddPet}
+        onSubmit={()=>window.location.reload()}
       />
 
       {/* Pet Details Dialog */}
       {selectedPet && (
-        <PetDetailsDialog
-          show={showPetDetails}
-          onClose={() => setShowPetDetails(false)}
-          onSave={() => alert("Edit feature coming soon")}
-          onDelete={() => alert("Delete feature coming soon")}
+        <OverlayPetDetail
+          open={showPetDetails}
           data={selectedPet}
+          onClose={() => setShowPetDetails(false)}
         />
       )}
     </div>

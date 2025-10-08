@@ -9,6 +9,28 @@ import { formatLocalDate } from "../utils/formatDate";
 export class UserService {
   #http: HttpClient = new HttpClient({baseUrl: API_URL.USER});
 
+  async updateProfile (userId: string, firstName: string, lastName: string, image: File | string | null){
+    const formData = new FormData();
+
+    if(image && typeof image !== "string"){
+      formData.append("file", image);
+    }
+    formData.append('data', JSON.stringify({
+      id: userId,
+      firstName: firstName,
+      lastName: lastName,
+      fullName: firstName + " " + lastName,
+    }));
+
+    console.log("formData", formData.getAll("data"));
+    return await this.#http.putForm<IResponse>('/', formData);
+    // return null;
+  }
+
+  async fetchUserById (userId: string){
+    return await this.#http.get<IResponse>('/' + userId);
+  }
+
   async fetchUserLocationById (userId: string){
     return await this.#http.get<IResponse>('/location/' + userId);
   }

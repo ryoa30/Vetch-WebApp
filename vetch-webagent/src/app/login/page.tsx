@@ -13,6 +13,9 @@ import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UserValidator } from "@/lib/validators/UserValidator";
 import { UserService } from "@/lib/services/UserService";
+import { useTheme } from "next-themes";
+import ToggleTheme from "@/components/ToggleTheme";
+import { useLoading } from "@/contexts/LoadingContext";
 
 interface IErrors{
   email: string;
@@ -31,7 +34,9 @@ export default function LoginPage() {
   const router = useRouter();
   const userValidator = new UserValidator();
   const userService = new UserService();
-  
+  const { theme } = useTheme();
+  const {setIsLoading} = useLoading();
+
 
   useEffect(() => {
     if(isFirstLoad){
@@ -49,27 +54,32 @@ export default function LoginPage() {
   }, [email, password])
 
   const handleLogin = async () => {
+    setIsLoading(true);
     const role = await userService.login(email, password, remember);
     if(role){
       setRole(role);
       setOpenSuccess(true);
     }
+    setIsLoading(false);
   };
 
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Form */}
-      <div className="w-full md:w-1/2 bg-[#B3D8A8] flex flex-col justify-center px-8 md:px-16">
+      <div className="w-full md:w-1/2 bg-[#B3D8A8] dark:bg-[#357C72] flex flex-col justify-center px-8 md:px-16">
         {/* Logo */}
-        <div className="flex space-x-2">
-          <Image
-            src="/img/logo/logo-white.png"
-            alt="Vetch Logo"
-            width={40}
-            height={40}
-            className="mb-4"
-          />
-          <h1 className="text-white font-bold text-2xl mb-6">Vetch</h1>
+        <div className="flex justify-between">
+          <div className="flex space-x-2">
+            <Image
+              src="/img/logo/logo-white.png"
+              alt="Vetch Logo"
+              width={40}
+              height={40}
+              className="mb-4"
+            />
+            <h1 className="text-white font-bold text-2xl mb-6">Vetch</h1>
+          </div>
+          <ToggleTheme />
         </div>
 
         {/* Title */}
@@ -94,13 +104,13 @@ export default function LoginPage() {
         <div className="flex-col mb-4">
           <div className="relative space-y-3 mt-2">
             <CiMail className="absolute left-3 top-1/2 -translate-y-1/2" />
-            <Input
+            <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email must contains @ and verified"
-              className="bg-[#F4F9F4] border-none pl-10"
+              className="bg-[#F4F9F4]/100 w-full rounded-lg p-2 dark:bg-[#2E4F4A]/100 border-none pl-10"
             />
           </div>
           {errors.email &&<span className="text-red-500 text-xs">{errors.email}</span>}
@@ -110,13 +120,13 @@ export default function LoginPage() {
         <div className="flex-col mb-4">
           <div className="relative space-y-3">
             <IoLockClosedOutline className="absolute left-3 top-1/2 -translate-y-1/2" />
-            <Input
+            <input
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password must be at least 8 characters"
-              className="bg-[#F4F9F4] border-none pl-10"
+              className="bg-[#F4F9F4] w-full rounded-lg p-2 dark:bg-[#2E4F4A]/100 border-none pl-10"
             />
           </div>
           {errors.password &&<span className="text-red-500 text-xs">{errors.password}</span>}
@@ -140,7 +150,7 @@ export default function LoginPage() {
           <Button
             onClick={handleLogin}
             disabled={!allowLogin}
-            className="w-full bg-white text-black hover:bg-gray-100 font-semibold cursor-pointer"
+            className="w-full bg-white text-black dark:bg-black dark:text-white hover:bg-gray-100 font-semibold cursor-pointer"
           >
             Login
           </Button>
@@ -158,6 +168,7 @@ export default function LoginPage() {
                 router.refresh();
               }else if(role === "vet") {
                 router.push('/vet/dashboard');
+                router.refresh();
               }else if(role === "admin") {
                 router.push('/admin/dashboard');
                 router.refresh();
@@ -173,14 +184,14 @@ export default function LoginPage() {
           <div className="flex justify-center gap-4 mt-1">
             <Link
               href="/register/vet/account"
-              className="text-blue-600 font-medium hover:underline"
+              className="text-[#00A6FF] font-medium hover:underline"
             >
               Sign Up as Vet
             </Link>
             <span>|</span>
             <Link
               href="/register/people/account"
-              className="text-blue-600 font-medium hover:underline"
+              className="text-[#00A6FF] font-medium hover:underline"
             >
               Sign Up as Pet Owner
             </Link>
@@ -189,23 +200,23 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side - Image */}
-      <div className="hidden md:flex w-1/2 bg-[#3D8D7A] relative flex-col items-center justify-center">
-        <Image
-          src="/img/login/foot-step.png"
+      <div className="hidden md:flex w-1/2 bg-[#3D8D7A] dark:bg-[#1F2D2A] relative flex-col items-center justify-between">
+      <div className="flex-col mt-auto">
+        {theme && <img
+          src={theme === "light" ? "/img/login/foot-step.png" : "/img/login/foot-step-dark.png"}
           alt="Pets Illustration"
           width={400}
           height={400}
           className="object-contain"
-        />
+        />}
         <h1 className="mt-24 text-white text-4xl font-semibold text-center">
           Caring for Your Pets, <br />Anytime, Anywhere
         </h1>
-        <Image
+      </div>
+        <img
           src="/img/login/girl-walking.png"
           alt="Pets Illustration"
-          width={400}
-          height={400}
-          className="object-contain"
+          className="w-full object-contain justify-self-end"
         />
       </div>
     </div>

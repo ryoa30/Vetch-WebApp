@@ -15,6 +15,8 @@ otpController.connect().catch(err => {
 
 router.get('/', userController.getAllUsers);
 
+router.put('/', upload.single("file"), userController.updateUserDetails);
+
 router.get('/:id', userController.getUserById);
 
 router.get('/location/:userId', userController.getUserLocation);

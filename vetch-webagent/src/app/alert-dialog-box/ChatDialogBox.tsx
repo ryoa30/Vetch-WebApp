@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { SignalData } from "simple-peer";
 import Peer, { type Instance } from "simple-peer";
 import { io, type Socket } from "socket.io-client";
@@ -85,7 +91,6 @@ export default function ChatDialogBox({
 
   const [conclussion, setConclussion] = useState("");
 
-
   // call state
   const [isVideoCall, setIsVideoCall] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -102,6 +107,18 @@ export default function ChatDialogBox({
   const connectionRef = useRef<Instance | null>(null);
   const joinedRef = useRef<Set<string>>(new Set());
 
+  const streamRef = useRef<MediaStream | null>(null);
+  const remoteStreamRef = useRef<MediaStream | null>(null);
+  const peerRef = useRef<RTCPeerConnection | null>(null);
+
+  // keep refs in sync with state
+  useEffect(() => {
+    streamRef.current = stream ?? null;
+  }, [stream]);
+  useEffect(() => {
+    remoteStreamRef.current = remoteStream ?? null;
+  }, [remoteStream]);
+
   const endRef = useRef<HTMLDivElement | null>(null);
 
   const chatService = new ChatService();
@@ -115,11 +132,21 @@ export default function ChatDialogBox({
       connectionRef.current?.destroy?.();
     } catch {}
     connectionRef.current = null;
-  }
-
-  function clearVideoEls() {
-    if (myVideo.current) (myVideo.current as any).srcObject = null;
-    if (userVideo.current) (userVideo.current as any).srcObject = null;
+    const pc = peerRef.current;
+    if (pc) {
+      try {
+        pc.getSenders()?.forEach((s) => {
+          try {
+            pc.removeTrack(s);
+          } catch {}
+        });
+        pc.ontrack = null;
+        pc.onicecandidate = null;
+        pc.onconnectionstatechange = null;
+        pc.close();
+      } catch {}
+      peerRef.current = null;
+    }
   }
 
   // -------- load chat messages when dialog opens ----------
@@ -135,9 +162,34 @@ export default function ChatDialogBox({
     })();
   }, [isOpen, booking]);
 
-  const onLeaveCall = () => {
+  function hardStopAllMedia() {
+    // 1) state-backed local stream
+    streamRef.current?.getTracks()?.forEach((t) => t.stop());
+
+    // 2) anything hanging off the video tags
+    const localElStream = (myVideo.current?.srcObject ||
+      null) as MediaStream | null;
+    localElStream?.getTracks()?.forEach((t) => t.stop());
+
+    const remoteElStream = (userVideo.current?.srcObject ||
+      null) as MediaStream | null;
+    remoteElStream?.getTracks()?.forEach((t) => t.stop());
+  }
+
+  function clearVideoEls() {
+    if (myVideo.current) {
+      (myVideo.current as any).srcObject = null;
+    }
+    if (userVideo.current) {
+      (userVideo.current as any).srcObject = null;
+    }
+  }
+
+  // stable leave handler that always uses refs
+  const onLeaveCall = useCallback(() => {
     destroyPeer();
-    stream?.getTracks().forEach((t) => t.stop());
+    hardStopAllMedia();
+
     setStream(null);
     setRemoteStream(null);
     setCallEnded(true);
@@ -148,27 +200,13 @@ export default function ChatDialogBox({
     setCallerSignal(null);
     setIsVideoCall(false);
     console.log("call ended by remote");
-  };
+  }, []);
 
+  // local ender stays the same, but reuse the same cleanup path
   const endCall = () => {
     if (!socket || !booking?.id) return;
-
-    // tell the other side
     socket.emit("leaveCall", { roomId: booking.id });
-
-    // local cleanup
-    destroyPeer();
-    stream?.getTracks().forEach((t) => t.stop());
-    setStream(null);
-    setRemoteStream(null);
-
-    setCallEnded(true);
-    setCallAccepted(false);
-    setReceivingCall(false);
-    setCaller("");
-    clearVideoEls();
-    setCallerSignal(null);
-    setIsVideoCall(false);
+    onLeaveCall();
   };
 
   // -------- join room + minimal listeners tied to the room ----------
@@ -203,7 +241,7 @@ export default function ChatDialogBox({
     socket.on("callUser", onIncomingCall);
 
     socket.off("leaveCall"); // clear any prior handler
-    socket.on("leaveCall", onLeaveCall);  
+    socket.on("leaveCall", onLeaveCall);
 
     return () => {
       socket.off("receive_message", onReceive);
@@ -289,9 +327,11 @@ export default function ChatDialogBox({
     setMessage("");
   };
 
-
   const wirePeer = (peer: Instance) => {
-    peer.on("stream", (remote) => {console.log("setRemoteStream", remote);setRemoteStream(remote)});
+    peer.on("stream", (remote) => {
+      console.log("setRemoteStream", remote);
+      setRemoteStream(remote);
+    });
     peer.on("error", (e) => console.error("[peer] error", e));
     peer.on("close", () => {
       // remote hung up or peer destroyed → local cleanup
@@ -343,7 +383,6 @@ export default function ChatDialogBox({
     connectionRef.current = peer;
   };
 
-
   // camera/mic toggles
   const [cameraOn, setCameraOn] = useState(true);
   const [micOn, setMicOn] = useState(true);
@@ -368,7 +407,7 @@ export default function ChatDialogBox({
     if (!isVideoCall && isOpen) {
       endRef.current?.scrollIntoView({ behavior: "instant" });
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, isVideoCall]);
 
   // ===================== RENDER =====================
 
@@ -570,16 +609,16 @@ export default function ChatDialogBox({
 
         {/* Video area */}
         <div className="relative h-full w-full pt-12 pb-20">
-          <div className="grid h-full w-full grid-cols-1 md:grid-cols-2">
+          <div className="relative grid h-full w-full grid-cols-1 md:grid-cols-2">
             {/* Local (You) */}
-            <div className="relative bg-black">
+            <div className="md:relative md:flex md:items-center md:w-full absolute bottom-0 right-0 z-10 w-[30vw] bg-black">
               {stream ? (
                 <video
                   ref={myVideo}
                   muted
                   playsInline
                   autoPlay
-                  className="h-full w-full object-cover [transform:scaleX(-1)]"
+                  className="w-full [transform:scaleX(-1)]"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
@@ -600,13 +639,13 @@ export default function ChatDialogBox({
             </div>
 
             {/* Remote (Callee) */}
-            <div className="relative bg-black">
+            <div className="relative flex items-center w-full bg-black">
               {callAccepted && !callEnded && remoteStream ? (
                 <video
                   ref={userVideo}
                   playsInline
                   autoPlay
-                  className="h-full w-full object-cover"
+                  className="w-full"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center px-6">

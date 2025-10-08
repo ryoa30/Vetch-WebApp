@@ -15,9 +15,10 @@ import successAnimation from "@/../public/lottie/Success.json";
 interface SuccessLoginProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  message?: string;
 }
 
-export default function SuccessLogin({ open, onOpenChange }: SuccessLoginProps) {
+export default function SuccessDialog({ open, onOpenChange, message }: SuccessLoginProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="flex flex-col items-center text-center bg-white">
@@ -28,11 +29,11 @@ export default function SuccessLogin({ open, onOpenChange }: SuccessLoginProps) 
 
         <AlertDialogHeader>
           <AlertDialogTitle className="text-2xl font-bold text-green-600">
-            Login Successful!
+            {message || "Operation Successful!"}
           </AlertDialogTitle>
-          <AlertDialogDescription>
+          {/* <AlertDialogDescription>
             You’ll now continue to Home
-          </AlertDialogDescription>
+          </AlertDialogDescription> */}
         </AlertDialogHeader>
 
         <AlertDialogFooter>

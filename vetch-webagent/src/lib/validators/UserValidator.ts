@@ -1,6 +1,4 @@
-import { HttpClient } from "../http/HttpClient";
 import { UserService } from "../services/UserService";
-import {API_URL} from "../../constant/apiConstant"
 
 // /lib/LoginValidator.ts
 export type AccountInfoInput = {
@@ -13,6 +11,10 @@ export type AccountInfoInput = {
   role: string;
   sipNumber: string;
   certificate: File | null;
+};
+export type UpdateInfoInput = {
+  firstName: string;
+  lastName: string;
 };
 export type LocationInput = {
   address: string;
@@ -34,6 +36,24 @@ export type ValidationResult<T> =
 
 export class UserValidator {
   #userService = new UserService();
+
+  validateUpdateAccountInfo(input: Partial<UpdateInfoInput>): ValidationResult<UpdateInfoInput> {
+    const errors: Record<string, string> = {};
+
+    const firstName = (input.firstName ?? "").trim();
+    if (!firstName) errors.firstName = "First name is required";
+
+    const lastName = (input.lastName ?? "").trim();
+    if (!lastName) errors.lastName = "Last name is required";
+
+    return {
+      ok: true,
+      data: {
+        firstName,
+        lastName,
+      },
+    };
+  }
 
   validateAccountInfo(input: Partial<AccountInfoInput>): ValidationResult<AccountInfoInput> {
     const errors: Record<string, string> = {};

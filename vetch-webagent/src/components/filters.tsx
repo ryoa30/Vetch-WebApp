@@ -118,7 +118,7 @@ export default function VetFilters({
           <Button
             size="sm"
             variant="ghost"
-            className="h-8 px-2"
+            className="h-8 px-2 text-black dark:text-white "
             onClick={() => {
               const cleared: VetFilterState = {
                 petTypes: [],
@@ -237,7 +237,7 @@ function ScheduleDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <Button
         variant="outline"
-        className="gap-2 rounded-full"
+        className="gap-2 rounded-full text-black dark:text-white "
         onClick={() => setOpen(true)}
       >
         <Clock className="size-4" /> Schedule
@@ -319,7 +319,7 @@ function MoreFiltersDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <Button
         variant="outline"
-        className="gap-2 rounded-full"
+        className="gap-2 rounded-full text-black dark:text-white "
         onClick={() => setOpen(true)}
       >
         <Filter className="size-4" /> Filter
@@ -387,6 +387,7 @@ function MoreFiltersDialog({
 
         <DialogFooter>
           <Button
+            className="text-black dark:text-white"
             variant="ghost"
             onClick={() => {
               onChange({

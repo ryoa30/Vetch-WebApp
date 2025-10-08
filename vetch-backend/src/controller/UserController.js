@@ -33,6 +33,42 @@ class UserController {
         this.register = this.register.bind(this);
         this.validateOTP = this.validateOTP.bind(this);
         this.validateLogin = this.validateLogin.bind(this);
+        this.updateUserDetails = this.updateUserDetails.bind(this);
+    }
+
+    async updateUserDetails(req, res) {
+        try {
+            const user = req.body.data ? JSON.parse(req.body.data) : req.body;
+
+            console.log("Updating user:", user);
+
+            if (req.file) {
+                // stream the buffer into Cloudinary
+                const uploadResult = await new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: "profile-pictures",
+                        resource_type: "image",
+                        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+                    },
+                    (error, result) => (error ? reject(error) : resolve(result))
+                    );
+                    // Multer memory buffer -> upload_stream
+                    stream.end(req.file.buffer);
+                });
+
+                console.log("uploadResult",uploadResult);
+
+                user.profilePicture = uploadResult.secure_url;
+            }
+
+            console.log("Updating user profile picture:", user);
+            const updatedUser = await this.#userRepository.update(user.id, user);
+            res.status(200).json({ok: true, message: 'User details updated successfully', data: updatedUser });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ok: false, message: 'Error updating user details', error: error.message });
+        }
     }
 
     async getAllUsers(req, res) {
@@ -63,11 +99,11 @@ class UserController {
             const { id } = req.params;
             const user = await this.#userRepository.findById(id);
             if (!user) {
-                return res.status(404).json({ message: 'User not found' });
+                return res.status(404).json({ok:false ,message: 'User not found' });
             }
-            res.status(200).json(user);
+            res.status(200).json({ok: true, data:user, message: "User found"});
         } catch (error) {
-            res.status(500).json({ message: 'Error fetching user', error: error.message });
+            res.status(500).json({ok:false, message: 'Error fetching user', error: error.message });
         }
     }
 

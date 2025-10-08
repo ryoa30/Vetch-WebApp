@@ -1,11 +1,6 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import {
-  ScheduleButton,
-  FilterButton,
-  PetTypeButton,
-} from "@/components/ui/buttonCustom";
 import DoctorScheduleCard from "@/components/ui/doctorschedulecard";
 import { IVet } from "./types";
 import { VetService } from "@/lib/services/VetService";
