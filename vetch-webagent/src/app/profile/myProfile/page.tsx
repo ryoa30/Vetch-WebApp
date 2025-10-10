@@ -99,7 +99,7 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#fcffe5] flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {/* Avatar */}
       <div className="w-full flex justify-center mt-10">
         <div className="relative w-[200px] h-[200px] rounded-full bg-gray-200">
@@ -125,7 +125,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Form */}
-      <div className="relative mx-auto w-4/5 mt-10 bg-[#B3D8A8] rounded-lg shadow-lg p-6">
+      <div className="relative mx-auto w-4/5 mt-10 bg-[#B3D8A8] dark:bg-[#357C72] rounded-lg shadow-lg p-6">
         {/* Paw Icon floating top-right */}
         <div className="absolute top-2 right-2">
           <Image src="/img/register/paw.png" alt="Paw" width={40} height={40} />
@@ -142,7 +142,7 @@ export default function ProfilePage() {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full rounded-md px-3 py-2 bg-[#fcffe5] outline-none focus:ring-2 focus:ring-teal-600"
+                className="w-full rounded-md px-3 py-2 bg-[#fcffe5] dark:bg-[#2E4F4A] outline-none focus:ring-2 focus:ring-teal-600"
               />
             </div>
             <div className="flex-1/2">
@@ -154,7 +154,7 @@ export default function ProfilePage() {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full rounded-md px-3 py-2 bg-[#fcffe5] outline-none focus:ring-2 focus:ring-teal-600"
+                className="w-full rounded-md px-3 py-2 bg-[#fcffe5] dark:bg-[#2E4F4A] outline-none focus:ring-2 focus:ring-teal-600"
               />
             </div>
           </div>
@@ -168,7 +168,7 @@ export default function ProfilePage() {
               value={formData.email}
               onChange={handleChange}
               disabled
-              className="w-full rounded-md px-3 py-2 bg-[#fcffe5] outline-none focus:ring-2 focus:ring-teal-600"
+              className="w-full rounded-md px-3 py-2 bg-[#fcffe5] dark:bg-[#2E4F4A] outline-none focus:ring-2 focus:ring-teal-600"
             />
           </div>
 
@@ -176,7 +176,7 @@ export default function ProfilePage() {
           <div className="flex justify-end mt-6">
             <button
               onClick={handleUpdate}
-              className="bg-white px-6 py-2 rounded-md shadow font-semibold hover:bg-gray-100"
+              className="bg-white px-6 py-2 rounded-md shadow font-semibold hover:bg-gray-100 text-black"
             >
               Update
             </button>

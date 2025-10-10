@@ -147,6 +147,7 @@ model Booking {
   bookingPrice       Int        @map("booking_price")
   bookingStatus      String     @map("booking_status") @db.VarChar(20)
   bookingType        String     @map("booking_type") @db.VarChar(65)
+  bookingConclusion  String     @default("") @map("booking_conclusion") @db.Text
   isDeleted          Boolean    @default(false) @map("is_deleted")
 
   // --- Relations ---
@@ -155,6 +156,7 @@ model Booking {
   location       Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
   payment        Payment?
   concernDetails ConcernDetail[]
+  rating         Rating?
 
   @@map("booking")
 }
@@ -203,6 +205,7 @@ model Rating {
   id         String   @id @default(cuid())
   vetId      String   @map("vet_id")
   userId     String   @map("user_id")
+  bookingId  String   @unique @map("booking_id")
   context    String   @db.VarChar(100)
   rating     Int
   ratingDate DateTime @map("rating_date")
@@ -210,6 +213,7 @@ model Rating {
   // --- Relations ---
   vet  Vet  @relation(fields: [vetId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@map("rating")
 }

@@ -8,120 +8,223 @@ import { BookingService } from "@/lib/services/BookingService";
 import { useSession } from "@/contexts/SessionContext";
 import { useLoading } from "@/contexts/LoadingContext";
 import ChatDialogBox from "@/app/alert-dialog-box/ChatDialogBox";
+import OrderDetailOverlay from "./components/OrderDetailOverlay";
+import { showPaymentSnap } from "@/lib/utils/snapPayment";
+import { PaymentService } from "@/lib/services/PaymentService";
+import { RatingDialog } from "./components/RatingDialog";
+import ChatHistoryDialogBox from "@/app/alert-dialog-box/ChatHistoryDialog";
 
 const tabList = [
-    { id: "PAYMENT", label: "Payment" },
-    { id: "PENDING", label: "Pending" },
-    { id: "ACCEPTED", label: "Accepted" },
-    { id: "ONGOING", label: "Ongoing" },
-    { id: "DONE", label: "Done" },
-    { id: "CANCELLED", label: "Cancelled" },
-]
+  { id: "PAYMENT", label: "Payment" },
+  { id: "PENDING", label: "Pending" },
+  { id: "ACCEPTED", label: "Accepted" },
+  { id: "ONGOING", label: "Ongoing" },
+  { id: "DONE", label: "Done" },
+  { id: "CANCELLED", label: "Cancelled" },
+];
 
 const OrderHistory: React.FC = () => {
-    const [selectedTab, setSelectedTab] = useState("PAYMENT");
-    const {user} = useSession();
-    const {setIsLoading} = useLoading();
+  const [selectedTab, setSelectedTab] = useState("PAYMENT");
+  const { user } = useSession();
+  const { setIsLoading } = useLoading();
 
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    // const [isChatOpen, setIsChatOpen] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isRatingOpen, setIsRatingOpen] = useState(false);
+  // const [isChatOpen, setIsChatOpen] = useState(true);
 
-    const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
-    const [reload, setReload] = useState(false);
+  const [reload, setReload] = useState(false);
 
-    const [onlineConsultations, setOnlineConsultations] = useState<any[]>([]);
-    const [homecareConsultations, setHomecareConsultations] = useState<any[]>([]);
+  const [onlineConsultations, setOnlineConsultations] = useState<any[]>([]);
+  const [homecareConsultations, setHomecareConsultations] = useState<any[]>([]);
 
-    const bookingService = new BookingService();
+  const bookingService = new BookingService();
+  const paymentService = new PaymentService();
 
-    const loadBookings = async () => {
-      setIsLoading(true);
-      if(!user) return;
-      const bookings = await bookingService.fetchBookingConsultationHomecare(user.id, selectedTab);
-      if(bookings.online) setOnlineConsultations(bookings.online);
-      else setOnlineConsultations([]);
-      if(bookings.homecare) setHomecareConsultations(bookings.homecare);
-      else setHomecareConsultations([]);
-      console.log(bookings);
-      setIsLoading(false);
-      setReload(false);
+  const loadBookings = async () => {
+    setIsLoading(true);
+    if (!user) return;
+    const bookings = await bookingService.fetchBookingConsultationHomecare(
+      user.id,
+      selectedTab
+    );
+    if (bookings.online) setOnlineConsultations(bookings.online);
+    else setOnlineConsultations([]);
+    if (bookings.homecare) setHomecareConsultations(bookings.homecare);
+    else setHomecareConsultations([]);
+    console.log(bookings);
+    setIsLoading(false);
+    setReload(false);
+  };
+
+  useEffect(() => {
+    loadBookings();
+  }, [selectedTab, reload]);
+
+  const handlePaymentClick = async (booking) => {
+    try {
+      const resultPayment = await paymentService.fetchTransactionToken(
+        booking.id
+      );
+      if (!resultPayment.ok) {
+        throw new Error("Failed to get payment token");
+      }
+      showPaymentSnap(
+        resultPayment.data,
+        { bookingId: booking.id },
+        {
+          onSuccess: () => {
+            console.log("masuk");
+            setReload(true);
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
     }
-
-    useEffect(()=>{
-      loadBookings();
-    }, [selectedTab, reload])
+  };
 
   return (
-    <div className="bg-gradient-to-br from-yellow-50 to-green-50 p-4 flex flex-col items-center">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl text-[#3D8D7A] mb-6">
-            Order <span className="font-bold">History</span>
-          </h1>
+    <div className=" p-4 flex flex-col items-center overflow-x-hidden">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-4xl text-[#3D8D7A] dark:text-white mb-6 dark:text-white">
+          Order <span className="font-bold">History</span>
+        </h1>
 
-          {/* Bone-like connector line */}
-          <div className="w-full flex justify-center mb-6">
-            <Image
-              src="/img/bone.png"
-              alt="Bone Divider"
-              width={600}
-              height={100}
-              className="object-contain"
+        {/* Bone-like connector line */}
+        <div className="w-full flex justify-center mb-6">
+          <img
+            src="/img/bone.png"
+            alt="Bone Divider"
+            className="w-full"
+          />
+        </div>
+
+        {/* Status labels */}
+        <div className="flex pb-2 sm:justify-center md:gap-20 gap-10 text-sm w-[90vw] overflow-x-scroll md:overflow-x-hidden">
+          {tabList.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedTab(tab.id)}
+              className={`text-[#3D8D7A] dark:text-white font-medium ${
+                tab.id === selectedTab ? "underline" : ""
+              } hover:underline`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Consultation Card */}
+      <div className="bg-white dark:bg-[#2D4236] w-full md:w-[70vw] rounded-2xl p-5 shadow-sm border mb-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex flex-col">
+            <h3 className="text-2xl font-semibold text-[#3D8D7A] dark:text-white">
+              Consultation
+            </h3>
+            <div className="h-[2px] bg-[#3D8D7A] w-1/2"></div>
+          </div>
+          <Headset className="w-6 h-6 text-[#3D8D7A] dark:text-white" />
+        </div>
+        {onlineConsultations.length === 0 && (
+          <p className="text-gray-500 dark:text-gray-200 italic">No consultation orders found.</p>
+        )}
+        {onlineConsultations.map((consultation, index) => (
+          <div key={consultation.id}>
+            <OrderCard
+              booking={consultation}
+              setRatingOpen={setIsRatingOpen}
+              setIsDetailOpen={setIsDetailOpen}
+              setIsChatOpen={setIsChatOpen}
+              setSelectedBooking={setSelectedBooking}
+              handleAction={
+                selectedTab === "PAYMENT"
+                  ? handlePaymentClick
+                  : () => console.log("click")
+              }
             />
+            {index != onlineConsultations.length - 1 && (
+              <div className="w-full my-4 h-[1px] bg-gray-200"></div>
+            )}
           </div>
+        ))}
+      </div>
 
-          {/* Status labels */}
-          <div className="flex justify-center gap-20 text-sm">
-            {tabList.map((tab) => (
-                <button key={tab.id} onClick={()=>setSelectedTab(tab.id)} className={`text-[#3D8D7A] font-medium ${tab.id === selectedTab? "underline": ""} hover:underline`}>{tab.label}</button>
-            ))}
+      {/* Homecare Card */}
+      <div className="bg-white dark:bg-[#2D4236] w-full md:w-[70vw] rounded-2xl p-5 shadow-sm border mb-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex flex-col">
+            <h3 className="text-2xl font-semibold text-[#3D8D7A] dark:text-white">
+              Homecare
+            </h3>
+            <div className="h-[2px] bg-[#3D8D7A] w-1/2"></div>
           </div>
+          <House className="w-6 h-6 text-[#3D8D7A] dark:text-white" />
         </div>
 
-        {/* Consultation Card */}
-        <div className="bg-white w-full md:w-[70vw] rounded-2xl p-5 shadow-sm border border-gray-100 mb-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex flex-col">
-                <h3 className="text-2xl font-semibold text-[#3D8D7A]">
-                Consultation
-                </h3>
-                <div className="h-[2px] bg-[#3D8D7A] w-1/2"></div>
-            </div>
-            <Headset className="w-6 h-6 text-[#3D8D7A]" />
+        {homecareConsultations.length === 0 && (
+          <p className="text-gray-500 dark:text-gray-200 italic">No homecare orders found.</p>
+        )}
+        
+        {homecareConsultations.map((consultation, index) => (
+          <div key={consultation.id}>
+            <OrderCard
+              booking={consultation}
+              setRatingOpen={setIsRatingOpen}
+              setIsDetailOpen={setIsDetailOpen}
+              setIsChatOpen={setIsChatOpen}
+              setSelectedBooking={setSelectedBooking}
+              handleAction={
+                selectedTab === "PAYMENT"
+                  ? handlePaymentClick
+                  : () => console.log("click")
+              }
+            />
+            {index != onlineConsultations.length - 1 && (
+              <div className="w-full my-4 h-[1px] bg-gray-200"></div>
+            )}
           </div>
-            {
-              onlineConsultations.length === 0 && (
-                <p className="text-gray-500 italic">No consultation orders found.</p>
-              )
-            }
-            {
-              onlineConsultations.map((consultation, index) => (
-                <div key={consultation.id}>
-                  <OrderCard booking={consultation} setReload={setReload} setIsChatOpen={setIsChatOpen} setSelectedBooking={setSelectedBooking}/>
-                  {index != onlineConsultations.length-1 && <div className="w-full my-4 h-[1px] bg-gray-200"></div>}
-                </div>
-              ))
-            }
-        </div>
+        ))}
+      </div>
 
-        {/* Homecare Card */}
-        <div className="bg-white w-full md:w-[70vw] rounded-2xl p-5 shadow-sm border border-gray-100 mb-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex flex-col">
-                <h3 className="text-2xl font-semibold text-[#3D8D7A]">
-                Homecare
-                </h3>
-                <div className="h-[2px] bg-[#3D8D7A] w-1/2"></div>
-            </div>
-            <House className="w-6 h-6 text-[#3D8D7A]" />
-          </div>
-
-          {/* <OrderCard /> */}
-        </div>
-
-        <ChatDialogBox isOpen={isChatOpen} setIsOpen={setIsChatOpen} booking={selectedBooking} />
-        {/* <ChatDialogBox isOpen={isChatOpen} setIsOpen={setIsChatOpen} booking={{id:"default", vet:{user:{profilePicture:null, fullName: "testing"}}}} /> */}
+      {isChatOpen && (
+        <ChatDialogBox
+          isOpen={isChatOpen}
+          setIsOpen={setIsChatOpen}
+          booking={selectedBooking}
+        />
+      )}
+      {selectedBooking && isDetailOpen && (
+        <OrderDetailOverlay
+          open={selectedBooking != null}
+          setIsOpen={setIsDetailOpen}
+          booking={selectedBooking}
+          handleAction={
+            selectedTab === "PAYMENT"
+              ? handlePaymentClick
+              : () => console.log("click")
+          }
+        />
+      )}
+      {isRatingOpen && (
+        <RatingDialog
+          show={isRatingOpen}
+          onClose={() => setIsRatingOpen(false)}
+          onSubmit={() => setReload(true)}
+          booking={selectedBooking}
+        />
+      )}
+      {selectedTab === "DONE" && (
+        <ChatHistoryDialogBox
+          isOpen={isChatOpen}
+          setIsOpen={setIsChatOpen}
+          booking={selectedBooking}
+        />
+      )}
     </div>
   );
 };

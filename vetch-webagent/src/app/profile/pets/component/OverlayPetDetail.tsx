@@ -2,7 +2,7 @@
 "use client";
 import { BookingService } from "@/lib/services/BookingService";
 import { ageFromDob, formatAge, formatIsoJakarta } from "@/lib/utils/formatDate";
-import { capitalize, toLower } from "lodash";
+import { capitalize, snakeCase } from "lodash";
 import { ClipboardPlus, X, AlignLeft } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -68,7 +68,7 @@ export default function OverlayPetDetail({
 
           <div className="flex flex-row gap-2 items-center">
             <Image 
-              src={`/img/pet-logo/${toLower(data.speciesName)}.png`}
+              src={`/img/pet-logo/${snakeCase(data.speciesName)}.png`}
               alt="Pet Species"
               className="dark:invert"
               width={40}

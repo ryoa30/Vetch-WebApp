@@ -109,8 +109,8 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email must contains @ and verified"
-              className="bg-[#F4F9F4]/100 w-full rounded-lg p-2 dark:bg-[#2E4F4A]/100 border-none pl-10"
+              placeholder="my-email-example@gmail.com"
+              className="bg-[#F4F9F4]/100 w-full rounded-lg p-2 placeholder:text-wrap dark:bg-[#2E4F4A]/100 border-none pl-10"
             />
           </div>
           {errors.email &&<span className="text-red-500 text-xs">{errors.email}</span>}
@@ -125,8 +125,8 @@ export default function LoginPage() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password must be at least 8 characters"
-              className="bg-[#F4F9F4] w-full rounded-lg p-2 dark:bg-[#2E4F4A]/100 border-none pl-10"
+              placeholder="********"
+              className="bg-[#F4F9F4] w-full rounded-lg p-2 h-fit dark:bg-[#2E4F4A]/100 border-none pl-10"
             />
           </div>
           {errors.password &&<span className="text-red-500 text-xs">{errors.password}</span>}

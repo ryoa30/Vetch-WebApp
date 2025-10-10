@@ -44,16 +44,11 @@ export function NavbarDesktop() {
               <NavigationMenuTrigger className="bg-transparent text-white font-bold text-base">
                 For Pet Parents
               </NavigationMenuTrigger>
-              <NavigationMenuContent className="bg-[#B3D8A8]">
+              <NavigationMenuContent className="bg-[#B3D8A8] dark:bg-[#357C72]">
                 <div className="p-4 w-48 flex flex-col gap-2">
                   <NavigationMenuLink asChild>
                     <Link href="/forPetParent/consultationVetList" className="text-base">
                       Consultation
-                    </Link>
-                  </NavigationMenuLink>
-                  <NavigationMenuLink asChild>
-                    <Link href="#" className="text-base">
-                      Homecare
                     </Link>
                   </NavigationMenuLink>
                   <NavigationMenuLink asChild>
@@ -104,26 +99,11 @@ export function NavbarDesktop() {
         {/* Profile & Theme Toggle */}
         <div className="flex items-center gap-4 relative">
           {/* Profile pakai DropdownMenu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full text-white hover:bg-[#2f6c5f]"
-              >
-                <User className="h-5 w-5" />
+          <Link href="/login">
+              <Button className="bg-white text-[#3D8D7A] font-semibold hover:bg-gray-100">
+                Login
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32 bg-[#B3D8A8]">
-              <DropdownMenuItem asChild>
-                <LoginConfirmDialog>
-                  <Button variant="ghost" className="w-full justify-start">
-                    Login
-                  </Button>
-                </LoginConfirmDialog>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Link>
 
           <ToggleTheme />
         </div>

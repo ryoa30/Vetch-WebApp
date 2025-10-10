@@ -50,24 +50,29 @@ export function ConcernDialog({ show, onClose, selected, setSelected }: { show: 
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg lg:max-w-2xl bg-white text-black rounded-xl shadow-lg">
+      <DialogContent className="sm:max-w-lg lg:max-w-2xl max-h-[70vh] bg-white overflow-y-auto dark:bg-[#1F2D2A] text-black rounded-xl shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-2xl text-[#0F5544] font-semibold">Concerns</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4 py-4">
+        <div className="grid md:grid-cols-2 gap-4 py-4">
           {concerns.map(c => (
             <label
               key={c.label}
-              className={`flex items-center justify-between border rounded-lg px-4 py-3 cursor-pointer hover:bg-gray-50 ${
+              className={`flex items-center justify-between border bg-white rounded-lg px-4 py-3 cursor-pointer hover:bg-gray-50 ${
                 selected.includes(c.label) ? "border-green-600 bg-green-50" : "border-gray-300"
               }`}
             >
               <span className="flex items-center space-x-2">
                 <Image src={`/img/concern-logos/${c.icon}.png`} alt="icon" width={50} height={50}/>
-                <span>{c.label}</span>
+                <div className="flex flex-col">
+                  <span>{c.label}</span>
+                  {c.label==="Other" && <span className="text-xs font-semibold text-gray-600">Must describe the concern in illness description</span>}
+                </div>
               </span>
               <Checkbox
+                color="black"
+                className="border border-black"
                 checked={selected.find((item: any) => item.label === c.label) !== undefined}
                 onCheckedChange={() => toggleConcern(c)}
               />

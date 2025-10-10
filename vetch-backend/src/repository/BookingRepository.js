@@ -49,6 +49,12 @@ class BookingRepository extends BaseRepository {
             user: true,
           }
         },
+        concernDetails: {
+          include: {
+            concern: true,
+          }
+        },
+        rating: true,
       }
     });
 

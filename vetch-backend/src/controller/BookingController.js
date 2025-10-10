@@ -1,4 +1,5 @@
 const BookingRepository = require('../repository/BookingRepository');
+const RatingRepository = require('../repository/RatingRepository');
 const ConcernDetailRepository = require('../repository/ConcernDetailRepository');
 const ConcernTypeRepository = require('../repository/ConcernTypeRepository');
 const { hhmmToUTCDate } = require('../utils/dateUtils');
@@ -8,19 +9,40 @@ class BookingController {
     #bookingRepository;
     #concernDetailRepository;
     #concernTypeRepository;
+    #ratingRepository;
 
     constructor() {
+        this.#ratingRepository = new RatingRepository();
         this.#bookingRepository = new BookingRepository();
         this.#concernDetailRepository = new ConcernDetailRepository();
         this.#concernTypeRepository = new ConcernTypeRepository();
 
         this.getConcernTypes = this.getConcernTypes.bind(this);
         this.createBooking = this.createBooking.bind(this);
+        this.createBookingRating = this.createBookingRating.bind(this);
         this.getBookingByUserIdDateTime = this.getBookingByUserIdDateTime.bind(this);
         this.putBookingStatus = this.putBookingStatus.bind(this);
         this.getBookingsByUserId = this.getBookingsByUserId.bind(this);
         this.getBookingByVetId = this.getBookingByVetId.bind(this);
         this.getPastBookingsByPetId = this.getPastBookingsByPetId.bind(this);
+    }
+
+    async createBookingRating (req, res) {
+        try {
+            const {vetId, userId, bookingId, context, rating} = req.body;
+            const newRating = await this.#ratingRepository.create({
+                vetId,
+                userId,
+                bookingId,
+                context,
+                rating,
+                ratingDate: new Date(),
+            });
+            res.status(201).json({ok: true, data: newRating, message: 'Rating created successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error rating booking', error: error.message });
+        }
     }
 
     async getConcernTypes(req, res) {

@@ -74,9 +74,9 @@ export default function PetsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcffe5] w-full flex flex-col items-center py-10">
+    <div className="min-h-screen w-full flex flex-col items-center py-10">
       {/* Title */}
-      <h1 className="text-3xl font-bold text-green-900 mb-4">Pets</h1>
+      <h1 className="text-3xl font-bold text-green-900 dark:text-white mb-4">Pets</h1>
 
       {/* Bone divider */}
       <div className="w-full flex justify-center mb-8">
@@ -90,27 +90,27 @@ export default function PetsPage() {
       </div>
 
       {/* Pets List Card */}
-      <div className="w-4/5 bg-white rounded-xl shadow-lg p-6">
+      <div className="w-4/5 bg-white dark:bg-[#2D4236] rounded-xl shadow-lg p-6">
         {pets.map((pet, idx) => (
           <div
             key={idx}
-            className="flex items-center justify-between py-4 border-b hover:bg-gray-100 rounded-md mt-2 cursor-pointer"
+            className="flex items-center justify-between py-4 border-b dark:hover:bg-gray-800/20 hover:bg-gray-100 rounded-md mt-2 cursor-pointer"
             onClick={() => handleShowDetails(pet)}
           >
             <div className="flex items-center gap-3">
               <img
                 src={`/img/pet-logo/${snakeCase(pet.speciesName)}.png`}
                 alt="Pet"
-                className="rounded-xl w-[60px] h-[60px] mr-2"
+                className="rounded-xl w-[60px] h-[60px] mr-2 dark:invert"
               />
               <div>
                 <p className="font-semibold">
                   {pet.petName}{" "}
-                  <span className="font-normal text-gray-600">
+                  <span className="font-normal text-gray-600 dark:text-white">
                     | {pet.speciesName}
                   </span>
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-white">
                   {formatAge(ageFromDob(pet.petDob))}
                 </p>
               </div>
@@ -120,12 +120,12 @@ export default function PetsPage() {
         ))}
 
         {pets.length === 0 && (
-          <p className="text-center text-gray-500">You have no pets added yet.</p>
+          <p className="text-center text-gray-500 dark:text-white">You have no pets added yet.</p>
         )}
 
         {/* Add Pet */}
         <button
-          className="flex items-center justify-center gap-2 py-4 w-full text-lg font-semibold text-gray-700 hover:bg-gray-100 rounded-md mt-2"
+          className="flex items-center justify-center gap-2 py-4 w-full text-lg font-semibold text-gray-700 dark:text-white dark:hover:bg-gray-800/20 hover:bg-gray-100 rounded-md mt-2"
           onClick={() => setShowPetDialog(true)}
         >
           <Plus className="w-6 h-6" />

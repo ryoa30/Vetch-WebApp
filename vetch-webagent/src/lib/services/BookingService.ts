@@ -7,6 +7,10 @@ import { formatLocalDate } from "../utils/formatDate";
 export class BookingService {
   #http: HttpClient = new HttpClient({ baseUrl: API_URL.BOOKING });
 
+  async rateBooking(userId: string, vetId: string, bookingId: string, rating: number, context: string) {
+    return await this.#http.post<IResponse>("/rate", { userId, vetId, bookingId, rating, context });
+  }
+
   async changeBookingStatus(bookingId: string, status: string) {
     return await this.#http.put<IResponse>(`/status`, {id: bookingId, status });
   }

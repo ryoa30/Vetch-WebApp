@@ -44,7 +44,7 @@ export function NavbarDesktop() {
               <NavigationMenuTrigger className="bg-transparent text-white font-bold text-base">
                 For Pet Parents
               </NavigationMenuTrigger>
-              <NavigationMenuContent className="bg-[#B3D8A8]">
+              <NavigationMenuContent className="bg-[#B3D8A8] dark:bg-[#357C72]">
                 <div className="p-4 w-48 flex flex-col gap-2">
                   <NavigationMenuLink asChild>
                     <Link href="/forPetParent/consultationVetList" className="text-base">
@@ -111,7 +111,7 @@ export function NavbarDesktop() {
                 <Bell className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32 bg-[#B3D8A8]">
+            <DropdownMenuContent align="end" className="w-32 bg-[#B3D8A8] dark:bg-[#357C72]">
               
               <DropdownMenuItem asChild>
                   <Link href="/profile/myProfile"

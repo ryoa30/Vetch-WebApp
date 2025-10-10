@@ -174,14 +174,16 @@ export default function ConfirmBookingPage() {
   return (
     <main className="bg-[#F5F5F5] dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       <div className="min-h-screen bg-[#FBFFE4] dark:bg-[#2E4F4A] p-8">
-        <div className="flex items-center mb-6">
+        <div className="flex flex-col sm:flex-row gap-2 items-center mb-6">
           <h1 className="text-2xl font-semibold text-green-900 dark:text-gray-200">
             Confirm your consultation booking{" "}
+            <br className="sm:hidden"/>
+            <span className="hidden sm:visible">|</span>
             <span className="font-normal text-gray-700  dark:text-gray-200">
-              | {date} at {time}
+              {date} at {time}
             </span>
           </h1>
-          <div className="ml-10">
+          <div className="sm:ml-10">
             <Image
               src="/img/login/foot-step.png"
               alt="Pets Illustration"
@@ -194,21 +196,19 @@ export default function ConfirmBookingPage() {
 
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           <div className="space-y-6 h-full">
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
-              <div className="w-24 h-24 rounded-xl bg-gray-200 flex items-center justify-center">
-                <Image
+            <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
+              <div className="w-full sm:w-[40%] p-5 sm:p-0 aspect-square rounded-xl  flex items-center justify-center">
+                <img
                   src={vet?.profilePicture || "/placeholder"}
                   alt="Doctor"
-                  width={96}
-                  height={96}
-                  className="rounded-xl"
+                  className="rounded-xl w-full"
                 />
               </div>
-              <div className="ml-4">
-                <h2 className="text-lg font-semibold">Dr. {vet?.fullName}</h2>
+              <div className="sm:ml-4 w-full">
+                <h2 className="text-2xl font-semibold">Dr. {vet?.fullName}</h2>
                 <div className="flex items-center text-sm text-gray-600">
                   <Star className="w-4 h-4 text-green-600 fill-green-600 mr-1 stroke-black" />
-                  <span className="dark:text-gray-200">
+                  <span className="dark:text-gray-200 text-xl">
                     {vet?.ratingAvg} | {vet?.ratingCount} Reviews
                   </span>
                 </div>
@@ -266,7 +266,7 @@ export default function ConfirmBookingPage() {
                     </span>
                   )}
                 </div>
-                <ChevronRight className="w-5 h-5 text-black ml-auto" />
+                <ChevronRight className="w-5 h-5 flex-shrink-0 text-black ml-auto" />
               </button>
 
               <div className="w-full bg-gray-300 h-[0.5px] my-2"></div>
@@ -283,7 +283,7 @@ export default function ConfirmBookingPage() {
                   <div className="flex items-center gap-2">
                     <span className="font-medium">Concerns</span>
                   </div>
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-gray-400 text-left">
                     {selectedConcerns.length === 0
                       ? "Select Concerns"
                       : selectedConcerns.map(
@@ -294,7 +294,7 @@ export default function ConfirmBookingPage() {
                         )}
                   </span>
                 </div>
-                <ChevronRight className="w-5 h-5 text-black ml-auto" />
+                <ChevronRight className="w-5 h-5 flex-shrink-0 text-black ml-auto" />
               </button>
 
               <div className="w-full bg-gray-300 h-[0.5px] my-2"></div>
@@ -362,7 +362,7 @@ export default function ConfirmBookingPage() {
             <div className="space-y-6 h-full">
               <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
                 <div className="p-4 flex items-center gap-3">
-                  <MapPin className="w-10 h-10 text-black mt-1" />
+                  <MapPin className="w-10 h-10 flex-shrink-0 text-black mt-1 dark:text-white" />
                   <div className="flex flex-col">
                     <div className="font-medium">Location</div>
                     <p className="text-sm text-gray-600 dark:text-gray-200">

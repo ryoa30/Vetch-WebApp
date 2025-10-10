@@ -83,10 +83,12 @@ export default function LayoutWrapper({ children, session }: { children: React.R
         </SessionProvider>
       ) : (
         <SessionProvider value={session}>
-          <Navbar session={session} />
-          <main>{children}</main>
-          <Footer />
-          <LoadingOverlay show={loading}/>
+          <div className="flex flex-col min-h-screen justify-between">
+            <Navbar session={session} />
+            <main className="flex-1 bg-[#FBFFE4] dark:bg-[#2E4F4A]">{children}</main>
+            <Footer />
+            <LoadingOverlay show={loading}/>
+          </div>
         </SessionProvider>
       )}
     </>
