@@ -2,6 +2,7 @@ const BookingRepository = require('../repository/BookingRepository');
 const RatingRepository = require('../repository/RatingRepository');
 const ConcernDetailRepository = require('../repository/ConcernDetailRepository');
 const ConcernTypeRepository = require('../repository/ConcernTypeRepository');
+const NotificationController = require('./NotificationController');
 const { hhmmToUTCDate } = require('../utils/dateUtils');
 
 
@@ -10,12 +11,14 @@ class BookingController {
     #concernDetailRepository;
     #concernTypeRepository;
     #ratingRepository;
+    #notificationController;
 
     constructor() {
         this.#ratingRepository = new RatingRepository();
         this.#bookingRepository = new BookingRepository();
         this.#concernDetailRepository = new ConcernDetailRepository();
         this.#concernTypeRepository = new ConcernTypeRepository();
+        this.#notificationController = new NotificationController();
 
         this.getConcernTypes = this.getConcernTypes.bind(this);
         this.createBooking = this.createBooking.bind(this);
@@ -102,6 +105,7 @@ class BookingController {
     async createBooking (req,res) {
         try {
             const {vetId, petId, locationId, illnessDescription, bookingDate, bookingTime, bookingPrice, bookingType, concerns} = req.body;
+            
             const newBooking = await this.#bookingRepository.create({
                 vetId,
                 petId,
@@ -113,6 +117,7 @@ class BookingController {
                 bookingStatus: 'PAYMENT',
                 bookingType
             });
+            console.log(newBooking);
 
             const insertedConcerns = [];
 
@@ -127,6 +132,8 @@ class BookingController {
                     insertedConcerns.push(newConcern);
                 });
             }
+            
+            this.#notificationController.sendToVets([vetId], {title:"You have a new booking request at " + bookingTime});
 
             res.status(201).json({ok: true, data: newBooking, message: 'Booking created successfully'});
 

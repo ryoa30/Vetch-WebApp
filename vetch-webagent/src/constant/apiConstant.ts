@@ -10,4 +10,5 @@ export const API_URL = {
     PET: `${API_BASE_URL}/api/pet`,
     PAYMENT: `${API_BASE_URL}/api/payment`,
     CHAT: `${API_BASE_URL}/api/chat`,
+    NOTIFICATION: `${API_BASE_URL}/api/notification`,
 }

@@ -65,7 +65,7 @@ export class UserService {
           }),
         });
 
-        return result.data.role;
+        return result.data;
       }
     } catch (error) {
       alert('Invalid email or password');

@@ -16,8 +16,9 @@ import { UserService } from "@/lib/services/UserService";
 import { useTheme } from "next-themes";
 import ToggleTheme from "@/components/ToggleTheme";
 import { useLoading } from "@/contexts/LoadingContext";
+import { NotificationService } from "@/lib/services/NotificationService";
 
-interface IErrors{
+interface IErrors {
   email: string;
   password: string;
 }
@@ -28,36 +29,48 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [openSuccess, setOpenSuccess] = useState(false);
   const [allowLogin, setAllowLogin] = useState(false);
-  const [errors, setErrors] = useState<IErrors>({email: "", password: ""});
+  const [errors, setErrors] = useState<IErrors>({ email: "", password: "" });
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [role, setRole] = useState("");
+  const [userId, setUserId] = useState("");
   const router = useRouter();
   const userValidator = new UserValidator();
   const userService = new UserService();
   const { theme } = useTheme();
-  const {setIsLoading} = useLoading();
+  const { setIsLoading } = useLoading();
+  const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 
+  const nc = new NotificationService("/sw.js");
+
+  const subscribeNotification = async () => {
+    console.log("Subscribing to notification...");
+    await nc.init();
+    await nc.ensurePermission();
+    await nc.subscribe(VAPID_PUBLIC_KEY, userId);
+    console.log("Subscribing to notification 2...");
+  };
 
   useEffect(() => {
-    if(isFirstLoad){
+    if (isFirstLoad) {
       setIsFirstLoad(false);
       return;
     }
     const response = userValidator.validateLogin(email, password);
-    if(!response.ok){
+    if (!response.ok) {
       setAllowLogin(false);
-      setErrors({...errors ,...response.errors});
-    }else{
+      setErrors({ ...errors, ...response.errors });
+    } else {
       setAllowLogin(true);
-      setErrors({email: "", password: ""});
+      setErrors({ email: "", password: "" });
     }
-  }, [email, password])
+  }, [email, password]);
 
   const handleLogin = async () => {
     setIsLoading(true);
-    const role = await userService.login(email, password, remember);
-    if(role){
-      setRole(role);
+    const data = await userService.login(email, password, remember);
+    if (data) {
+      setRole(data.role);
+      setUserId(data.id);
       setOpenSuccess(true);
     }
     setIsLoading(false);
@@ -113,7 +126,9 @@ export default function LoginPage() {
               className="bg-[#F4F9F4]/100 w-full rounded-lg p-2 placeholder:text-wrap dark:bg-[#2E4F4A]/100 border-none pl-10"
             />
           </div>
-          {errors.email &&<span className="text-red-500 text-xs">{errors.email}</span>}
+          {errors.email && (
+            <span className="text-red-500 text-xs">{errors.email}</span>
+          )}
         </div>
 
         {/* Password */}
@@ -129,13 +144,21 @@ export default function LoginPage() {
               className="bg-[#F4F9F4] w-full rounded-lg p-2 h-fit dark:bg-[#2E4F4A]/100 border-none pl-10"
             />
           </div>
-          {errors.password &&<span className="text-red-500 text-xs">{errors.password}</span>}
+          {errors.password && (
+            <span className="text-red-500 text-xs">{errors.password}</span>
+          )}
         </div>
 
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <Checkbox checked={remember} onCheckedChange={() => setRemember(!remember)}/>
-            <Label htmlFor="remember" className="text-sm cursor-pointer text-white">
+            <Checkbox
+              checked={remember}
+              onCheckedChange={() => setRemember(!remember)}
+            />
+            <Label
+              htmlFor="remember"
+              className="text-sm cursor-pointer text-white"
+            >
               Remember me?
             </Label>
           </div>
@@ -157,20 +180,22 @@ export default function LoginPage() {
         </div>
 
         {/* Success Dialog */}
-        <SuccessDialog open={openSuccess} 
-        onOpenChange={(val) => {
+        <SuccessDialog
+          open={openSuccess}
+          onOpenChange={(val) => {
             setOpenSuccess(val);
+            subscribeNotification();
             if (!val) {
               // Kalau dialog ditutup → redirect ke homepage
-              if(role === "user") {
-                router.push('/');
+              if (role === "user") {
+                router.push("/");
                 // Ensure server components (layout) re-read session
                 router.refresh();
-              }else if(role === "vet") {
-                router.push('/vet/dashboard');
+              } else if (role === "vet") {
+                router.push("/vet/dashboard");
                 router.refresh();
-              }else if(role === "admin") {
-                router.push('/admin/dashboard');
+              } else if (role === "admin") {
+                router.push("/admin/dashboard");
                 router.refresh();
               }
               // router.push("/");
@@ -201,18 +226,25 @@ export default function LoginPage() {
 
       {/* Right Side - Image */}
       <div className="hidden md:flex w-1/2 bg-[#3D8D7A] dark:bg-[#1F2D2A] relative flex-col items-center justify-between">
-      <div className="flex-col mt-auto">
-        {theme && <img
-          src={theme === "light" ? "/img/login/foot-step.png" : "/img/login/foot-step-dark.png"}
-          alt="Pets Illustration"
-          width={400}
-          height={400}
-          className="object-contain"
-        />}
-        <h1 className="mt-24 text-white text-4xl font-semibold text-center">
-          Caring for Your Pets, <br />Anytime, Anywhere
-        </h1>
-      </div>
+        <div className="flex-col mt-auto">
+          {theme && (
+            <img
+              src={
+                theme === "light"
+                  ? "/img/login/foot-step.png"
+                  : "/img/login/foot-step-dark.png"
+              }
+              alt="Pets Illustration"
+              width={400}
+              height={400}
+              className="object-contain"
+            />
+          )}
+          <h1 className="mt-24 text-white text-4xl font-semibold text-center">
+            Caring for Your Pets, <br />
+            Anytime, Anywhere
+          </h1>
+        </div>
         <img
           src="/img/login/girl-walking.png"
           alt="Pets Illustration"

@@ -9,13 +9,16 @@ const bookingRoutes = require('./routes/BookingRoute');
 const petRoutes = require('./routes/PetRoute');
 const vetRoutes = require('./routes/VetRoute');
 const paymentRoutes = require('./routes/PaymentRoute');
-const chatRoutes = require('./routes/ChatRoute')
+const chatRoutes = require('./routes/ChatRoute');
+const notificationRoutes = require('./routes/NotificationRoute');
 const cookieParser = require('cookie-parser');
-const main = require('./utils/seeder');
+const webpush = require("./utils/web-push");
 
 dotenv.config();
 
 const app = express();
+
+webpush();
 
 // Middleware to parse JSON bodies.
 app.use(cookieParser());
@@ -34,6 +37,7 @@ app.use('/api/booking', bookingRoutes);
 app.use('/api/pet', petRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/notification', notificationRoutes);
 
 app.use('/api/locations', locationRoutes);
 app.get('/', (req, res) => {

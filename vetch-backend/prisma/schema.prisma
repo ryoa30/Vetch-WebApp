@@ -30,6 +30,7 @@ model User {
   locations   Location[]
   pets        Pet[]
   ratings     Rating[]
+  notificationSubscriptions  NotificationSubscription[]
   vetProfile  Vet?
 
   @@map("users")
@@ -270,4 +271,26 @@ model Schedule {
   vet Vet @relation(fields: [vetId], references: [id], onDelete: Cascade)
 
   @@map("schedule")
+}
+
+model NotificationSubscription {
+  id        String @id @default(cuid())
+  userId    String @map("user_id")
+  endpoint  String @db.Text
+  keys      Json
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_subscription")
+}
+
+model Notification {
+  id        String @id @default(cuid())
+  userId    String @map("user_id")
+  endpoint  String @db.Text
+  keys      Json
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_subscription")
 }
