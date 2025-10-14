@@ -1,100 +1,108 @@
-// components/BlogSection.tsx
-import { useState } from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Article } from "./interface/Article";
+import SearchFilterBar from "./components/SearchBarBlog";
+import LatestArticle from "./components/LatestBlog";
+import SidebarArticles from "./components/sidebarBlog";
+import ArticleCarousel from "./components/blogCarousel";
+import { useSearchParams } from "next/navigation";
+import { slugify } from './interface/Slugify';
 
 const categories = ["All", "Daily Care", "Nutrition", "Disease", "Prevention"];
 
-const blogs = [
+const rawArticles = [
   {
     id: 1,
-    title: "Judul Blog",
+    title: "Pentingnya Nutrisi Seimbang untuk Hewan Peliharaan",
     date: "Sep 25, 2025",
-    summary: "This is a short summary of the blog post...",
+    summary:
+      "Pelajari cara memilih makanan yang tepat untuk hewan peliharaan agar tetap sehat, aktif, dan berumur panjang.",
     category: "Nutrition",
-    image: "/placeholder1.png",
+    imageSrc: "/img/blog/nutrition/nutrition1.jpg",
+    createdAt: "2025-09-25T09:00:00"
   },
   {
     id: 2,
-    title: "Judul Blog",
+    title: "Mengenali Penyakit Umum pada Hewan Peliharaan",
     date: "Sep 26, 2025",
-    summary: "Another interesting blog summary goes here...",
+    summary:
+      "Kenali tanda-tanda awal penyakit pada hewan kesayangan dan kapan harus membawa mereka ke dokter hewan.",
     category: "Disease",
-    image: "/placeholder2.png",
+    imageSrc: "/img/blog/disease/disease1.jpg",
+    createdAt: "2025-09-25T09:00:00"
   },
   {
     id: 3,
-    title: "Judul Blog",
+    title: "Rutinitas Perawatan Harian untuk Hewan Peliharaan",
     date: "Sep 27, 2025",
-    summary: "Tips and tricks for daily pet care...",
+    summary:
+      "Panduan sederhana menjaga kebersihan, kesehatan, dan kebahagiaan hewan peliharaan melalui rutinitas harian.",
     category: "Daily Care",
-    image: "/placeholder3.png",
+    imageSrc: "/img/blog/dailycare/dailycare1.jpg",
+    createdAt: "2025-09-25T09:00:00"
   },
 ];
 
-export default function BlogSection() {
-  const [activeCategory, setActiveCategory] = useState("All");
+export const articles: Article[] = rawArticles.map(a => ({
+    ...a,
+    slug: slugify(a.title),
+}));
 
-  const filteredBlogs =
-    activeCategory === "All"
-      ? blogs
-      : blogs.filter((blog) => blog.category === activeCategory);
+const BlogPage = () => {
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
+  const searchParams = useSearchParams();
+  const categoryFromUrl = searchParams.get("category");
+
+  useEffect(() => {
+    if (categoryFromUrl && categories.includes(categoryFromUrl)) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [categoryFromUrl]);
+
+  const sortedArticles: Article[] = [...articles].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  const filteredArticles =
+    selectedCategory === "All"
+      ? sortedArticles
+      : sortedArticles.filter(
+          (article) => article.category === selectedCategory
+        );
+
+  const latestArticle = filteredArticles[0];
+  const sidebarArticles = filteredArticles.slice(1, 5);
+
+  if (!latestArticle) {
+    return (
+      <div className="px-6 md:px-16 py-10 font-sans">
+        <h2 className="text-xl font-bold">
+          Tidak ada artikel pada kategori ini.
+        </h2>
+      </div>
+    );
+  }
 
   return (
-    <section className="bg-[#fcffe5] py-10 px-6">
-      {/* Category Filter */}
-      <div className="flex flex-wrap gap-3 justify-center mb-8">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-full border transition 
-              ${
-                activeCategory === cat
-                  ? "bg-black text-white"
-                  : "border-gray-400 text-gray-700 hover:bg-gray-200"
-              }`}
-          >
-            {cat}
-          </button>
-        ))}
+    <>
+      <SearchFilterBar
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        articles={articles}
+      />
+
+      <div className="px-6 md:px-16 py-10 font-sans">
+        <div className="flex flex-col md:flex-row gap-6">
+          <LatestArticle article={latestArticle} />
+          <SidebarArticles articles={sidebarArticles} />
+        </div>
       </div>
-
-      {/* Section Title */}
-      <h2 className="text-xl font-bold mb-6">Recent Blog Posts</h2>
-
-      {/* Blog Grid */}
-      <div className="grid md:grid-cols-2 gap-8">
-        {filteredBlogs.map((blog) => (
-          <div
-            key={blog.id}
-            className="flex flex-col md:flex-row bg-white shadow rounded-lg overflow-hidden"
-          >
-            {/* Blog Image */}
-            <img
-              src={blog.image}
-              alt={blog.title}
-              className="w-full md:w-1/3 h-40 object-cover"
-            />
-
-            {/* Blog Content */}
-            <div className="p-4 flex flex-col justify-between">
-              <div>
-                <p className="text-sm text-gray-500">{blog.date}</p>
-                <h3 className="text-lg font-semibold">{blog.title}</h3>
-                <p className="text-gray-600">{blog.summary}</p>
-              </div>
-
-              <div className="mt-3 flex items-center gap-2">
-                <span className="px-3 py-1 text-sm rounded-full bg-black text-white">
-                  {blog.category}
-                </span>
-                <button className="ml-auto px-4 py-1 rounded-full bg-[#926d66] text-white">
-                  Read More
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
+      <ArticleCarousel articles={filteredArticles} />
+    </>
   );
-}
+};
+
+export default BlogPage;
