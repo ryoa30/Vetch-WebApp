@@ -1,16 +1,18 @@
 const VetRepository = require("../repository/VetRepository");
-
+const NotificationController = require("./NotificationController");
 
 class AdminController {
     #vetRepository;
+    #notificationController;
     
     constructor() {
         this.#vetRepository = new VetRepository();
+        this.#notificationController = new NotificationController();
 
         this.getUncomfirmedVetCertificates = this.getUncomfirmedVetCertificates.bind(this);
         this.getComfirmedVetCertificates = this.getComfirmedVetCertificates.bind(this);
         this.putVetCertificateStatus = this.putVetCertificateStatus.bind(this);
-    
+        
     }
 
     async getUncomfirmedVetCertificates(req, res) {
@@ -46,6 +48,7 @@ class AdminController {
 
         const result = await this.#vetRepository.updateVetCertificateStatus(vetId, status);
         console.log(result);
+        this.#notificationController.sendToVets([vetId], {title: `Your vet certificate has been ${status ? 'approved' : 'rejected'}`});
         res.status(200).json({ok: true, message: 'Success', data: result});
     }
 }
