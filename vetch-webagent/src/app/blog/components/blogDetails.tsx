@@ -16,7 +16,7 @@ const ArticleDetails: React.FC<Props> = ({ article }) => {
   });
 
   return (
-    <div className="bg-white p-5 rounded-xl border-[6px] border-teal-400 md:col-span-2">
+    <div className="bg-[#B3D8A8] dark:bg-[#357C72] p-5 rounded-xl border-[6px] border-teal-400 md:col-span-2">
       <div className="relative rounded-lg overflow-hidden">
         <img
           src={article.imageSrc}

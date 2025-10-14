@@ -88,7 +88,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   };
 
   return (
-    <>
+    <div className="bg-[#B3D8A8] dark:bg-[#357C72]">
       <SearchFilterBar
         categories={categories}
         selectedCategory={selectedCategory}
@@ -129,6 +129,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       </div>
 
       <ArticleCarousel articles={filteredArticles} />
-    </>
+    </div>
   );
 }

@@ -45,7 +45,7 @@ const SearchFilterBar: React.FC<Props> = ({ categories, selectedCategory, onSele
     };
 
     return (
-        <div className="bg-gradient-to-b from-teal-200 to-white px-6 md:px-16 pt-10 font-sans relative">
+        <div className="bg-[#B3D8A8] dark:bg-[#357C72] px-6 md:px-16 pt-10 font-sans relative">
             <div className="flex flex-col md:flex-row items-center gap-4">
                 <div className="flex w-full relative">
                     <input

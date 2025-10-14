@@ -86,7 +86,7 @@ const BlogPage = () => {
   }
 
   return (
-    <>
+    <div className="bg-[#B3D8A8] dark:bg-[#357C72] text-black dark:text-white">
       <SearchFilterBar
         categories={categories}
         selectedCategory={selectedCategory}
@@ -101,7 +101,7 @@ const BlogPage = () => {
         </div>
       </div>
       <ArticleCarousel articles={filteredArticles} />
-    </>
+    </div>
   );
 };
 
