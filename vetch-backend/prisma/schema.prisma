@@ -31,6 +31,7 @@ model User {
   pets        Pet[]
   ratings     Rating[]
   notificationSubscriptions  NotificationSubscription[]
+  notifications Notification[]
   vetProfile  Vet?
 
   @@map("users")
@@ -287,10 +288,10 @@ model NotificationSubscription {
 model Notification {
   id        String @id @default(cuid())
   userId    String @map("user_id")
-  endpoint  String @db.Text
-  keys      Json
+  message   String @db.Text
+  confirmed Boolean  @default(false)
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("notification_subscription")
+  @@map("notification")
 }

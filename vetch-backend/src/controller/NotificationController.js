@@ -1,15 +1,20 @@
-const NotificationSubscriptionRepository = require("../repository/NotificationSubscriptionRepository");
 const webpush = require("web-push");
+const NotificationSubscriptionRepository = require("../repository/NotificationSubscriptionRepository");
+const NotificationRepository = require("../repository/NotificationRepository");
 
 class PaymentController {
   #notificationSubscriptionRepository;
+  #notificationRepository;
 
   constructor() {
     this.#notificationSubscriptionRepository =
       new NotificationSubscriptionRepository();
+    this.#notificationRepository = new NotificationRepository();
 
     this.detectSubscription = this.detectSubscription.bind(this);
     this.sendToAll = this.sendToAll.bind(this);
+    this.sendToUsers = this.sendToUsers.bind(this);
+    this.sendToVets = this.sendToVets.bind(this);
   }
   async detectSubscription(req, res) {
     try {
@@ -89,6 +94,11 @@ class PaymentController {
             { endpoint: s.endpoint, keys: s.keys },
             JSON.stringify(payload)
           );
+          await this.#notificationRepository.create({
+            userId: s.userId,
+            message: payload.title,
+            confirmed: false,
+          });
           ok++;
         } catch (err) {
           // 404/410 => gone
