@@ -64,7 +64,7 @@ export function NavbarDesktop() {
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <Link
-                  href="/blog"
+                  href="/register/vet/account"
                   className="bg-transparent text-white hover:underline font-bold text-base"
                 >
                   Become a Vet
