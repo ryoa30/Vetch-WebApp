@@ -38,8 +38,9 @@ class VetRepository extends BaseRepository {
     const feeMax = filters.feeRange ? filters.feeRange[1] * 1_000 : undefined;
 
     const wantHomecare = filters.homecareAble ?? false;
-
+    
     const schedule = filters.schedule;
+    console.log(schedule)
     const haveScheduleFilter = !!schedule;
     const scheduleDays = haveScheduleFilter
       ? daysForPresetDb(

@@ -1,5 +1,4 @@
 export function formatIsoJakarta(iso: string) {
-  console.log("date format", iso);
   const months = [
     "Jan",
     "Feb",
@@ -36,7 +35,6 @@ export function formatIsoJakarta(iso: string) {
   const hh = parts.hour; // "11"
   const mm = parts.minute;
 
-  console.log(hh);
 
   return `${day} ${mon} ${year} at ${hh}:${mm}`;
 }

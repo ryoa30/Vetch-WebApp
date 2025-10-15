@@ -65,6 +65,7 @@ const OrderHistory: React.FC = () => {
 
   const handlePaymentClick = async (booking) => {
     try {
+      setIsDetailOpen(false);
       const resultPayment = await paymentService.fetchTransactionToken(
         booking.id
       );

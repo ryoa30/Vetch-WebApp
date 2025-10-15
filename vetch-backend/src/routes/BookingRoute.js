@@ -1,4 +1,5 @@
 const express = require('express');
+const cron = require('node-cron');
 const router = express.Router();
 const BookingController = require('../controller/BookingController');
 
@@ -13,5 +14,7 @@ router.get('/by-user-date-time', bookingController.getBookingByUserIdDateTime);
 router.post('/', bookingController.createBooking);
 router.post('/rate', bookingController.createBookingRating);
 router.put('/status', bookingController.putBookingStatus);
+
+cron.schedule("* * * * *", async () => { bookingController.syncBookings() });
 
 module.exports = router;

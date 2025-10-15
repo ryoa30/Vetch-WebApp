@@ -4,6 +4,9 @@ const NotificationController = require('../controller/NotificationController');
 
 const notificationController = new NotificationController();
 
+router.get('/unconfirmed/:userId', notificationController.getUnconfirmedNotifications);
+router.put('/confirm', notificationController.putConfirmNotification);
+router.put('/confirm-all', notificationController.putConfirmAllNotifications);
 router.post('/subscribe', notificationController.detectSubscription);
 router.post('/test', notificationController.sendToAll);
 

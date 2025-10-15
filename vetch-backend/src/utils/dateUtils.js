@@ -76,6 +76,57 @@ function daysForPresetDb(preset, baseDate ) {
   }
 }
 
+ function toMins(hhmm) {
+    const [h, m] = hhmm.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  function minsToHHMM(mins) {
+    const m = (mins + MIN_PER_DAY) % MIN_PER_DAY;
+    const h = String(Math.floor(m / 60)).padStart(2, "0");
+    const mm = String(m % 60).padStart(2, "0");
+    return `${h}:${mm}`;
+  }
+
+
+  function formatIsoJakartaShort(iso) {
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Jakarta",
+    day: "2-digit",
+    month: "2-digit", // numeric so we can map to our custom short month
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(new Date(iso))
+    .reduce((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+
+  const day = parts.day; // "15"
+  const mon = months[Number(parts.month) - 1]; // "Sep"
+  const year = parts.year; // "07"
+
+  return `${day} ${mon} ${year}`;
+}
+
 
 module.exports = {
   hhmmToUTCDate,
@@ -83,5 +134,8 @@ module.exports = {
   daysForPresetDb,
   normalizeWeekdayToDb,
   dateToHHMM,
-  nowForSchedule
+  nowForSchedule,
+  toMins,
+  minsToHHMM,
+  formatIsoJakartaShort,
 };

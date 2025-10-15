@@ -59,7 +59,7 @@ export default function Home() {
               <img
                 src="/img/dog-and-doctor.png"
                 alt="Veterinarian with dog and cat"
-                className="max-w-md"
+                className="w-full max-w-4xl"
               />
             </div>
           </div>

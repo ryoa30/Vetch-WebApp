@@ -1,3 +1,4 @@
+const { nowForSchedule } = require("../utils/dateUtils");
 const BaseRepository = require("./BaseRepository");
 
 class BookingRepository extends BaseRepository {
@@ -149,6 +150,88 @@ class BookingRepository extends BaseRepository {
     })
 
     return bookings;
+  }
+
+  
+  async findBookingByIntervalStatusType(interval, status){
+    const { timeOfDay } = nowForSchedule();
+    const startDate = new Date(`${new Date().toISOString().split("T")[0]}T00:00:00.000Z`);
+    const endDate = new Date(`${new Date().toISOString().split("T")[0]}T23:59:59.999Z`);
+    
+    const start = new Date(`1970-01-01T${new Date(timeOfDay.getTime() + (interval-1) * 60 * 1000).toISOString().split("T")[1]}`);
+    const end = new Date(`1970-01-01T${new Date(timeOfDay.getTime() + interval * 60 * 1000).toISOString().split("T")[1]}`);
+
+    const bookings = await this._model.findMany({
+      where:{
+        bookingDate: { gte: startDate, lte: endDate },
+        bookingTime: { gt: start, lte: end },
+        bookingStatus: status? {in: status}: { in: ["PAYMENT", "PENDING", "ACCEPTED", "ONGOING"] },
+      },
+      include:{
+        pet: true,
+        vet: true
+      }
+    })
+
+    return bookings;
+  }
+
+  async findFinishedOngoingBooking(){
+    const { timeOfDay } = nowForSchedule();
+    
+    const startDate = new Date(`${new Date().toISOString().split("T")[0]}T00:00:00.000Z`);
+    const endDate = new Date(`${new Date().toISOString().split("T")[0]}T23:59:59.999Z`);
+    
+    const baselineDate = new Date(`1970-01-01T${new Date(timeOfDay.getTime() - (40) * 60 * 1000).toISOString().split("T")[1]}`);
+
+    const bookings = await this._model.findMany({
+      where:{
+        bookingDate: { gte: startDate, lte: endDate },
+        bookingTime: { lt: baselineDate },
+        bookingStatus: { in: ["ONGOING"] },
+      },
+      include:{
+        pet: true,
+        vet: true
+      }
+    })
+
+    return bookings;
+  }
+
+  async findExpiredBooking(){
+    const { timeOfDay } = nowForSchedule();
+    const startDate = new Date(`${new Date().toISOString().split("T")[0]}T00:00:00.000Z`);
+    const endDate = new Date(`${new Date().toISOString().split("T")[0]}T23:59:59.999Z`);
+    
+    const start = new Date(`1970-01-01T${timeOfDay.toISOString().split("T")[1]}`);
+
+    const bookings = await this._model.findMany({
+      where:{
+        bookingDate: { gte: startDate, lte: endDate },
+        bookingTime: { lt: start },
+        bookingStatus: { in: ["PAYMENT", "PENDING"] },
+      },
+      include:{
+        pet: true,
+        vet: true
+      }
+    })
+
+    return bookings;
+  }
+
+  async updateBookingsStatus(bookingIds, status){
+    const result = await this._model.updateMany({
+      where:{
+        id: { in: bookingIds },
+        isDeleted: false,
+      },
+      data:{
+        bookingStatus: status,
+      }
+    })
+    return result;
   }
 }
 

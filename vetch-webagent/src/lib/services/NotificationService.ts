@@ -10,7 +10,6 @@ export class NotificationService {
   private swReg?: ServiceWorkerRegistration;
   constructor(private swPath = "/sw.js") {}
 
-  /** Registers SW and ensures permission was granted */
   async init(): Promise<void> {
     if (!("serviceWorker" in navigator)) throw new Error("Service Worker unsupported");
     this.swReg = await navigator.serviceWorker.register(this.swPath);
@@ -32,12 +31,6 @@ export class NotificationService {
       userVisibleOnly: true,
       applicationServerKey: appServerKey,
     });
-    // save to backend
-    // await fetch("/api/push/subscribe", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(sub),
-    // });
     const res = await this.http.post<IResponse>("/subscribe", {sub, userId});
     console.log("subscribe result", res);
     return sub;
@@ -51,19 +44,28 @@ export class NotificationService {
   async unsubscribe(): Promise<void> {
     const sub = await this.getSubscription();
     if (sub) {
-    //   await fetch("/api/push/unsubscribe", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(sub),
-    //   });
       await this.http.post<IResponse>("/unsubscribe", JSON.stringify(sub as SubscriptionJSON));
       await sub.unsubscribe();
     }
   }
 
+  async getUncomfirmedNotifications(userId: string) {
+    const res = await this.http.get<IResponse>(`/unconfirmed/${userId}`);
+    return res;
+  }
+
+  async confirmNotification(id: string) {
+    const res = await this.http.put<IResponse>("/confirm", {id});
+    return res;
+  }
+
+  async confirmAllNotifications(userId: string) {
+    const res = await this.http.put<IResponse>("/confirm-all", {userId});
+    return res;
+  }
+
   /** Debug helper to trigger a test push from server */
   async sendTest(): Promise<void> {
-    // await fetch("/api/push/send", { method: "POST" });
     await this.http.post<IResponse>("/send");
   }
 }
