@@ -5,7 +5,9 @@ const {
 } = require("../utils/dateUtils");
 const BaseRepository = require("./BaseRepository");
 const RatingRepository = require("./RatingRepository");
+const {Client} = require("@googlemaps/google-maps-services-js");
 
+const client = new Client({});
 class VetRepository extends BaseRepository {
   #ratingRepository;
   constructor() {
@@ -13,6 +15,7 @@ class VetRepository extends BaseRepository {
     this.#ratingRepository = new RatingRepository();
 
     this.findVetListConsultation = this.findVetListConsultation.bind(this);
+    this.findVetListEmergency = this.findVetListEmergency.bind(this);
   }
 
   async findVetUserId(id){
@@ -213,6 +216,150 @@ class VetRepository extends BaseRepository {
           ...s,
           timeOfDay: s.timeOfDay.toISOString().slice(11, 16), // "HH:mm"
         })),
+      };
+    });
+
+    return { vets, totalPages, totalItems };
+  }
+
+  async findVetListEmergency(page = 1, volume = 10, query = "", filters) {
+    const offset = (page - 1) * volume;
+    const { timeOfDay } = nowForSchedule(); // current day + current time
+    const q = query?.trim();
+    const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const today = startOfDay(new Date());
+    const timeIn1h = new Date(timeOfDay + 60 * 60 * 1000);
+
+    console.log(filters);
+
+    // --------- derive filters ---------
+    const petTypes = filters.petTypes?.length ? filters.petTypes : undefined;
+
+    // fee in DB = rupiah; UI dalam ribuan
+    const feeMin = filters.feeRange ? filters.feeRange[0] * 1_000 : undefined;
+    const feeMax = filters.feeRange ? filters.feeRange[1] * 1_000 : undefined;
+
+    // --------- base WHERE (verified, non-deleted, future slots) ---------
+    const where = {
+      bookings: {
+        none: {
+          bookingStatus: { in: ["ACCEPTED", "ONGOING"] },
+          isDeleted: false,
+          bookingDate: { equals: today },
+          bookingTime: { gte: timeOfDay, lt: timeIn1h },
+        }
+      },
+      user: {
+        is: {
+          isDeleted: false,
+          ...(q ? { fullName: { contains: q, mode: "insensitive" } } : {}),
+        },
+      },
+      NOT: { price: 0, description: "" },
+      verified: true,
+      verifiedDate: { not: null },
+      ...(feeMin != null || feeMax != null
+        ? {
+            price: {
+              ...(feeMin != null ? { gte: feeMin } : {}),
+              ...(feeMax != null ? { lte: feeMax } : {}),
+            },
+          }
+        : {}),
+      isAvailHomecare: true,
+      isAvailEmergency: true,
+
+      // Pet types (via Species -> SpeciesType)
+      ...(petTypes
+        ? {
+            speciesHandled: {
+              some: {
+                speciesType: {
+                  speciesName: {
+                    in: petTypes,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            },
+          }
+        : {}),
+
+    };
+
+    // 1) fetch vets + next 3 slots (unsorted)
+    const rows = await this._model.findMany({
+      select: {
+        id: true,
+        userId: true,
+        price: true,
+        isAvailHomecare: true,
+        user: 
+        { 
+          select: 
+            { profilePicture: true, 
+              fullName: true,
+              locations: true 
+            } 
+        },
+      },
+      where,
+    });
+
+    console.log(rows[0].user.locations[0]);
+
+    // 2) sort by soonest upcoming slot
+    // rows.sort((a, b) => {
+    //   const A = a.schedules[0];
+    //   const B = b.schedules[0];
+    //   if (!A && !B) return 0;
+    //   if (!A) return 1;
+    //   if (!B) return -1;
+    //   if (A.dayNumber !== B.dayNumber) return A.dayNumber - B.dayNumber;
+    //   return A.timeOfDay.getTime() - B.timeOfDay.getTime();
+    // });
+
+    // (optional) filter by minRating AFTER we know ratings
+    const candidateIds = rows.map((v) => v.id);
+    const ratingAgg = await this.#ratingRepository.findAverageRatingVets(
+      candidateIds
+    );
+    const ratingMap = new Map(
+      ratingAgg.map((r) => [
+        r.vetId,
+        {
+          ratingAvg: r._avg.rating ?? 0,
+          ratingCount: r._count._all,
+        },
+      ])
+    );
+
+    const minRating = filters.minRating ?? undefined;
+    const rowsAfterRating = minRating
+      ? rows.filter((v) => {
+          const agg = ratingMap.get(v.id);
+          const avg = agg ? agg.ratingAvg : 0;
+          return avg >= minRating;
+        })
+      : rows;
+
+    // 3) paginate AFTER sort (+ after rating filter)
+    const totalItems = rowsAfterRating.length;
+    const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / volume);
+    const pageRows = rowsAfterRating.slice(offset, offset + volume);
+
+    // 4) shape response
+    const vets = pageRows.map((vet) => {
+      const agg = ratingMap.get(vet.id) ?? { ratingAvg: 0, ratingCount: 0 };
+      return {
+        ...vet,
+        ...vet.user,
+        profilePicture:
+          vet.user.profilePicture ||
+          "https://res.cloudinary.com/daimddpvp/image/upload/v1758101764/default-profile-pic_lppjro.jpg",
+        user: undefined,
+        ratingCount: agg.ratingCount,
+        ratingAvg: Math.round((agg.ratingAvg ?? 0) * 10) / 10,
       };
     });
 

@@ -5,13 +5,14 @@ class BlogRepository extends BaseRepository {
     super("Blog");
   }
 
-  async findBlogsPagination(page = 0, volume = 10, query = "") {
+  async findBlogsPagination(page = 0, volume = 10, query = "", categoryId = null) {
     const offset = (page - 1) * volume;
     const q = query?.trim();
 
     const where = {
         isDeleted: false,
         ...(q ? { title: { contains: q, mode: "insensitive" } } : {}),
+        ...(categoryId ? { categoryId: categoryId } : {}),
     }
 
     const rows = await this._model.findMany({
@@ -24,6 +25,7 @@ class BlogRepository extends BaseRepository {
         title: true,
         picture: true,
         date: true,
+        context: true,
         category: { select: { id: true, categoryName: true } },
       }
     });

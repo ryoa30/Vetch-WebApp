@@ -1,10 +1,12 @@
 import React from 'react';
 import { Article } from '../interface/Article';
+import DOMPurify from "isomorphic-dompurify";
+
 
 type Props = { article: Article };
 
 const ArticleDetails: React.FC<Props> = ({ article }) => {
-  const d = new Date(article.createdAt);
+  const d = new Date(article.date);
   const date = d.toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'long',
@@ -16,12 +18,12 @@ const ArticleDetails: React.FC<Props> = ({ article }) => {
   });
 
   return (
-    <div className="bg-[#B3D8A8] dark:bg-[#357C72] p-5 rounded-xl border-[6px] border-teal-400 md:col-span-2">
-      <div className="relative rounded-lg overflow-hidden">
+    <div className="bg-white dark:bg-black p-5 rounded-xl border-[6px] md:max-w-[60vw] border-teal-400 md:col-span-2">
+      <div className="relative rounded-lg max-h-[50vh] overflow-hidden">
         <img
-          src={article.imageSrc}
+          src={article.picture}
           alt={article.title}
-          className="w-full max-h-[120vh] object-cover mx-auto"
+          className="w-full object-cover mx-auto"
         />
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-4">
           <p className="text-lg font-light">{time} | {date}</p>
@@ -29,7 +31,16 @@ const ArticleDetails: React.FC<Props> = ({ article }) => {
         </div>
       </div>
 
-      <p className="mt-4 text-black text-justify">{article.summary}</p>
+      <div
+        className="tiptap prose prose-neutral dark:prose-invert max-w-none mt-4 text-black dark:text-white"
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(article.context, {
+            ADD_ATTR: ["data-type", "data-checked", "data-indent"], // for task lists
+            ADD_TAGS: ["input", "label"], // if DOMPurify strips these
+          }),
+        }}
+      />
+      
     </div>
   );
 };

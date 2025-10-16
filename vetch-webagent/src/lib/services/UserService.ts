@@ -68,8 +68,6 @@ export class UserService {
         return result.data;
       }
     } catch (error) {
-      alert('Invalid email or password');
-      console.log(error); 
       return null;
     }
   }

@@ -18,6 +18,7 @@ class VetController {
         this.getVetDetailsById = this.getVetDetailsById.bind(this);
         this.getVetRatings = this.getVetRatings.bind(this);
         this.getVetSchedulesByDayAndId = this.getVetSchedulesByDayAndId.bind(this);
+        this.getVetListEmergency = this.getVetListEmergency.bind(this);
     }
 
 
@@ -43,6 +44,17 @@ class VetController {
         try {
             const { page, volume, query, filters} = req.body;
             const vets = await this.#vetRepository.findVetListConsultation(Number(page), Number(volume), query, filters);
+            res.status(200).json({ok: true, data: vets, message: 'Vet list fetched successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching vet list', error: error.message });
+        }
+    }
+
+    async getVetListEmergency(req, res) {
+        try {
+            const { page, volume, query, filters} = req.body;
+            const vets = await this.#vetRepository.findVetListEmergency(Number(page), Number(volume), query, filters);
             res.status(200).json({ok: true, data: vets, message: 'Vet list fetched successfully'});
         } catch (error) {
             console.log(error);

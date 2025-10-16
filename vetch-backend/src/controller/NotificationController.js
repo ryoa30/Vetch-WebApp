@@ -4,7 +4,7 @@ const NotificationRepository = require("../repository/NotificationRepository");
 
 const logo_url = "https://res.cloudinary.com/daimddpvp/image/upload/v1760450608/logo-white_odlyob.png";
 const defaultPayload = {
-  icon:logo_url, badge: logo_url, image: logo_url
+  icon:logo_url, badge: logo_url, image: logo_url, vibrate: [100, 50, 100]
 }
 
 class PaymentController {

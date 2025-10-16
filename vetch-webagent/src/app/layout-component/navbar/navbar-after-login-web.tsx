@@ -89,7 +89,7 @@ export function NavbarDesktop() {
                     </Link>
                   </NavigationMenuLink>
                   <NavigationMenuLink asChild>
-                    <Link href="#" className="text-base">
+                    <Link href="/forPetParent/emergencyVetList" className="text-base">
                       Emergency
                     </Link>
                   </NavigationMenuLink>

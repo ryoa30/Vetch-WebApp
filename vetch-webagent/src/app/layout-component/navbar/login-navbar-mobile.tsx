@@ -186,7 +186,7 @@ export function NavbarMobile() {
             <Link href="/forPetParent/consultationVetList" className="hover:underline pl-3 ">
               Consultation
             </Link>
-            <Link href="#" className="hover:underline pl-3">
+            <Link href="/forPetParent/emergencyVetList" className="hover:underline pl-3">
               Emergency
             </Link>
             {!isAuthenticated && (

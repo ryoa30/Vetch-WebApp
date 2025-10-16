@@ -80,6 +80,7 @@ export default function LayoutWrapper({ children, session }: { children: React.R
       {isNoLayout ? (
         <SessionProvider value={session}>
           <main>{children}</main>
+          <LoadingOverlay show={loading}/>
         </SessionProvider>
       ) : (
         <SessionProvider value={session}>

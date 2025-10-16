@@ -18,32 +18,6 @@ import AppPaginationClient from "@/components/app-pagination-client";
 import { formatIsoJakarta } from "@/lib/utils/formatDate";
 import LoadingOverlay from "@/components/LoadingOverlay";
 
-// const historyData = [
-//   {
-//     name: "Dr. Seemore",
-//     type: "Registration Certificate",
-//     status: "Approved",
-//     date: "20 May 2025 at 10:00",
-//   },
-//   {
-//     name: "Dr. Taftian",
-//     type: "Specialty Certificate",
-//     status: "Disapproved",
-//     date: "19 May 2025 at 11:00",
-//   },
-//   {
-//     name: "Dr. Raydawn",
-//     type: "Specialty Certificate",
-//     status: "Disapproved",
-//     date: "18 May 2025 at 12:00",
-//   },
-//   {
-//     name: "Dr. Seemore",
-//     type: "Registration Certificate",
-//     status: "Approved",
-//     date: "17 May 2025 at 14:00",
-//   },
-// ];
 
 export default function ApprovalHistoryPage() {
   const [selected, setSelected] = useState<null | IVet>(null);
@@ -81,7 +55,7 @@ export default function ApprovalHistoryPage() {
         <h1 className="text-4xl font-bold text-white">History</h1>
         <Input
           placeholder="Search for Veterinarian"
-          className="w-full md:w-64 mt-3 md:mt-0 rounded-full bg-white dark:bg-white"
+          className="w-full md:w-64 mt-3 md:mt-0 rounded-full bg-white dark:bg-white text-black"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />

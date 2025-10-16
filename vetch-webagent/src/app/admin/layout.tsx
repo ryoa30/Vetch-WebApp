@@ -20,7 +20,7 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex flex-col flex-1 bg-[#A3D1C6]">
+      <div className="flex flex-col flex-1 bg-[#A3D1C6] dark:bg-[#71998F]">
         <main>{children}</main>
         <div className="mt-auto">
           <Footer />

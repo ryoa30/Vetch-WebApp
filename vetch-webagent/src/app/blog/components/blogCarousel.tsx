@@ -1,5 +1,6 @@
 "use client";
 
+import DOMPurify from "isomorphic-dompurify";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Article } from "../interface/Article";
@@ -7,9 +8,10 @@ import { formatDateArticle } from "../interface/formatDateArticle";
 
 interface Props {
   articles: Article[]; 
+  setSelectedArticle: (article: Article) => void;
 }
 
-const ArticleCarousel: React.FC<Props> = ({ articles }) => {
+const ArticleCarousel: React.FC<Props> = ({ articles, setSelectedArticle }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollAmount, setScrollAmount] = useState(280);
 
@@ -46,23 +48,23 @@ const ArticleCarousel: React.FC<Props> = ({ articles }) => {
               <div ref={scrollRef} className="overflow-hidden scroll-smooth scrollbar-hide">
                 <div className="flex gap-6 py-4 w-max">
                   {articles.map((article) => (
-                    <Link
-                      href={`/blog/${article.slug}`}
+                    <button
+                      onClick={() => setSelectedArticle(article)}
                       key={article.id}
                       className="flex-shrink-0 article-card block cursor-pointer rounded-lg shadow border overflow-hidden w-[270px] md:w-[338px] bg-white hover:shadow-lg transition"
                     >
                       <img
-                        src={article.imageSrc}
+                        src={article.picture}
                         alt={article.title}
                         className="w-full h-[200px] md:h-[220px] object-cover"
                       />
                       <div className="p-4">
-                        <span className="text-base text-teal-600 font-medium">{article.category}</span>
+                        <span className="text-base text-teal-600 font-medium">{article.categoryName}</span>
                         <h4 className="text-lg font-semibold mt-1 line-clamp-2">{article.title}</h4>
-                        <p className="text-sm font-normal mt-1">{formatDateArticle(article.createdAt)}</p>
-                        <p className="text-base text-gray-500 mt-2 line-clamp-3">{article.summary}</p>
+                        <p className="text-sm font-normal mt-1">{formatDateArticle(article.date)}</p>
+                        <div className="text-base text-gray-500 mt-2 line-clamp-3" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.context) }}></div>
                       </div>
-                    </Link>
+                    </button>
                   ))}
                 </div>
               </div>

@@ -163,7 +163,7 @@ export default function AddBlogPage() {
           placeholder="Blog Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="bg-white dark:bg-white"
+          className="bg-white dark:bg-white text-black"
         />
       </div>
 

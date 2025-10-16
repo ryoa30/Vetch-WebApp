@@ -5,6 +5,7 @@ const VetController = require('../controller/VetController');
 const vetController = new VetController();
 
 router.post('/', vetController.getVetListConsultation);
+router.post('/emergency', vetController.getVetListEmergency);
 
 router.get('/schedule', vetController.getVetSchedulesByDayAndId);
 router.get('/:id', vetController.getVetDetailsById);

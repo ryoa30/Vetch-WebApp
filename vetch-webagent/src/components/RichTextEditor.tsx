@@ -90,7 +90,7 @@ export default function RichTextEditor({ value = "", onChange, className }: Prop
   return (
     <div className={className}>
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-2 rounded-t-md border border-b-0 bg-white p-2">
+      <div className="flex flex-wrap gap-2 rounded-t-md border border-b-0 bg-white p-2 text-black">
         <Btn on={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")}>B</Btn>
         <Btn on={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")}><i>I</i></Btn>
         <Btn on={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive("underline")}><u>U</u></Btn>
@@ -136,7 +136,7 @@ export default function RichTextEditor({ value = "", onChange, className }: Prop
       </div>
 
       {/* Surface */}
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className="text-black"/>
     </div>
   );
 }

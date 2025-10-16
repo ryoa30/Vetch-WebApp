@@ -5,16 +5,17 @@ import { useRouter } from 'next/navigation';
 import { Article } from '../interface/Article';
 
 interface Props {
-    categories: string[];
+    categories: any[];
     selectedCategory: string;
     onSelectCategory: (category: string) => void;
     articles: Article[];
     showCategories?: boolean;
+    inputValue: string;
+    setInputValue: (value: string) => void;
+    onAction: () => void;
 }
 
-const SearchFilterBar: React.FC<Props> = ({ categories, selectedCategory, onSelectCategory, articles, showCategories }) => {
-    const router = useRouter();
-    const [inputValue, setInputValue] = useState('');
+const SearchFilterBar: React.FC<Props> = ({ categories, selectedCategory, onSelectCategory, articles, showCategories, inputValue, setInputValue, onAction }) => {
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -34,8 +35,7 @@ const SearchFilterBar: React.FC<Props> = ({ categories, selectedCategory, onSele
     }, [inputValue, articles]);
 
     const handleSearch = () => {
-        if (!inputValue.trim()) return;
-        router.push(`/blog/search-result?query=${encodeURIComponent(inputValue.trim())}`);
+        onAction();
     };
 
     const handleSelectSuggestion = (title: string) => {
@@ -69,7 +69,7 @@ const SearchFilterBar: React.FC<Props> = ({ categories, selectedCategory, onSele
                         className="px-4 py-2 w-[20%] bg-teal-500 text-white font-semibold hover:bg-teal-600 transition"
                         onClick={handleSearch}
                     >
-                        Cari
+                        Search
                     </button>
 
                     {showSuggestions && suggestions.length > 0 && (
@@ -92,13 +92,13 @@ const SearchFilterBar: React.FC<Props> = ({ categories, selectedCategory, onSele
                 {categories.map((cat, i) => (
                     <button
                         key={i}
-                        onClick={() => onSelectCategory(cat)}
-                        className={`px-4 py-1 border rounded-full font-semibold transition ${selectedCategory === cat
+                        onClick={() => onSelectCategory(cat.id)}
+                        className={`px-4 py-1 border rounded-full font-semibold transition ${selectedCategory === cat.id
                             ? 'bg-teal-500 text-white'
                             : 'border-teal-500 text-black hover:bg-teal-500 hover:text-white'
                             }`}
                     >
-                        {cat}
+                        {cat.categoryName}
                     </button>
                 ))}
             </div>}

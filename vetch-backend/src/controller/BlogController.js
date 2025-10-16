@@ -79,12 +79,13 @@ class BlogController {
 
   async getAllBlogs(req, res) {
     try {
-      const { page = 1, volume = 10, query = "" } = req.query;
+      const { page = 1, volume = 10, query = "", categoryId = null } = req.query;
       const { blogs, totalPages, totalItems } =
         await this.#blogRepository.findBlogsPagination(
           parseInt(page),
           parseInt(volume),
-          query
+          query,
+          categoryId
         );
       res
         .status(200)

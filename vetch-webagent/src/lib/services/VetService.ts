@@ -20,6 +20,20 @@ export class VetService {
       `/`, payload
     );
   }
+  async fetchVetsEmergency(page: number, volume: number, query: string = "", filters: any = {}) {
+    const payload = {
+      page,
+      volume,
+      query,
+      filters
+    }
+
+    console.log("filters: ",filters);
+
+    return await this.#http.post<IResponse>(
+      `/emergency`, payload
+    );
+  }
 
   async fetchVetDetails(id: string){
     return await this.#http.get<IResponse>(

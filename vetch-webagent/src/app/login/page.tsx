@@ -17,6 +17,7 @@ import { useTheme } from "next-themes";
 import ToggleTheme from "@/components/ToggleTheme";
 import { useLoading } from "@/contexts/LoadingContext";
 import { NotificationService } from "@/lib/services/NotificationService";
+import ErrorDialog from "../alert-dialog-box/ErrorDialogBox";
 
 interface IErrors {
   email: string;
@@ -28,6 +29,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [openSuccess, setOpenSuccess] = useState(false);
+  const [openError, setOpenError] = useState(false);
   const [allowLogin, setAllowLogin] = useState(false);
   const [errors, setErrors] = useState<IErrors>({ email: "", password: "" });
   const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -72,6 +74,8 @@ export default function LoginPage() {
       setRole(data.role);
       setUserId(data.id);
       setOpenSuccess(true);
+    }else{
+      setOpenError(true);
     }
     setIsLoading(false);
   };
@@ -109,75 +113,76 @@ export default function LoginPage() {
         </div>
 
         <img src="/img/register/bone.png" alt="" />
+        <form onSubmit={(e)=>{handleLogin(); e.preventDefault();}}>
+          {/* User Login */}
+          <h3 className="text-2xl font-bold mt-2 text-white">User Login</h3>
 
-        {/* User Login */}
-        <h3 className="text-2xl font-bold mt-2 text-white">User Login</h3>
-
-        {/* Email */}
-        <div className="flex-col mb-4">
-          <div className="relative space-y-3 mt-2">
-            <CiMail className="absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="my-email-example@gmail.com"
-              className="bg-[#F4F9F4]/100 w-full rounded-lg p-2 placeholder:text-wrap dark:bg-[#2E4F4A]/100 border-none pl-10"
-            />
+          {/* Email */}
+          <div className="flex-col mb-4">
+            <div className="relative space-y-3 mt-2">
+              <CiMail className="absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="my-email-example@gmail.com"
+                className="bg-[#F4F9F4]/100 w-full rounded-lg p-2 placeholder:text-wrap dark:bg-[#2E4F4A]/100 border-none pl-10"
+              />
+            </div>
+            {errors.email && (
+              <span className="text-red-500 text-xs">{errors.email}</span>
+            )}
           </div>
-          {errors.email && (
-            <span className="text-red-500 text-xs">{errors.email}</span>
-          )}
-        </div>
 
-        {/* Password */}
-        <div className="flex-col mb-4">
-          <div className="relative space-y-3">
-            <IoLockClosedOutline className="absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="********"
-              className="bg-[#F4F9F4] w-full rounded-lg p-2 h-fit dark:bg-[#2E4F4A]/100 border-none pl-10"
-            />
+          {/* Password */}
+          <div className="flex-col mb-4">
+            <div className="relative space-y-3">
+              <IoLockClosedOutline className="absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="********"
+                className="bg-[#F4F9F4] w-full rounded-lg p-2 h-fit dark:bg-[#2E4F4A]/100 border-none pl-10"
+              />
+            </div>
+            {errors.password && (
+              <span className="text-red-500 text-xs">{errors.password}</span>
+            )}
           </div>
-          {errors.password && (
-            <span className="text-red-500 text-xs">{errors.password}</span>
-          )}
-        </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              checked={remember}
-              onCheckedChange={() => setRemember(!remember)}
-            />
-            <Label
-              htmlFor="remember"
-              className="text-sm cursor-pointer text-white"
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={remember}
+                onCheckedChange={() => setRemember(!remember)}
+              />
+              <Label
+                htmlFor="remember"
+                className="text-sm cursor-pointer text-white"
+              >
+                Remember me?
+              </Label>
+            </div>
+
+            <Link href="#" className="text-sm text-white hover:underline">
+              Forgot Password?
+            </Link>
+          </div>
+
+          {/* Login Button */}
+          <div className="flex justify-center items-center">
+            <Button
+              type="submit"
+              disabled={!allowLogin}
+              className="w-full bg-white text-black dark:bg-black dark:text-white hover:bg-gray-100 font-semibold cursor-pointer"
             >
-              Remember me?
-            </Label>
+              Login
+            </Button>
           </div>
-
-          <Link href="#" className="text-sm text-white hover:underline">
-            Forgot Password?
-          </Link>
-        </div>
-
-        {/* Login Button */}
-        <div className="flex justify-center items-center">
-          <Button
-            onClick={handleLogin}
-            disabled={!allowLogin}
-            className="w-full bg-white text-black dark:bg-black dark:text-white hover:bg-gray-100 font-semibold cursor-pointer"
-          >
-            Login
-          </Button>
-        </div>
+        </form>
 
         {/* Success Dialog */}
         <SuccessDialog
@@ -202,6 +207,8 @@ export default function LoginPage() {
             }
           }}
         />
+
+        <ErrorDialog open={openError} onOpenChange={setOpenError} errors={["Invalid Password Or Username"]}/>
 
         {/* Sign Up Links */}
         <div className="mt-4 text-sm text-center">
