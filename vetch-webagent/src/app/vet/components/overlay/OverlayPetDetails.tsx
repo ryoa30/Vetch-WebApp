@@ -26,14 +26,12 @@ interface PetData {
 interface PetDetailProps {
   open: boolean;
   onClose: () => void;
-  onStartAppointment: () => void;
   data: PetData | null;
 }
 
 export default function OverlayPetDetail({
   open,
   onClose,
-  onStartAppointment,
   data,
 }: PetDetailProps) {
   if (!open || !data) return null;
@@ -96,19 +94,7 @@ export default function OverlayPetDetail({
             ))}
           </ul>
         </div>
-
-        {/* Button */}
-        <div className="mt-6 text-right">
-          <button
-            onClick={onStartAppointment}
-            className="bg-[#3D8D7A] hover:bg-[#327566] text-white px-4 py-2 rounded-lg font-semibold"
-          >
-            Start Appointment
-          </button>
-          <p className="text-[10px] text-gray-500 mt-1">
-            Appointment can only start 10 mins before scheduled time
-          </p>
-        </div>
+        
       </div>
     </div>
   );
