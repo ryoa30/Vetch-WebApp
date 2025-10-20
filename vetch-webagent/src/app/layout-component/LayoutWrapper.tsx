@@ -34,7 +34,8 @@ export default function LayoutWrapper({ children, session }: { children: React.R
     "/vet/history",
     "/vet/patients",
     "/vet/schedule",
-    "/vet/profile-and-schedules",
+    "/vet/profile-and-schedules/profile",
+    "/vet/profile-and-schedules/schedules",
     "/admin/blog/set-blog",
   ];
 
