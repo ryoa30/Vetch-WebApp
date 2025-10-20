@@ -5,7 +5,7 @@ const {
 } = require("../utils/dateUtils");
 const BaseRepository = require("./BaseRepository");
 const RatingRepository = require("./RatingRepository");
-const {Client} = require("@googlemaps/google-maps-services-js");
+const { Client } = require("@googlemaps/google-maps-services-js");
 
 const client = new Client({});
 class VetRepository extends BaseRepository {
@@ -18,8 +18,11 @@ class VetRepository extends BaseRepository {
     this.findVetListEmergency = this.findVetListEmergency.bind(this);
   }
 
-  async findVetUserId(id){
-    return this._model.findUnique({ where: { id: id }, select: { userId: true } });
+  async findVetUserId(id) {
+    return this._model.findUnique({
+      where: { id: id },
+      select: { userId: true },
+    });
   }
 
   async findVetsCards(options = {}) {
@@ -41,9 +44,9 @@ class VetRepository extends BaseRepository {
     const feeMax = filters.feeRange ? filters.feeRange[1] * 1_000 : undefined;
 
     const wantHomecare = filters.homecareAble ?? false;
-    
+
     const schedule = filters.schedule;
-    console.log(schedule)
+    console.log(schedule);
     const haveScheduleFilter = !!schedule;
     const scheduleDays = haveScheduleFilter
       ? daysForPresetDb(
@@ -222,11 +225,18 @@ class VetRepository extends BaseRepository {
     return { vets, totalPages, totalItems };
   }
 
-  async findVetListEmergency(page = 1, volume = 10, query = "", filters) {
+  async findVetListEmergency(
+    page = 1,
+    volume = 10,
+    query = "",
+    filters,
+    userLocation
+  ) {
     const offset = (page - 1) * volume;
     const { timeOfDay } = nowForSchedule(); // current day + current time
     const q = query?.trim();
-    const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const startOfDay = (d) =>
+      new Date(d.getFullYear(), d.getMonth(), d.getDate());
     const today = startOfDay(new Date());
     const timeIn1h = new Date(timeOfDay + 60 * 60 * 1000);
 
@@ -247,7 +257,7 @@ class VetRepository extends BaseRepository {
           isDeleted: false,
           bookingDate: { equals: today },
           bookingTime: { gte: timeOfDay, lt: timeIn1h },
-        }
+        },
       },
       user: {
         is: {
@@ -284,7 +294,6 @@ class VetRepository extends BaseRepository {
             },
           }
         : {}),
-
     };
 
     // 1) fetch vets + next 3 slots (unsorted)
@@ -294,33 +303,52 @@ class VetRepository extends BaseRepository {
         userId: true,
         price: true,
         isAvailHomecare: true,
-        user: 
-        { 
-          select: 
-            { profilePicture: true, 
-              fullName: true,
-              locations: true 
-            } 
+        user: {
+          select: { profilePicture: true, fullName: true, locations: true },
         },
       },
       where,
     });
 
-    console.log(rows[0].user.locations[0]);
+    // console.log(rows[0].user.locations[0]);
 
-    // 2) sort by soonest upcoming slot
-    // rows.sort((a, b) => {
-    //   const A = a.schedules[0];
-    //   const B = b.schedules[0];
-    //   if (!A && !B) return 0;
-    //   if (!A) return 1;
-    //   if (!B) return -1;
-    //   if (A.dayNumber !== B.dayNumber) return A.dayNumber - B.dayNumber;
-    //   return A.timeOfDay.getTime() - B.timeOfDay.getTime();
-    // });
+    const distancedRows = (await Promise.all(
+      rows.map(async (vet) => {
+        if (!vet.user?.locations?.length) return null;
+        const loc = vet.user.locations[0];
+
+        const { data } = await client.distancematrix({
+          params: {
+            key: process.env.GOOGLE_MAPS_API_KEY,
+            origins: [loc.coordinates],
+            destinations: [userLocation.coordinates],
+            mode: "driving",
+            units: "metric",
+          },
+        });
+
+        const el = data.rows[0].elements[0];
+        if (!el?.distance?.value) return null;
+
+        return {
+          ...vet,
+          distance: el.distance, // meters
+          duration: el.duration, // seconds
+        };
+      })
+    )).filter(Boolean);
+
+    // sort by smallest distance (meters) ascending; undefined distances go last
+    distancedRows.sort(
+      (a, b) =>
+        (a.distance?.value ?? Number.POSITIVE_INFINITY) -
+        (b.distance?.value ?? Number.POSITIVE_INFINITY)
+    );
+
+    console.log(distancedRows);
 
     // (optional) filter by minRating AFTER we know ratings
-    const candidateIds = rows.map((v) => v.id);
+    const candidateIds = distancedRows.map((v) => v.id);
     const ratingAgg = await this.#ratingRepository.findAverageRatingVets(
       candidateIds
     );
@@ -336,12 +364,12 @@ class VetRepository extends BaseRepository {
 
     const minRating = filters.minRating ?? undefined;
     const rowsAfterRating = minRating
-      ? rows.filter((v) => {
+      ? distancedRows.filter((v) => {
           const agg = ratingMap.get(v.id);
           const avg = agg ? agg.ratingAvg : 0;
           return avg >= minRating;
         })
-      : rows;
+      : distancedRows;
 
     // 3) paginate AFTER sort (+ after rating filter)
     const totalItems = rowsAfterRating.length;
@@ -365,7 +393,6 @@ class VetRepository extends BaseRepository {
 
     return { vets, totalPages, totalItems };
   }
-
 
   async findVetById(id) {
     const row = await this._model.findUnique({

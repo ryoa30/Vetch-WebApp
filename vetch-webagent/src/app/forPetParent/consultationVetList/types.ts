@@ -12,6 +12,8 @@ export interface IVet {
     isAvailEmergency?:boolean;
     sipNumber?: string;
     speciesHandled?: string[];
+    distance?: any,
+    duration?: any,
 }
 
 export interface ISchedules {

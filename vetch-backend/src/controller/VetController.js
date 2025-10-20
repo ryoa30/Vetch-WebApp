@@ -1,4 +1,5 @@
 const VetRepository = require('../repository/VetRepository');
+const LocationRepository = require('../repository/LocationRepository');
 const ScheduleRepository = require('../repository/ScheduleRepository');
 const RatingRepository = require('../repository/RatingRepository');
 const { hhmmToUTCDate, dateToHHMM } = require('../utils/dateUtils');
@@ -7,11 +8,13 @@ class VetController {
     #vetRepository;
     #scheduleRepository;
     #ratingRepository;
+    #locationRepository;
 
     constructor() {
         this.#scheduleRepository = new ScheduleRepository();
         this.#vetRepository = new VetRepository();
         this.#ratingRepository = new RatingRepository();
+        this.#locationRepository = new LocationRepository();
 
         this.createSchedule = this.createSchedule.bind(this);
         this.getVetListConsultation = this.getVetListConsultation.bind(this);
@@ -53,8 +56,10 @@ class VetController {
 
     async getVetListEmergency(req, res) {
         try {
-            const { page, volume, query, filters} = req.body;
-            const vets = await this.#vetRepository.findVetListEmergency(Number(page), Number(volume), query, filters);
+            const { page, volume, query, filters, userId} = req.body;
+            const location = await this.#locationRepository.findLocationByUserId(userId);
+            // console.log(location);
+            const vets = await this.#vetRepository.findVetListEmergency(Number(page), Number(volume), query, filters, location);
             res.status(200).json({ok: true, data: vets, message: 'Vet list fetched successfully'});
         } catch (error) {
             console.log(error);

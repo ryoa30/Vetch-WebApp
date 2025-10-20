@@ -20,12 +20,13 @@ export class VetService {
       `/`, payload
     );
   }
-  async fetchVetsEmergency(page: number, volume: number, query: string = "", filters: any = {}) {
+  async fetchVetsEmergency(page: number, volume: number, query: string = "", filters: any = {}, userId: string) {
     const payload = {
       page,
       volume,
       query,
-      filters
+      filters,
+      userId
     }
 
     console.log("filters: ",filters);

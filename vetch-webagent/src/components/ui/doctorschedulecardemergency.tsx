@@ -35,8 +35,12 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
               ).toString()}`
             )
           }
-          className="w-full h-48 pb-2 flex items-center justify-center"
+          className="w-full h-48 pb-2 flex items-center justify-center relative"
         >
+          <div className="absolute top-0 right-0 bg-black text-white p-2 rounded-bl-lg">
+            <span className="font-medium">{doctor.distance.text}</span>
+            
+          </div>
           <Image
             src={doctor.profilePicture} // replace with your actual image
             alt="Doctor"

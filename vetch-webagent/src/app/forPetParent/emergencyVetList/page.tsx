@@ -8,6 +8,7 @@ import AppPaginationClient from "@/components/app-pagination-client";
 import { useLoading } from "@/contexts/LoadingContext";
 import { Input } from "@/components/ui/input";
 import VetFilters from "@/components/filtersEmergency";
+import { useSession } from "@/contexts/SessionContext";
 
 export default function HomePage() {
   const [doctors, setDoctors] = useState<IVet[]>([]);
@@ -16,6 +17,7 @@ export default function HomePage() {
   const [volume, setVolume] = useState(12);
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState({});
+  const {user} = useSession();
 
   const {setIsLoading} = useLoading();
 
@@ -24,7 +26,7 @@ export default function HomePage() {
   const loadVets = async () => {
     setIsLoading(true);
     try {
-      const result = await vetService.fetchVetsEmergency(pageNumber, volume, query, filters);
+      const result = await vetService.fetchVetsEmergency(pageNumber, volume, query, filters, user?.id || "");
       console.log(result);
       if (result.ok) {
         setTotalPages(result.data.totalPages);
