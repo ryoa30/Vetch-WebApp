@@ -190,7 +190,7 @@ class PaymentController {
         } catch (err) {
           // 404/410 => gone
           if (err && (err.statusCode === 404 || err.statusCode === 410)) {
-            await this.repo.remove(s.endpoint);
+            // await this.repo.remove(s.endpoint);
           }
           fail++;
         }
@@ -222,7 +222,7 @@ class PaymentController {
         } catch (err) {
           // 404/410 => gone
           if (err && (err.statusCode === 404 || err.statusCode === 410)) {
-            await this.repo.remove(s.endpoint);
+            // await this.repo.remove(s.endpoint);
           }
           fail++;
         }
@@ -254,7 +254,7 @@ class PaymentController {
         } catch (err) {
           // 404/410 => gone
           if (err && (err.statusCode === 404 || err.statusCode === 410)) {
-            await this.repo.remove(s.endpoint);
+            // await this.repo.remove(s.endpoint);
           }
           fail++;
         }
