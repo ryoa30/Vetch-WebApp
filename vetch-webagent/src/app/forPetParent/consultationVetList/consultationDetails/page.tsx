@@ -36,6 +36,7 @@ export default function DoctorProfile() {
   const vetService = new VetService();
   const [showError, setShowError] = useState(false);
   const [vet, setVet] = useState<IVet>();
+  const [errors, setErrors] = useState<string[]>([]);
   const router = useRouter();
 
   const loadVetDetails = async () => {
@@ -106,9 +107,16 @@ export default function DoctorProfile() {
         selectedTime: selectedTime || "",
       });
       if(!validation.ok){
+        console.log(validation.errors);
+        // Coerce validator errors to string[] safely
+        const errs = Object.values(validation.errors ?? {}).filter(
+          (e): e is string => typeof e === "string" && e.trim() !== ""
+        );
+        setErrors(errs);
         setShowError(true);
         return;
       }
+      setErrors([]);
 
       router.push(
         `/forPetParent/consultationVetList/consultationBooking?${new URLSearchParams(
@@ -336,7 +344,7 @@ export default function DoctorProfile() {
           )}
         </div>
       </div>
-      <ErrorDialog open={showError} onOpenChange={() => setShowError(false)} errors={["You already have a booking at this date and time"]}/>
+      <ErrorDialog open={showError} onOpenChange={() => setShowError(false)} errors={errors}/>
     </div>
   );
 }

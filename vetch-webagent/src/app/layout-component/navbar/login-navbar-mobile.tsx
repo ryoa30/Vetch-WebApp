@@ -28,7 +28,6 @@ export function NavbarMobile() {
           const res = await notificationService.confirmAllNotifications(user?.id || "");
           console.log(res);
           if(res.ok){
-              // remove notification from list
               loadUncomfirmedNotifications();
           }
       } catch (error) {

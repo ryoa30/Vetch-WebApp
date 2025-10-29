@@ -25,7 +25,7 @@ export default function Sidebar() {
     },
     { href: "/vet/history", label: "History", icon: History },
     {
-      href: "/vet/profile-and-schedules",
+      href: "/vet/profile-and-schedules/profile",
       label: "Profile & Schedules",
       icon: Contact,
     },
@@ -74,7 +74,7 @@ export default function Sidebar() {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start gap-2 text-white hover:bg-white/20",
+                    "w-full justify-start gap-2 text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20",
                     active && "bg-white/30"
                   )}
                 >
@@ -89,7 +89,7 @@ export default function Sidebar() {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-2 text-white hover:bg-white/20",
+                  "w-full justify-start gap-2 text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20",
                   ""
                 )}
               >

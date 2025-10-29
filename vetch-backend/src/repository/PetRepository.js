@@ -9,6 +9,10 @@ class PetRepository extends BaseRepository {
         return this._model.findMany({ where: { userId, isDeleted: false } });
     }
 
+    async findPetsByVetId(userId) {
+        return this._model.findMany({where: {bookings: {some: {vet: {userId}}}, isDeleted: false } });
+    }
+
 }
 
 module.exports = PetRepository;

@@ -3,55 +3,57 @@
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-interface Appointment {
-  name: string;
-  species: string;
-  time: string;
-  date: string;
-  details: string;
-}
-
-const appointments: Appointment[] = [
-  {
-    name: "Lorensius",
-    species: "Cat",
-    date: "22 Apr 2025",
-    time: "22:00",
-    details: "Regular check-up for vaccination and grooming.",
-  },
-  {
-    name: "Maurus",
-    species: "Cat",
-    date: "20 Apr 2025",
-    time: "12:00",
-    details: "Health check for seasonal allergy.",
-  },
-  {
-    name: "Lorensius",
-    species: "Reptile",
-    date: "20 Apr 2025",
-    time: "10:00",
-    details: "Temperature regulation and nutrition review.",
-  },
-  {
-    name: "Maurus",
-    species: "Reptile",
-    date: "19 Apr 2025",
-    time: "8:00",
-    details: "Routine check-up and habitat consultation.",
-  },
-];
+import { useLoading } from "@/contexts/LoadingContext";
+import { useEffect, useState } from "react";
+import { useSession } from "@/contexts/SessionContext";
+import { BookingService } from "@/lib/services/BookingService";
+import { BookingData, BookingWithRelations } from "@/app/types";
+import { snakeCase } from "lodash";
+import { formatIsoJakarta } from "@/lib/utils/formatDate";
+import { History, MessageCircle } from "lucide-react";
+import ChatHistoryDialogBox from "@/app/alert-dialog-box/ChatHistoryDialog";
+import OrderDetailOverlay from "@/app/forPetParent/orderHistory/components/OrderDetailOverlay";
 
 export default function HistoryPage() {
+  const { setIsLoading } = useLoading();
+  const [appointments, setAppointments] = useState<BookingWithRelations[]>([]);
+  const { user } = useSession();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<BookingWithRelations | null>(null);
+  const bookingService = new BookingService();
+  const loadAppointments = async () => {
+    setIsLoading(true);
+    try {
+      if (user) {
+        const result = await bookingService.fetchVetBookings(user?.id, [
+          "DONE",
+          "CANCELLED",
+        ]);
+        console.log(result.data);
+        if (result.ok) {
+          setAppointments(result.data);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
   return (
     <div className="p-6 bg-[#A3D1C6] dark:bg-[#71998F] min-h-screen text-black font-sans">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-4">
         <h1 className="text-4xl font-bold text-white">History</h1>
-        <Input
+        <input
           placeholder="Search for Veterinarian"
-          className="w-full md:w-[500px] mt-3 md:mt-0 rounded-full bg-white border-none text-black placeholder:text-gray-500"
+          className="w-full md:w-[500px] mt-3 md:mt-0 rounded-full px-4 py-2 bg-white border-none text-black placeholder:text-gray-500"
         />
       </div>
 
@@ -68,47 +70,95 @@ export default function HistoryPage() {
 
       {/* Appointment List */}
       <div className="space-y-4">
-        {appointments.map((a, idx) => (
+        {appointments.map((item, idx) => (
           <div
             key={idx}
-            className="flex justify-between items-center border-b border-black pb-3"
+            className="flex justify-between items-center border-b dark:text-white border-black pb-3"
           >
             {/* Left Info */}
             <div className="flex items-start gap-3">
               <Image
-                src={`/img/vet/${a.species.toLowerCase()}.png`}
-                alt={a.species}
-                width={40}
-                height={40}
-                className="object-contain"
+                src={`/img/pet-logo/${snakeCase(item.pet?.speciesName)}.png`}
+                alt={item.pet?.speciesName || "Vet"}
+                width={60}
+                height={60}
+                className="object-contain dark:invert"
               />
               <div>
                 <p className="font-semibold text-sm">
-                  {a.name} <span className="font-normal">| {a.species}</span>
+                  {item.pet?.petName}{" "}
+                  <span className="font-normal">| {item.pet?.speciesName}</span>
                 </p>
                 <p className="text-sm mt-1">
-                  <span className="font-semibold">Time:</span> {a.date} at {a.time}
+                  <span className="font-semibold">Time:</span>{" "}
+                  {item.bookingType === "Emergency"
+                    ? "EMERGENCY"
+                    : `${formatIsoJakarta(
+                        item.bookingDate.split("T")[0] +
+                          "T" +
+                          item.bookingTime.split("T")[1]
+                      )} (${item.bookingType})`} 
                 </p>
-                <a
-                  href="#"
-                  className="text-sm text-blue-700 hover:underline block mt-1"
-                >
-                  Details
-                </a>
-                <p className="text-sm mt-1">🐾 🐾 🐾 🐾 🐾</p>
+                <div className="flex flex-row gap-3 mt-3">
+                  <button
+                    className="text-[#3674B5] dark:text-[#a1bef1] text-sm font-medium cursor-pointer hover:underline"
+                    onClick={() => {
+                      setSelectedBooking(item);
+                      setIsDetailOpen(true);
+                    }}
+                  >
+                    Details
+                  </button>
+                  <Image
+                    src="/img/login/foot-step.png"
+                    alt="Pets Illustration"
+                    width={100}
+                    height={400}
+                    className="object-contain dark:invert"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Chat Button */}
-            <Button
-              variant="outline"
-              className="rounded-full border border-black text-black bg-white hover:bg-gray-100 text-sm px-3 py-1"
-            >
-              💬 Chat History
-            </Button>
+            <div>
+              {
+                item.bookingStatus === "DONE" &&
+                <button
+                  onClick={() => {
+                    setIsChatOpen(true);
+                    setSelectedBooking(item);
+                  }}
+                  className="bg-transparent w-fit flex-1/2 self-center h-fit text-black px-3 py-2 rounded-lg text-sm font-medium border border-black dark:hover:bg-gray-500 hover:bg-gray-100 dark:text-white dark:border-white duration-200 flex items-center gap-2"
+                >
+                  <div className="w-6 h-6 relative">
+                    <History className="absolute w-3 h-3 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black dark:text-white" />
+                    <MessageCircle className="w-6 h-6 text-black dark:text-white" />
+                  </div>
+                  Chat History
+                </button>
+              }
+              { item.bookingStatus === "CANCELLED" &&
+                <p className="text-red-500 font-semibold">Cancelled</p>
+              }
+            </div>
           </div>
         ))}
       </div>
+      {isChatOpen && (
+        <ChatHistoryDialogBox
+          isOpen={isChatOpen}
+          setIsOpen={setIsChatOpen}
+          booking={selectedBooking}
+        />
+      )}
+      {isDetailOpen && selectedBooking &&
+      <OrderDetailOverlay 
+        booking={selectedBooking}
+        handleAction={()=>{}}
+        open={isDetailOpen}
+        setIsOpen={setIsDetailOpen}
+      />}
     </div>
   );
 }

@@ -91,6 +91,19 @@ class ScheduleRepository extends BaseRepository {
       timeOfDay: schedule.timeOfDay.toISOString().slice(11, 16),
     }));
   }
+
+  async findVetShcedulesUserIdDay(userId, day) {
+    const result = await this._model.findMany({
+      where: {
+        vet: {
+          userId: userId
+        },
+        dayNumber: Number(day),
+      },
+      orderBy: { timeOfDay: "asc" },
+    })
+    return result;
+  }
 }
 
 module.exports = ScheduleRepository;

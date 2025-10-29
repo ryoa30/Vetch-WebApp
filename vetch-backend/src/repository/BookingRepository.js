@@ -92,7 +92,7 @@ class BookingRepository extends BaseRepository {
       bookingStatus: status.length > 0
         ? {in: status}
         : { in: ["PAYMENT", "PENDING", "ACCEPTED", "ONGOING", "DONE", "CANCELLED"] },
-      bookingType: type ? type : { in: ["Online", "Homecare"] },
+      bookingType: type ? type : { in: ["Online", "Homecare", "Emergency"] },
       bookingDate: { gte: start, lte: end },
       ...(date
         ? {
@@ -211,6 +211,7 @@ class BookingRepository extends BaseRepository {
         bookingDate: { gte: startDate, lte: endDate },
         bookingTime: { lt: start },
         bookingStatus: { in: ["PAYMENT", "PENDING"] },
+        bookingType: { in: ["Online"] },
       },
       include:{
         pet: true,

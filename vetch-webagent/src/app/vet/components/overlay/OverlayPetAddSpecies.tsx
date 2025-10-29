@@ -18,20 +18,59 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEffect, useState } from "react";
+import { SpeciesTypeData } from "@/app/types";
+import { VetService } from "@/lib/services/VetService";
 
-export default function AddSpeciesModal() {
+export default function AddSpeciesModal({vetId, onAction, speciesHandled = []}: {vetId: string, onAction: (data?: any) => void, speciesHandled?: any[]}) {
+  const [speciesTypes, setSpeciesTypes] = useState<SpeciesTypeData[]>([]);
+  const [speciesTypeId, setSpeciesTypeId] = useState<string>("");
+  const [open, setOpen] = useState(false);
+  const vetService = new VetService();
+
+  useEffect(() => {
+    const loadSpeciesTypes = async () => {
+      try {
+        const result = await vetService.fetchSpeciesTypes();
+        console.log(result);
+        if (result.ok) {
+          setSpeciesTypes(result.data.filter((st:SpeciesTypeData) => !speciesHandled.some(sh => sh.speciesType.id === st.id)));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    loadSpeciesTypes();
+  }, [])
+  
+  const handleConfirm = async () =>{
+    try {
+      const response = await vetService.postVetSpecies(vetId, speciesTypeId);
+      if(response.ok){
+        onAction({...response.data, speciesType: {id: speciesTypeId, speciesName: speciesTypes.find(st => st.id === speciesTypeId)?.speciesName || ""}});
+        console.log(response);
+        // close dialog after successful action
+        setOpen(false);
+        // optional: reset selection
+        setSpeciesTypeId("");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     // Komponen ini membungkus pemicu (tombol +) dan konten modal
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       {/* Pemicu yang akan membuka modal */}
       <DialogTrigger asChild>
         <Button className="bg-gray-200 text-black hover:bg-gray-300">+</Button>
       </DialogTrigger>
 
       {/* Konten yang akan ditampilkan di dalam overlay */}
-      <DialogContent className="sm:max-w-[480px] bg-white">
+      <DialogContent className="sm:max-w-[480px] bg-white dark:bg-[#1F2D2A]">
         <DialogHeader>
-          <DialogTitle className="text-xl text-teal-700 font-bold">
+          <DialogTitle className="text-xl text-teal-700 dark:text-white font-bold">
             Add Species
           </DialogTitle>
         </DialogHeader>
@@ -41,23 +80,24 @@ export default function AddSpeciesModal() {
           {/* Dropdown untuk memilih spesies */}
           <div className="grid gap-2">
             <label htmlFor="species" className="text-sm font-medium">
-              Pet's Species
+              Pet&apos;s Species
             </label>
-            <Select>
-              <SelectTrigger id="species">
-                <SelectValue placeholder="- Choose -" />
+            <Select value={speciesTypeId} onValueChange={setSpeciesTypeId}>
+              <SelectTrigger id="species" className="w-full">
+                <SelectValue placeholder="- Choose -" className="w-full"/>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="bird">Bird</SelectItem>
-                <SelectItem value="fish">Fish</SelectItem>
-                <SelectItem value="rabbit">Rabbit</SelectItem>
-                <SelectItem value="hamster">Hamster</SelectItem>
+                {speciesTypes.map((species) => (
+                  <SelectItem key={species.id} value={species.id}>
+                    {species.speciesName}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           
           {/* Input untuk upload file */}
-          <div className="grid gap-2">
+          {/* <div className="grid gap-2">
             <label htmlFor="proof" className="text-sm font-medium">
               Add Proof/Certificate
             </label>
@@ -66,11 +106,11 @@ export default function AddSpeciesModal() {
               <Upload className="h-4 w-4 text-gray-500" />
             </label>
             <Input id="proof-upload" type="file" className="hidden" />
-          </div>
+          </div> */}
         </div>
         
         <DialogFooter>
-          <Button variant="outline" className="font-semibold">
+          <Button variant="outline" className="font-semibold" onClick={handleConfirm}>
             Confirm
           </Button>
         </DialogFooter>

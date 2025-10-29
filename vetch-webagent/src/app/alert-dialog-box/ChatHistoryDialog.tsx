@@ -55,9 +55,7 @@ export default function ChatHistoryDialogBox({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent
         showCloseButton={false}
-        className={`${
-          user?.role === "vet" ? "sm:max-w-4xl" : "sm:max-w-lg"
-        } flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
+        className={` sm:max-w-lg flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
       >
 
         <div className="flex flex-col h-[600px] w-full">

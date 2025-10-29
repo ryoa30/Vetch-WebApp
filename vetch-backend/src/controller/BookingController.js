@@ -3,6 +3,7 @@ const RatingRepository = require('../repository/RatingRepository');
 const ConcernDetailRepository = require('../repository/ConcernDetailRepository');
 const ConcernTypeRepository = require('../repository/ConcernTypeRepository');
 const NotificationController = require('./NotificationController');
+const PetRepository = require('../repository/PetRepository');
 const { hhmmToUTCDate, dateToHHMM, formatIsoJakartaShort } = require('../utils/dateUtils');
 
 
@@ -12,6 +13,7 @@ class BookingController {
     #concernTypeRepository;
     #ratingRepository;
     #notificationController;
+    #petRepository;
 
     constructor() {
         this.#ratingRepository = new RatingRepository();
@@ -19,6 +21,7 @@ class BookingController {
         this.#concernDetailRepository = new ConcernDetailRepository();
         this.#concernTypeRepository = new ConcernTypeRepository();
         this.#notificationController = new NotificationController();
+        this.#petRepository = new PetRepository();
 
         this.getConcernTypes = this.getConcernTypes.bind(this);
         this.createBooking = this.createBooking.bind(this);
@@ -29,6 +32,7 @@ class BookingController {
         this.getBookingByVetId = this.getBookingByVetId.bind(this);
         this.getPastBookingsByPetId = this.getPastBookingsByPetId.bind(this);
         this.syncBookings = this.syncBookings.bind(this);
+        this.putConclussionDates = this.putConclussionDates.bind(this);
     }
 
     async createBookingRating (req, res) {
@@ -147,9 +151,36 @@ class BookingController {
         try {
             const {id, status} = req.body;
             const updatedBooking = await this.#bookingRepository.update(id, {bookingStatus: status});
+            console.log(updatedBooking);
             if(status === "PENDING") {
-                this.#notificationController.sendToVets([updatedBooking.vetId], {title:`You have a new booking request on ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)}`});
+                this.#notificationController.sendToVets([updatedBooking.vetId], {title:`You have a new ${updatedBooking.bookingType} booking request on ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)}`});
+            }else if(status === "ACCEPTED") {
+                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your booking has been accepted by the vet for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)}`});
+            }else if(status === "CANCELLED") {
+                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking has been cancelled`});
+                this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} has been cancelled`});
+            }else if(status === "DONE") {
+                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking has been marked as done`});
+                this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} has been marked as done`});
+            }else if(status === "ONGOING") {
+                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now ongoing`});
+                this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now ongoing`});
             }
+            res.status(200).json({ok: true, data: updatedBooking, message: 'Booking status updated successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ok: false, message: 'Error updating booking status', error: error.message });
+        }
+    }
+
+    async putConclussionDates (req, res) { 
+        try {
+            const {id, conclusion, consultationDate, vaccineDate} = req.body;
+            const updatedBooking = await this.#bookingRepository.update(id, {bookingConclusion: conclusion});
+            if(consultationDate || vaccineDate){
+                await this.#petRepository.update(updatedBooking.petId, {reminderConsultationDate: consultationDate ? new Date(consultationDate) : null, reminderVaccineDate: vaccineDate ? new Date(vaccineDate) : null});
+            }
+            console.log(updatedBooking);
             res.status(200).json({ok: true, data: updatedBooking, message: 'Booking status updated successfully'});
         } catch (error) {
             console.log(error);

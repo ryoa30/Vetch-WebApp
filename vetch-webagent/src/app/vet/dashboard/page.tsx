@@ -51,7 +51,7 @@ export default function DashboardPage() {
     setIsChatOpen(false);
   };
 
-  const handleStartAppointment = () => {
+  const handleChatOpen = () => {
     setIsDetailOpen(false); // Tutup detail
     setIsChatOpen(true); // Buka chat
   };
@@ -179,14 +179,14 @@ export default function DashboardPage() {
       </div>
 
       {/* ✅ 5. Props untuk Overlay diperbaiki */}
-      <OverlayPetDetail
+      {isDetailOpen && <OverlayPetDetail
         open={isDetailOpen}
         onClose={handleCloseAll}
         data={selectedBooking}
-        onStartAppointment={handleStartAppointment}
-      />
+        onAction={handleChatOpen}
+      />}
 
-      <ChatDialogBox booking={selectedBooking} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>
+      { isChatOpen && <ChatDialogBox booking={selectedBooking} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>}
     </div>
   );
 }

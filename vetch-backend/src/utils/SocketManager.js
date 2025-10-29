@@ -1,13 +1,16 @@
 const ChatRepository = require("../repository/ChatRepository");
+const NotificationController = require("../controller/NotificationController");
 
 class SocketManager {
   /**
    * @param {import('socket.io').Server} io
    */
   #chatRepository;
+  #notificationController;
   constructor(io) {
     this.io = io;
     this.#chatRepository = new ChatRepository();
+    this.#notificationController = new NotificationController();
   }
 
   init() {
@@ -34,7 +37,7 @@ class SocketManager {
 
       socket.on(
         "send_message",
-        async ({ roomId, senderId, senderRole, message }) => {
+        async ({ roomId, senderId, senderRole, message }, ack) => {
           try {
             const saved = await this.#chatRepository.addMessage({
               roomId,
@@ -42,7 +45,37 @@ class SocketManager {
               senderRole,
               content: message,
             });
+
+            // Count others in the room (works with clustered adapters)
+            const socketsInRoom = await this.io.in(roomId).allSockets();
+            const total = socketsInRoom.size;
+            const others = socket.rooms.has(roomId) ? Math.max(total - 1, 0) : total;
+
             this.io.to(roomId).emit("receive_message", saved);
+            if (others > 0) {
+              ack?.({ deliveredRealtime: true, notified: false });
+            } else {
+              await this.#notificationController.sendToUserBooking([roomId], {title: "New message in your chat", body: message}, senderRole);
+              ack?.({ deliveredRealtime: false, notified: true });
+            }
+          } catch (err) {
+            console.error("Error saving message:", err);
+            ack?.({ error: true });
+          }
+        }
+      );
+
+      socket.on(
+        "finishBooking",
+        async ({ roomId }) => {
+          try {
+            // Count others in the room (works with clustered adapters)
+            if (!socket.rooms.has(roomId)) return;
+            console.log(`finish booking from booking ${roomId}`);
+
+            socket.to(roomId).emit("finishBooking", {
+              roomId,
+            });
           } catch (err) {
             console.error("Error saving message:", err);
           }
@@ -50,11 +83,12 @@ class SocketManager {
       );
 
       // WebRTC signaling passthrough
-      socket.on("callUser", ({ roomId, signalData, from, name }) => {
+      socket.on("callUser", async ({ roomId, signalData, from, name, senderRole }) => {
         if (!roomId) return;
         // ensure the caller is actually in the room (optional safety)
         if (!socket.rooms.has(roomId)) return;
         console.log(`callUser from ${from} to room ${roomId}`);
+        await this.#notificationController.sendToUserBooking([roomId], {title: "You have a new call"}, senderRole);
 
         socket.to(roomId).emit("callUser", {
           signal: signalData, // offer

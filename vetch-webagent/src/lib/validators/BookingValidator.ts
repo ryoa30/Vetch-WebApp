@@ -1,5 +1,5 @@
 import { BookingService } from "../services/BookingService";
-import { formatLocalDate } from "../utils/formatDate";
+import { dateToUTCDate, formatLocalDate, hhmmToUTCDate } from "../utils/formatDate";
 
 // /lib/LoginValidator.ts
 export type BookingInfoInput = {
@@ -24,9 +24,12 @@ export class BookingValidator {
 
   async validateBookingSelection(input: Partial<BookingSelectionInput>) {
     const errors: Record<string, string> = {};
-
+    console.log("Validating booking selection:", input);
+    if(hhmmToUTCDate(input.selectedTime) < dateToUTCDate(new Date()) && formatLocalDate(input.selectedDate!) === formatLocalDate(new Date())){
+      errors.selectedTime = "Selected date time cannot be in the past";
+    }
     const booking = await this.bookingService.fetchBookingByUserDateTime(input.userId!, formatLocalDate(input.selectedDate!), input.selectedTime!);
-    console.log(booking);
+    console.log(booking.data);
 
     if(booking.data){
       errors.selectedTime = "You already have a booking at this date and time";
@@ -37,7 +40,6 @@ export class BookingValidator {
     return {
       ok: true,
     };
-    // const 
   }
 
   validateBookingInfo(

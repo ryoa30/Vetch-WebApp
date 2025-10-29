@@ -158,6 +158,24 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
+.custom-scrollbar-secondary::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.custom-scrollbar-secondary::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 16px;
+}
+.custom-scrollbar-secondary::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 3px;
+}
+.custom-scrollbar-secondary::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+/* globals.css */
+.pac-container { z-index: 100000 !important; }
+
 
 @layer base {
   * {

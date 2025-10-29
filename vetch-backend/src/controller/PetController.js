@@ -7,6 +7,7 @@ class PetController {
     this.#petRepository = new PetRepository();
 
     this.getPetsByUserId = this.getPetsByUserId.bind(this);
+    this.getPetsByVetId = this.getPetsByVetId.bind(this);
     this.updatePetDetails = this.updatePetDetails.bind(this);
     this.softDeletePet = this.softDeletePet.bind(this);
     this.createPet = this.createPet.bind(this);
@@ -89,6 +90,23 @@ class PetController {
       res.status(500).json({
         ok: false,
         message: "Error fetching pets types",
+        error: error.message,
+      });
+    }
+  }
+
+  async getPetsByVetId(req, res) {
+    try {
+      const { userId } = req.params;
+      const vets = await this.#petRepository.findPetsByVetId(userId);
+      res
+        .status(200)
+        .json({ ok: true, data: vets, message: "Pets fetched successfully" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        ok: false,
+        message: "Error fetching pets based on vet",
         error: error.message,
       });
     }

@@ -47,14 +47,14 @@ export function ConfirmationDialogBox({
           <AlertDialogAction asChild>
             <button
               onClick={onConfirm}
-              className="px-6 py-2 rounded-md border border-black bg-white !text-black hover:bg-transparent"
+              className="px-6 py-2 rounded-md border border-black dark:border-white dark:hover:text-white bg-white text-black hover:bg-transparent"
             >
               Yes
             </button>
           </AlertDialogAction>
 
           {/* No button */}
-          <AlertDialogCancel className="px-6 py-2 rounded-md bg-red-500 text-white hover:bg-red-600">
+          <AlertDialogCancel className="px-6 py-2 rounded-md !bg-red-500 text-white hover:!bg-red-600">
             No
           </AlertDialogCancel>
         </AlertDialogFooter>

@@ -17,6 +17,18 @@ class NotificationSubscriptionRepository extends BaseRepository {
         return this._model.findMany({ where: { user: { vetProfile: { id: {in: vetIds}}} }});
     }
 
+    async findByPetIds(petIds) {
+        return this._model.findMany({ where: { user: { pets: { some: {id: {in: petIds}}}} }});
+    }
+
+    async findByBookingIds(bookingIds, role) {
+        if(role === "vet"){
+            return this._model.findMany({ where: { user: {pets: {some: {bookings: {some: {id:{in: bookingIds}}}}}} }});
+        }else{
+            return this._model.findMany({where: { user: {vetProfile: {bookings: {some: {id:{in: bookingIds}}}}}} });
+        }
+    }
+
 }
 
 module.exports = NotificationSubscriptionRepository;

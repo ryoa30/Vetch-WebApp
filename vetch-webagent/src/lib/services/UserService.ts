@@ -27,6 +27,23 @@ export class UserService {
     // return null;
   }
 
+  async updateLocation (userId: string, addressName: string, postalCode: string, city: string, district: string, urbanVillage: string, province: string, addressNotes: string, coordinates: string){
+    // console.log(coordinates);
+    return await this.#http.put<IResponse>('/location/', {
+      userId: userId,
+      location:{
+        addressName: addressName,
+        postalCode: postalCode,
+        city: city,
+        district: district,
+        urbanVillage: urbanVillage,
+        province: province,
+        addressNotes: addressNotes,
+        coordinates: coordinates,
+      }
+    } )
+  }
+
   async fetchUserById (userId: string){
     return await this.#http.get<IResponse>('/' + userId);
   }

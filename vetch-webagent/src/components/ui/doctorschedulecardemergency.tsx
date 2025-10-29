@@ -30,7 +30,7 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
         <button
           onClick={() =>
             router.push(
-              `/forPetParent/consultationVetList/consultationDetails?${new URLSearchParams(
+              `/forPetParent/emergencyVetList/emergencyDetails?${new URLSearchParams(
                 { id: doctor.id }
               ).toString()}`
             )
@@ -119,7 +119,7 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
         {isAuthenticated && 
         (<button className="text-center w-full font-medium text-gray-800 hover:underline">
           <a
-            href={`/forPetParent/consultationVetList/consultationDetails?${new URLSearchParams(
+            href={`/forPetParent/emergencyVetList/emergencyDetails?${new URLSearchParams(
               { id: doctor.id }
             ).toString()}`}
             className="block px-4 py-2 text-gray-800 dark:text-white"

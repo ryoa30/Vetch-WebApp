@@ -11,10 +11,12 @@ router.get('/vet', bookingController.getBookingByVetId);
 router.get('/concern-types', bookingController.getConcernTypes);
 router.get('/by-user-date-time', bookingController.getBookingByUserIdDateTime);
 
+
 router.post('/', bookingController.createBooking);
 router.post('/rate', bookingController.createBookingRating);
 router.put('/status', bookingController.putBookingStatus);
+router.put('/conclusion', bookingController.putConclussionDates);
 
-cron.schedule("* * * * *", async () => { bookingController.syncBookings() });
+// cron.schedule("* * * * *", async () => { bookingController.syncBookings() });
 
 module.exports = router;

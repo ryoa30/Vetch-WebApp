@@ -25,6 +25,13 @@ class VetRepository extends BaseRepository {
     });
   }
 
+  async findVetId(userId) {
+    return this._model.findUnique({
+      where: { userId: userId },
+      select: { id: true },
+    });
+  }
+
   async findVetsCards(options = {}) {
     return this._model.findMany(options);
   }
@@ -394,7 +401,7 @@ class VetRepository extends BaseRepository {
     return { vets, totalPages, totalItems };
   }
 
-  async findVetById(id) {
+  async findVetById(id, userLocation) {
     const row = await this._model.findUnique({
       select: {
         id: true,
@@ -404,7 +411,7 @@ class VetRepository extends BaseRepository {
         isAvailEmergency: true,
         price: true,
         description: true,
-        user: { select: { profilePicture: true, fullName: true } },
+        user: { select: { profilePicture: true, fullName: true , locations: true } },
         speciesHandled: {
           select: {
             speciesType: {
@@ -423,6 +430,22 @@ class VetRepository extends BaseRepository {
       },
     });
 
+    let el = null;
+
+    if(userLocation != null){
+      const { data } = await client.distancematrix({
+        params: {
+          key: process.env.GOOGLE_MAPS_API_KEY,
+          origins: [row.user.locations[0].coordinates],
+          destinations: [userLocation.coordinates],
+          mode: "driving",
+          units: "metric",
+        },
+      });
+  
+      el = data.rows[0].elements[0];
+    }
+
     const rating = await this.#ratingRepository.findAverageRatingVet(id);
 
     console.log(rating);
@@ -432,6 +455,8 @@ class VetRepository extends BaseRepository {
       ...row.user,
       ratingAvg: rating[0] ? Math.round(rating[0]._avg.rating * 10) / 10 : 0,
       ratingCount: rating[0] ? rating[0]._count._all : 0,
+      distance: el? el.distance : undefined, // meters
+      duration: el? el.duration : undefined, // seconds
       profilePicture:
         row.user.profilePicture ||
         "https://res.cloudinary.com/daimddpvp/image/upload/v1758101764/default-profile-pic_lppjro.jpg",
@@ -484,6 +509,13 @@ class VetRepository extends BaseRepository {
     return { flattened, totalPages, totalItems: total };
   }
 
+  async findVetByUserId(userId) {
+    return this._model.findUnique({
+      where: { userId: userId },
+      include: { user: {include: {locations: true}}, speciesHandled: { include: { speciesType: true } } },
+    })
+  }
+
   async findVetsConfirmedCertificates(page = 0, volume = 10, query = "") {
     const offset = (page - 1) * volume;
     const q = query?.trim();
@@ -527,6 +559,14 @@ class VetRepository extends BaseRepository {
         verifiedDate: new Date(),
       },
     });
+  }
+
+  async updateVetDetails(vet) {
+    const updatedVet = await this._model.update({
+      where: { id: vet.id },
+      data: vet,
+    });
+    return updatedVet;
   }
 }
 

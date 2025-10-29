@@ -53,6 +53,7 @@ const OrderHistory: React.FC = () => {
     if (bookings.online) setOnlineConsultations(bookings.online);
     else setOnlineConsultations([]);
     if (bookings.homecare) setHomecareConsultations(bookings.homecare);
+    if (bookings.emergency) setHomecareConsultations(prev => [...prev, ...bookings.emergency]);
     else setHomecareConsultations([]);
     console.log(bookings);
     setIsLoading(false);

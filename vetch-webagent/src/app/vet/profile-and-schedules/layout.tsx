@@ -23,10 +23,6 @@ export default function ProfileAndSchedulesLayout({
         <h1 className="text-4xl font-bold text-white">
           Profiles and Schedules
         </h1>
-        <Input
-          placeholder="Search for Veterinarian"
-          className="w-full md:w-[500px] mt-3 md:mt-0 rounded-full bg-white dark:bg-white"
-        />
       </div>
 
       {/* Bone divider */}

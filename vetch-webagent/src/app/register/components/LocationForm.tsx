@@ -151,6 +151,7 @@ const LocationForm:FC<IProps> = ({role}) => {
           <Autocomplete
             onLoad={(ref) => (autoCompleteRef.current = ref)}
             onPlaceChanged={handlePlaceChanged}
+            className="w-full"
           >
             <input
               type="text"

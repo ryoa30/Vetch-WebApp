@@ -1,25 +1,17 @@
 // components/OverlayPetDetail.tsx
 "use client";
+import { PetData } from "@/app/types";
+import { BookingService } from "@/lib/services/BookingService";
+import { ageFromDob, formatAge, formatIsoJakarta } from "@/lib/utils/formatDate";
 import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader } from "lucide-react";
 
 // Tipe untuk item riwayat
 interface HistoryItem {
   date: string;
   desc: string;
   type: string;
-}
-
-// Tipe untuk data hewan peliharaan
-interface PetData {
-  name: string;
-  gender: string;
-  species: string;
-  neuter: string;
-  age: string;
-  weight: string;
-  color: string;
-  medicalHistory?: HistoryItem[]; 
-  myHistory?: HistoryItem[]; // Dibuat optional karena bisa jadi undefined
 }
 
 // Tipe untuk props komponen
@@ -34,11 +26,40 @@ export default function OverlayPetDetail({
   onClose,
   data,
 }: PetDetailProps) {
-  if (!open || !data) return null;
+  const bookingService = new BookingService();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [medicalHistory, setMedicalHistory] = useState<any[]>([]);
+
+
+
+  const loadMedicalHistory = async () => {
+    setIsLoading(true);
+    try {
+      const result1 = await bookingService.fetchPetMedicalHistory(
+        data?.id || ""
+      );
+      // const result2 = await bookingService.fetchPetMedicalHistory(data.id, data.vet.id);
+      // console.log(result2);
+      setMedicalHistory(result1.data || []);
+      // setMedicalHistoryWithVet(result2.data || []);
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    if (data) {
+      loadMedicalHistory();
+    }
+  }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 z-50 bg-black/50" onClick={onClose}></div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh] z-100">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-600 dark:text-gray-200"
@@ -50,28 +71,29 @@ export default function OverlayPetDetail({
         <div className="space-y-3">
           <div>
             <p className="text-lg font-semibold text-gray-800 dark:text-white">
-              {data.name} | {data.gender}
+              {data?.petName} | {data?.gender}
             </p>
             <p className="text-xs text-gray-500">Pet name</p>
           </div>
 
           <div>
             <p className="text-base text-gray-800 dark:text-white">
-              {data.species} | {data.neuter}
+              {data?.speciesName} |{" "}
+              {data?.neuterStatus ? "Neutered" : "Not Neutered"}
             </p>
             <p className="text-xs text-gray-500">Species | Neuter Status</p>
           </div>
 
           <div>
             <p className="text-base text-gray-800 dark:text-white">
-              {data.age} | {data.weight}
+              {formatAge(ageFromDob(data?.petDob || ""))} | {data?.weight}Kg
             </p>
             <p className="text-xs text-gray-500">Age | Weight</p>
           </div>
 
           <div>
             <p className="text-base text-gray-800 dark:text-white">
-              {data.color}
+              {data?.primaryColor}
             </p>
             <p className="text-xs text-gray-500">Primary Color</p>
           </div>
@@ -82,19 +104,34 @@ export default function OverlayPetDetail({
           <h3 className="font-semibold text-gray-800 dark:text-white mb-2">
             Medical History
           </h3>
-          <ul className="list-disc list-inside text-sm space-y-2">
-            {data.medicalHistory?.map((item, idx) => (
+          <ul className="list-disc list-inside text-sm space-y-2 text-black dark:text-white">
+            {medicalHistory?.map((item, idx) => (
               <li key={idx} className="flex items-center justify-between">
-                <span className="flex-1">
-                  {item.date} {item.desc}
+                <span className="flex-[30%]">
+                  {formatIsoJakarta(
+                    item.bookingDate.split("T")[0] +
+                      "T" +
+                      item.bookingTime.split("T")[1]
+                  )}
                 </span>
-                <span className="w-px h-4 bg-gray-300 mx-2" />
-                <span className="text-gray-500 text-xs">{item.type}</span>
+                <span className="flex-[50%] px-2">
+                  {item.concernDetails
+                    .map((c: any) => c.concern.concernName)
+                    .join(", ")}
+                </span>
+                <span className="flex-[20%]">{item.bookingType}</span>
               </li>
             ))}
+            {medicalHistory.length === 0 && (
+              <p className="text-gray-500">No medical history available.</p>
+            )}
+            {isLoading && (
+              <div className="flex justify-center transition-all duration-300">
+                <Loader className="animate-spin w-6 h-6 text-gray-600 dark:text-gray-200" />
+              </div>
+            )}
           </ul>
         </div>
-        
       </div>
     </div>
   );

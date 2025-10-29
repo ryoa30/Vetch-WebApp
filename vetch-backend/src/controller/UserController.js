@@ -34,6 +34,7 @@ class UserController {
         this.validateOTP = this.validateOTP.bind(this);
         this.validateLogin = this.validateLogin.bind(this);
         this.updateUserDetails = this.updateUserDetails.bind(this);
+        this.updateUserLocation = this.updateUserLocation.bind(this);
     }
 
     async updateUserDetails(req, res) {
@@ -68,6 +69,24 @@ class UserController {
         } catch (error) {
             console.log(error);
             res.status(500).json({ok: false, message: 'Error updating user details', error: error.message });
+        }
+    }
+
+    async updateUserLocation(req, res) {
+        try {
+            const { userId, location } = req.body;
+            console.log("Updating location for user:", userId, location);
+            const existingLocation = await this.#locationRepository.findLocationByUserId(userId);
+            if(existingLocation){
+                const updatedLocation = await this.#locationRepository.update(existingLocation.id, location);
+                res.status(200).json({ok: true, message: 'User location updated successfully', data: updatedLocation });
+            }else{
+                const newLocation = await this.#locationRepository.create({...location, userId});
+                res.status(200).json({ok: true, message: 'User location created successfully', data: newLocation });
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ok: false, message: 'Error updating user location', error: error.message });
         }
     }
 

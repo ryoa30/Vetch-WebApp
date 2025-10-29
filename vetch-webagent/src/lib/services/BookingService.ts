@@ -15,6 +15,10 @@ export class BookingService {
     return await this.#http.put<IResponse>(`/status`, {id: bookingId, status });
   }
 
+  async changeBookingConclusionDate(bookingId: string, conclusion: string) {
+    return await this.#http.put<IResponse>(`/conclusion`, {id: bookingId, conclusion });
+  }
+
   async fetchConcernTypes() {
     return await this.#http.get<IResponse>("/concern-types");
   }
@@ -28,16 +32,18 @@ export class BookingService {
   async fetchBookingConsultationHomecare(userId: string, status: string){
     const resultOnline =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Online&status=${status}`);
     const resultHomecare =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Homecare&status=${status}`);
+    const resultEmergency =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Emergency&status=${status}`);
 
     console.log(resultOnline, resultHomecare);
 
     return {
       online: resultOnline.ok? resultOnline.data: undefined,
-      homecare: resultHomecare.ok ? resultHomecare.data : undefined
+      homecare: resultHomecare.ok ? resultHomecare.data : undefined, 
+      emergency: resultEmergency.ok ? resultEmergency.data : undefined
     }
   }
   
-  async fetchVetBookings(userId: string, status: string[], date: string){
+  async fetchVetBookings(userId: string, status: string[], date?: string){
     const result =  await this.#http.get<IResponse>(`/vet/?userId=${userId}&status=${status}${date?`&date=${date}`:""}`);
 
     // console.log(result);

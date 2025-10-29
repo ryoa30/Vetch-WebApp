@@ -20,6 +20,8 @@ class PaymentController {
     this.sendToAll = this.sendToAll.bind(this);
     this.sendToUsers = this.sendToUsers.bind(this);
     this.sendToVets = this.sendToVets.bind(this);
+    this.sendToPetOwners = this.sendToPetOwners.bind(this);
+    this.sendToUserBooking = this.sendToUserBooking.bind(this);
     this.getUnconfirmedNotifications = this.getUnconfirmedNotifications.bind(this);
     this.putConfirmNotification = this.putConfirmNotification.bind(this);
     this.putConfirmAllNotifications = this.putConfirmAllNotifications.bind(this);
@@ -166,9 +168,73 @@ class PaymentController {
     return { ok, fail };
   }
 
+  async sendToUserBooking(bookingIds, payload, role) {
+    const subs = await this.#notificationSubscriptionRepository.findByBookingIds(
+      bookingIds, role
+    );
+    let ok = 0,
+      fail = 0;
+    await Promise.all(
+      subs.map(async (s) => {
+        try {
+          await webpush.sendNotification(
+            { endpoint: s.endpoint, keys: s.keys },
+            JSON.stringify({...payload, ...defaultPayload})
+          );
+          await this.#notificationRepository.create({
+            userId: s.userId,
+            message: payload.title,
+            confirmed: false,
+          });
+          ok++;
+        } catch (err) {
+          // 404/410 => gone
+          if (err && (err.statusCode === 404 || err.statusCode === 410)) {
+            await this.repo.remove(s.endpoint);
+          }
+          fail++;
+        }
+      })
+    );
+
+    return { ok, fail };
+  }
+
   async sendToVets(vetIds, payload) {
     const subs = await this.#notificationSubscriptionRepository.findByVetIds(
       vetIds
+    );
+    let ok = 0,
+      fail = 0;
+    await Promise.all(
+      subs.map(async (s) => {
+        try {
+          await webpush.sendNotification(
+            { endpoint: s.endpoint, keys: s.keys },
+            JSON.stringify({...payload, ...defaultPayload})
+          );
+          await this.#notificationRepository.create({
+            userId: s.userId,
+            message: payload.title,
+            confirmed: false,
+          }); 
+          ok++;
+        } catch (err) {
+          // 404/410 => gone
+          if (err && (err.statusCode === 404 || err.statusCode === 410)) {
+            await this.repo.remove(s.endpoint);
+          }
+          fail++;
+        }
+      })
+    );
+
+    return { ok, fail };
+  }
+
+  async sendToPetOwners(petIds, payload) {
+    const subs = await this.#notificationSubscriptionRepository.findByPetIds(
+      petIds
     );
     let ok = 0,
       fail = 0;

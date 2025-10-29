@@ -22,4 +22,8 @@ export class PetService {
         return await this.#http.get<IResponse>('/'+userId);
     }
 
+    async fetchPetsByVetId(vetId) {
+        return await this.#http.get<IResponse>('/vet/'+vetId);
+    }
+
 }

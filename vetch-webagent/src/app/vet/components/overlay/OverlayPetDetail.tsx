@@ -11,20 +11,18 @@ import { useEffect, useState } from "react";
 interface PetDetailProps {
   open: boolean;
   onClose: () => void;
-  onStartAppointment: () => void;
+  onAction: (param?:any) => void;
   data: any | null;
 }
 
 export default function OverlayPetDetail({
   open,
   onClose,
-  onStartAppointment,
+  onAction,
   data,
 }: PetDetailProps) {
   
   const bookingService = new BookingService();
-
-  console.log(data);
 
   const [medicalHistory, setMedicalHistory] = useState<any[]>([]);
   const [medicalHistoryWithVet, setMedicalHistoryWithVet] = useState<any[]>([]);
@@ -47,9 +45,13 @@ export default function OverlayPetDetail({
 
   if (!open || !data) return null;
 
+  console.log("Check", !(new Date(new Date(data.bookingDate.split("T")[0] +"T"+ (data.bookingTime.split("T")[1]).split("Z")[0]).getTime() - 10*60000) <= new Date()));
+  // console.log("Check", new Date(data.bookingDate.split("T")[0] +"T"+ (data.bookingTime.split("T")[1]).split("Z")[0]));
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 z-50 bg-black/60" onClick={onClose}></div>
+      <div className="bg-white dark:bg-gray-800 z-100 rounded-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh]">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-600 dark:text-gray-200"
@@ -115,7 +117,7 @@ export default function OverlayPetDetail({
             <textarea 
               disabled
               value={data.illnessDescription}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-full p-2 border min-h-[100px] border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white"
             />
           </div>
         </div>
@@ -139,6 +141,9 @@ export default function OverlayPetDetail({
                 </span>
               </li>
             ))}
+            {medicalHistory.length === 0 && (
+              <p className="text-gray-500">No medical history available.</p>
+            )}
           </ul>
         </div>
 
@@ -160,23 +165,60 @@ export default function OverlayPetDetail({
                 </span>
               </li>
             ))}
+            {medicalHistoryWithVet.length === 0 && (
+              <p className="text-gray-500">No medical history with you available.</p>
+            )}
           </ul>
         </div>
 
-        {/* ... (Sisa JSX lain tidak berubah) ... */}
+        {/* Button */}
+        {
+          data.bookingStatus === "ACCEPTED" && 
+          <div className="mt-6 text-right">
+            <button
+              onClick={onAction}
+              className={`bg-[#3D8D7A] text-white px-4 py-2 rounded-lg font-semibold ${!(new Date(new Date(data.bookingDate.split("T")[0] +"T"+ (data.bookingTime.split("T")[1]).split("Z")[0]).getTime() - 10*60000) <= new Date()) ? "opacity-50 cursor-not-allowed" : "hover:bg-[#327566]"}`}
+              disabled={!(new Date(new Date(data.bookingDate.split("T")[0] +"T"+ (data.bookingTime.split("T")[1]).split("Z")[0]).getTime() - 10*60000) <= new Date())}
+            >
+              Start Appointment
+            </button>
+            <p className="text-[10px] text-gray-500 mt-1">
+              Appointment can only start 10 mins before scheduled time
+            </p>
+          </div>
+        }
 
         {/* Button */}
-        <div className="mt-6 text-right">
-          <button
-            onClick={onStartAppointment}
-            className="bg-[#3D8D7A] hover:bg-[#327566] text-white px-4 py-2 rounded-lg font-semibold"
-          >
-            Start Appointment
-          </button>
-          <p className="text-[10px] text-gray-500 mt-1">
-            Appointment can only start 10 mins before scheduled time
-          </p>
-        </div>
+        {
+          data.bookingStatus === "ONGOING" && 
+          <div className="mt-6 text-right">
+            <button
+              onClick={onAction}
+              className="bg-[#3D8D7A] hover:bg-[#327566] text-white px-4 py-2 rounded-lg font-semibold"
+            >
+              Chat With Pet Owner
+            </button>
+          </div>
+        }
+
+        {
+          data.bookingStatus === "PENDING" && 
+          <div className="flex flex-row justify-end mt-5 gap-2">
+            <button
+              onClick={()=>onAction("ACCEPTED")}
+              className="bg-[#3D8D7A] hover:bg-[#327566] duration-200 text-white px-4 py-2 rounded-lg font-semibold"
+            >
+              Accept
+            </button>
+
+            <button
+              onClick={()=>onAction("REJECTED")}
+              className="bg-red-500 hover:bg-red-600 duration-200 text-white px-4 py-2 rounded-lg font-semibold"
+            >
+              Reject
+            </button>
+          </div>
+        }
       </div>
     </div>
   );

@@ -36,11 +36,11 @@ const OrderCard = ({
               </h4>
               <p className="text-sm text-black font-semibold dark:text-white">
                 <span className="font-bold text-[#3D8D7A] dark:text-white">Time:</span>{" "}
-                {formatIsoJakarta(
+                {booking.bookingType!=="Emergency"?formatIsoJakarta(
                   booking.bookingDate.split("T")[0] +
                     "T" +
                     booking.bookingTime.split("T")[1]
-                )}
+                ):"EMERGENCY BOOKING"}
               </p>
               <div className="flex items-center mt-1">
                 <Image

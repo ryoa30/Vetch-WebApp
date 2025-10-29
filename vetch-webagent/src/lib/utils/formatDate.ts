@@ -1,18 +1,19 @@
+const months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
 export function formatIsoJakarta(iso: string) {
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
 
   const parts = new Intl.DateTimeFormat("id-ID", {
     timeZone: "Asia/Jakarta",
@@ -38,21 +39,32 @@ export function formatIsoJakarta(iso: string) {
 
   return `${day} ${mon} ${year} at ${hh}:${mm}`;
 }
+
+export function hourMinuteFromString(iso: string) {
+
+  const parts = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    day: "2-digit",
+    month: "2-digit", // numeric so we can map to our custom short month
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(new Date(iso.split("Z")[0]))
+    .reduce<Record<string, string>>((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+
+  const hh = parts.hour;
+  const mm = parts.minute;
+
+
+  return {hours: Number(hh), minutes: Number(mm)} as {hours: number, minutes: number};
+}
+
 export function formatIsoJakartaShort(iso: string) {
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
 
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Jakarta",
@@ -82,6 +94,31 @@ export const formatLocalDate = (d: Date) => {
     "0"
   )}-${String(d.getDate()).padStart(2, "0")}`;
 };
+
+export function hhmmToUTCDate(hhmm) {
+  console.log("hhmmToUTCDate", hhmm);
+    if (typeof hhmm !== "string" || !/^\d{2}:\d{2}$/.test(hhmm)) {
+    throw new Error("time must be 'HH:mm'");
+  }
+  const [h, m] = hhmm.split(":").map(Number);
+  if (h > 23 || m > 59) throw new Error("invalid HH:mm");
+  return new Date(Date.UTC(1970, 0, 1, h, m, 0, 0));
+}
+
+export function dateToHHMM(d) {
+  // date is anchored at 1970-01-01Z; safe to use toISOString slice
+  return d.toISOString().slice(11, 16);
+}
+
+export function dateToUTCDate(d: Date) {
+  return hhmmToUTCDate(dateToHHMM(d));
+}
+
+export function hhmmToUtcString(hhmm: {hours: number; minutes: number}) {
+  const h = String(hhmm.hours).padStart(2, "0");
+  const m = String(hhmm.minutes).padStart(2, "0");
+  return `1970-01-01T${h}:${m}:00.000Z`;
+}
 
 /**
  * Calculate age (years + months) from a date of birth.

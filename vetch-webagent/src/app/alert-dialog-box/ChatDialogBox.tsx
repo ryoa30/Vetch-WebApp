@@ -26,6 +26,7 @@ import {
   Video as VideoIcon,
   VideoOff,
   PhoneOff,
+  Flag,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChatService } from "@/lib/services/ChatService";
@@ -34,6 +35,10 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import IncomingCallDialog from "./IncomingCallDialog";
 import { clear } from "console";
+import { BookingService } from "@/lib/services/BookingService";
+import { dateToHHMM, formatLocalDate } from "@/lib/utils/formatDate";
+import ConfirmationDialogBox from "./ConfirmationDialogBox";
+import SuccessDialog from "./SuccessDialog";
 
 // ---------- socket singleton (prevents duplicates in Next dev/HMR) ----------
 let _socket: Socket | null = null;
@@ -82,6 +87,7 @@ export default function ChatDialogBox({
   setIsOpen: (open: boolean) => void;
   booking: any;
 }) {
+
   const socket = useMemo(() => getSocket(), []);
   const { user } = useSession();
 
@@ -89,7 +95,10 @@ export default function ChatDialogBox({
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any[]>([]);
 
-  const [conclussion, setConclussion] = useState("");
+  const [conclussion, setConclussion] = useState(booking?.bookingConclusion || "");
+  const [vaccinationDate, setVaccinationDate] = useState("");
+  const [consultationDate, setConsultationDate] = useState("");
+  const [isConsultationEnded, setIsConsultationEnded] = useState(false);
 
   // call state
   const [isVideoCall, setIsVideoCall] = useState(false);
@@ -234,6 +243,11 @@ export default function ChatDialogBox({
       setCallerSignal(data.signal);
     };
 
+    const onFinishBooking = () => {
+      setIsOpen(false);
+      setIsConsultationEnded(true);
+    }
+
     socket.off("receive_message", onReceive);
     socket.on("receive_message", onReceive);
 
@@ -242,6 +256,9 @@ export default function ChatDialogBox({
 
     socket.off("leaveCall"); // clear any prior handler
     socket.on("leaveCall", onLeaveCall);
+
+    socket.off("finishBooking"); // clear any prior handler
+    socket.on("finishBooking", onFinishBooking);
 
     return () => {
       socket.off("receive_message", onReceive);
@@ -357,6 +374,7 @@ export default function ChatDialogBox({
         signalData,
         from: socket.id,
         name: user?.fullName,
+        senderRole: user?.role
       });
     });
 
@@ -409,6 +427,28 @@ export default function ChatDialogBox({
     }
   }, [messages, isOpen, isVideoCall]);
 
+  const bookingService = new BookingService();
+
+  const handleUpdateConclusion = async () => {
+    if(!booking?.id) return;
+    const result = await bookingService.changeBookingConclusionDate(booking.id, conclussion);
+
+    if(result.ok){
+      // alert("Conclusion updated successfully");
+    }
+  }
+
+  const handleFinishConsultation = async () => {
+    if(!booking?.id) return;
+    await bookingService.changeBookingStatus(booking.id, "DONE");
+    if (!socket || !booking) return;
+    socket.emit("finishBooking", {
+      roomId: booking.id
+    });
+    setIsOpen(false);
+    window.location.reload();
+  }
+
   // ===================== RENDER =====================
 
   if (!isVideoCall) {
@@ -443,11 +483,13 @@ export default function ChatDialogBox({
                   <div className="flex items-center gap-3 justify-between">
                     <div className="flex gap-2">
                       <Syringe className="w-5 h-5 text-gray-500" />
-                      <span className="font-medium">Vacccination</span>
+                      <span className="font-medium">Vaccination</span>
                     </div>
                     <input
                       type="date"
+                      value={vaccinationDate}
                       className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
+                      onChange={(e) => {if(e.target.value > formatLocalDate(new Date())) setVaccinationDate(e.target.value)}}
                     />
                   </div>
                   <div className="flex items-center justify-between gap-3">
@@ -457,16 +499,31 @@ export default function ChatDialogBox({
                     </div>
                     <input
                       type="date"
+                      value={consultationDate}
                       className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
+                      onChange={(e) => {if(e.target.value > formatLocalDate(new Date())) setConsultationDate(e.target.value)}}
                     />
                   </div>
                 </div>
               </div>
-              <div className="mt-auto">
-                <button className="w-full bg-[#3D8D7A] hover:bg-[#327566] text-white px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2">
+              <div className="mt-auto flex flex-col gap-3">
+                <button className=" w-full bg-[#3D8D7A] hover:bg-[#327566] text-white duration-200 px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2" 
+                  onClick={handleUpdateConclusion}
+                >
                   <Save className="w-5 h-5" />
-                  Save
+                  Save Details
                 </button>
+                <ConfirmationDialogBox 
+                  message={"Are you sure you want to end the consultation? This action cannot be undone."} 
+                  subMessage={`${new Date(new Date(booking?.bookingDate.split("T")[0] +"T"+ (booking?.bookingTime.split("T")[1]).split("Z")[0]).getTime() + 30*60000) > new Date() ? "There is still time for the booking" : ""}`}
+                  onConfirm={handleFinishConsultation}
+                >
+                  <button className=" w-full bg-red-600 hover:bg-red-800 text-white duration-200 px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2" 
+                  >
+                    <Flag className="w-5 h-5" />
+                    End Consultation
+                  </button>
+                </ConfirmationDialogBox>
               </div>
             </div>
           )}
@@ -715,6 +772,9 @@ export default function ChatDialogBox({
             </Button>
           </div>
         </div>
+
+        <SuccessDialog message="Your Consultation is ended" open={isConsultationEnded} onOpenChange={() => window.location.reload()}/>
+        
       </DialogContent>
     </Dialog>
   );
