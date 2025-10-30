@@ -4,6 +4,9 @@ const AdminController = require('../controller/AdminController');
 
 const adminController = new AdminController();
 
+const AuthController = require('../middleware/AuthController');
+router.use(AuthController.authorize);
+
 router.get('/vet-certificates', adminController.getUncomfirmedVetCertificates);
 router.get('/vet-confirmed-certificates', adminController.getComfirmedVetCertificates);
 

@@ -13,14 +13,16 @@ otpController.connect().catch(err => {
     process.exit(1); // Exit if critical services fail
 });
 
-router.get('/', userController.getAllUsers);
+const AuthController = require('../middleware/AuthController');
 
-router.put('/', upload.single("file"), userController.updateUserDetails);
-router.put('/location', userController.updateUserLocation);
+router.get('/',AuthController.authorize, userController.getAllUsers);
 
-router.get('/:id', userController.getUserById);
+router.put('/',AuthController.authorize, upload.single("file"), userController.updateUserDetails);
+router.put('/location',AuthController.authorize, userController.updateUserLocation);
 
-router.get('/location/:userId', userController.getUserLocation);
+router.get('/:id',AuthController.authorize, userController.getUserById);
+
+router.get('/location/:userId',AuthController.authorize, userController.getUserLocation);
 
 router.get('/email/:email', userController.getUserByEmail);
 

@@ -5,6 +5,9 @@ const BookingController = require('../controller/BookingController');
 
 const bookingController = new BookingController();
 
+const AuthController = require('../middleware/AuthController');
+router.use(AuthController.authorize);
+
 router.get('/', bookingController.getBookingsByUserId);
 router.get('/past-booking', bookingController.getPastBookingsByPetId);
 router.get('/vet', bookingController.getBookingByVetId);

@@ -74,7 +74,12 @@ export class HttpClient {
     }
 
     // Auth
-    const token = this.getToken?.();
+    const res = await fetch("/api/token", {
+      method: "GET",
+      credentials: "include", // include session cookies
+      cache: "no-store",
+    });
+    const token = await res.json().then((data) => data.token);
     if (token && !headers.Authorization) {
       headers.Authorization = `Bearer ${token}`;
     }
@@ -96,7 +101,39 @@ export class HttpClient {
 
       if (!res.ok) throw new HttpError(res.status, parsed, url);
       return parsed as T;
-    } finally {
+    } catch(error){
+      // console.log("fetch error",(error as string).toString().includes("401"));
+      if((error as string).toString().includes("401")){
+        console.log("Unauthorized! Refreshing token...");
+        const res = await fetch(process.env.NEXT_PUBLIC_API_BASE_URL + "/api/token/refresh", {
+          method: "POST",
+          credentials: "include", // include session cookies)
+        })
+        const response = await res.json();
+        if(response.ok){
+          console.log(response);
+          await fetch("/api/session/setToken", {
+            method: "POST",
+            credentials: "include", // include session cookies
+            cache: "no-store",
+            body: JSON.stringify({ accessToken: response.accessToken }),
+          });
+          console.log("Token refreshed. Retrying original request...");
+          const finalRes = await this.request<T>(path, init);
+          console.log("Retried request successful.", finalRes);
+          return finalRes as T;
+        }else{
+          await fetch("/api/logout", {
+            method: "GET",
+            credentials: "include", // include session cookies
+            cache: "no-store",
+          });
+          window.location.href = "/login";
+        }
+      }
+      return Promise.reject(error);
+    } 
+    finally {
       clearTimeout(id);
     }
   }

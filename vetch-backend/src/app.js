@@ -11,6 +11,7 @@ const vetRoutes = require('./routes/VetRoute');
 const paymentRoutes = require('./routes/PaymentRoute');
 const chatRoutes = require('./routes/ChatRoute');
 const notificationRoutes = require('./routes/NotificationRoute');
+const tokenRoutes = require('./routes/TokenRoute');
 const cookieParser = require('cookie-parser');
 const webpush = require("./utils/web-push");
 
@@ -30,6 +31,7 @@ app.use(cors({
 
 app.use('/api/users', userRoutes);
 
+app.use('/api/token', tokenRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/vet', vetRoutes);
 app.use('/api/blogs', blogRoutes);

@@ -24,7 +24,7 @@ export default function ErrorDialog({ open, onOpenChange, errors }: errorDialogP
       <AlertDialogContent className="flex flex-col items-center text-center">
         {/* Animasi Lottie */}
         <div className="w-32 h-32">
-          <Lottie animationData={errorAnimation} loop={false} />
+          <Lottie animationData={errorAnimation} loop={true} />
         </div>
 
         <AlertDialogHeader>

@@ -4,24 +4,27 @@ const VetController = require('../controller/VetController');
 
 const vetController = new VetController();
 
+const AuthController = require('../middleware/AuthController');
+router.use(AuthController.authorize);
+
 router.post('/', vetController.getVetListConsultation);
 router.post('/emergency', vetController.getVetListEmergency);
 
-router.get('/schedule', vetController.getVetSchedulesByDayAndId);
-router.get('/daily-schedule', vetController.getVetSchedulesUserIdDay);
-router.get('/species-types', vetController.getAllSpeciesTypes);
-router.get('/ratings/:id', vetController.getVetRatings);
-router.get('/user/:userId', vetController.getVetByUserId);
+router.get('/schedule',AuthController.authorize, vetController.getVetSchedulesByDayAndId);
+router.get('/daily-schedule',AuthController.authorize, vetController.getVetSchedulesUserIdDay);
+router.get('/species-types',AuthController.authorize, vetController.getAllSpeciesTypes);
+router.get('/ratings/:id',AuthController.authorize, vetController.getVetRatings);
+router.get('/user/:userId',AuthController.authorize, vetController.getVetByUserId);
 
-router.get('/:id', vetController.getVetDetailsById);
+router.get('/:id',AuthController.authorize, vetController.getVetDetailsById);
 
-router.post('/schedule', vetController.createSchedule);
-router.post('/add-species', vetController.addVetSpeciesType);
-router.put('/', vetController.putVetDetails);
-router.put('/availability', vetController.putVetHomecareEmergency);
-router.put('/schedule', vetController.putSchedule);
+router.post('/schedule',AuthController.authorize, vetController.createSchedule);
+router.post('/add-species',AuthController.authorize, vetController.addVetSpeciesType);
+router.put('/',AuthController.authorize, vetController.putVetDetails);
+router.put('/availability',AuthController.authorize, vetController.putVetHomecareEmergency);
+router.put('/schedule',AuthController.authorize, vetController.putSchedule);
 
-router.delete('/delete-species', vetController.deleteSpecies);
-router.delete('/schedule/:id', vetController.deleteSchedule);
+router.delete('/delete-species',AuthController.authorize, vetController.deleteSpecies);
+router.delete('/schedule/:id',AuthController.authorize, vetController.deleteSchedule);
 
 module.exports = router;

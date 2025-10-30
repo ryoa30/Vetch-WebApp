@@ -4,6 +4,9 @@ const NotificationController = require('../controller/NotificationController');
 
 const notificationController = new NotificationController();
 
+const AuthController = require('../middleware/AuthController');
+router.use(AuthController.authorize);
+
 router.get('/unconfirmed/:userId', notificationController.getUnconfirmedNotifications);
 router.put('/confirm', notificationController.putConfirmNotification);
 router.put('/confirm-all', notificationController.putConfirmAllNotifications);

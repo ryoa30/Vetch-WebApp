@@ -124,12 +124,12 @@ export default function OverlayPetDetail({
 
         {/* Medical History */}
         <div className="mt-6">
-          <h3 className="font-semibold text-gray-800 dark:text-white mb-2">
+          <h3 className="font-semibold text-black dark:text-white mb-2">
             Medical History
           </h3>
           <ul className="list-disc list-inside text-sm space-y-2">
             {medicalHistory?.map((item, idx) => (
-              <li key={idx} className="flex items-center justify-between">
+              <li key={idx} className="flex items-center justify-between text-black dark:text-white">
                 <span className="flex-[30%]">
                   {formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}
                 </span>
@@ -148,12 +148,12 @@ export default function OverlayPetDetail({
         </div>
 
         <div className="mt-6">
-          <h3 className="font-semibold text-gray-800 dark:text-white mb-2">
+          <h3 className="font-semibold text-black dark:text-white mb-2">
             Medical History With Me
           </h3>
           <ul className="list-disc list-inside text-sm space-y-2">
             {medicalHistoryWithVet?.map((item, idx) => (
-              <li key={idx} className="flex items-center justify-between">
+              <li key={idx} className="flex items-center justify-between text-black dark:text-white">
                 <span className="flex-[30%]">
                   {formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}
                 </span>
