@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function Calendar() {
+export default function Calendar({selectedDate, onDateSelect}: {selectedDate: Date; onDateSelect: (date: Date) => void}) {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
+
 
   const monthNames = [
     "January",
@@ -29,6 +30,11 @@ export default function Calendar() {
   const calendarDays: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) calendarDays.push(null);
   for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
+
+  const handleSelectDate = (day: number) => {
+    const selected = new Date(currentYear, currentMonth, day);
+    onDateSelect(selected);
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 w-full transition-colors duration-300">
@@ -83,13 +89,16 @@ export default function Calendar() {
         {calendarDays.map((day, idx) => (
           <div
             key={idx}
-            className={`p-2 rounded-md text-sm transition-colors ${
-              day === today.getDate() &&
+            className={`p-2 rounded-md text-sm transition-colors cursor-pointer ${
+               day === selectedDate.getDate() &&
+              currentMonth === selectedDate.getMonth() &&
+              currentYear === selectedDate.getFullYear()? "bg-green-500 text-white font-bold" : day === today.getDate() &&
               currentMonth === today.getMonth() &&
               currentYear === today.getFullYear()
-                ? "bg-green-500 text-white font-bold"
-                : "text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#3D6F64]"
+                ? "text-green-500 font-bold"
+                :"text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#3D6F64]"
             }`}
+            onClick={() => day && handleSelectDate(day)}
           >
             {day || ""}
           </div>

@@ -255,4 +255,11 @@ export interface VetWithSpeciesType extends VetData {
   speciesHandled: Array<SpeciesData & { speciesType: SpeciesTypeData }>;
 }
 
+export interface VetStats {
+  totalPatients: number;
+  totalIncome: number ; 
+  upcomingAppointment: number ;
+  pendingAppointment: number ;
+}
+
 

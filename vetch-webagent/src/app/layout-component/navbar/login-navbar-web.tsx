@@ -11,16 +11,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
 import ToggleTheme from "@/components/ToggleTheme";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import LoginConfirmDialog from "@/app/alert-dialog-box/LoginConfirmDialogBox";
 
 export function NavbarDesktop() {
   return (

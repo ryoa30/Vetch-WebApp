@@ -568,6 +568,79 @@ class VetRepository extends BaseRepository {
     });
     return updatedVet;
   }
+
+  async countTotalPatients(userId) {
+    const result = await this._model.findFirst({
+      where: { userId: userId },
+      select: {
+        bookings: {
+          distinct: ['petId'],
+          select: {
+            petId: true
+          }
+        }
+      }
+    })
+    return result.bookings.length;
+  }
+
+  async calculateTotalIncome(userId) {
+    const result = await this._model.findFirst({
+      where: { userId: userId },
+      select: {
+        bookings: {
+          where: {
+            bookingStatus: 'DONE'
+          },
+          select: {
+            bookingPrice: true
+          }
+        }
+      }
+    })
+    return result.bookings.reduce((sum, booking) => sum + ((booking.bookingPrice*100)/115), 0);
+  }
+
+  async countUpcomingAppointments(userId) {
+    const { timeOfDay } = nowForSchedule(); // current day + current time
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const result = await this._model.findFirst({
+      where: { userId: userId },
+      select: {
+        bookings: {
+          where: {
+            bookingStatus: { in: ['ACCEPTED', 'ONGOING'] },
+            OR: [
+              { bookingDate: { gt: today } },
+              { bookingDate: { equals: today }, bookingTime: { gte: timeOfDay } }
+            ]
+          },
+          select: {
+            id: true
+          }
+        }
+      }
+    })
+    return result.bookings.length;
+  }
+
+  async countPendingAppointments(userId) {
+    const result = await this._model.findFirst({
+      where: { userId: userId },
+      select: {
+        bookings: {
+          where: {
+            bookingStatus: 'PENDING'
+          },
+          select: {
+            id: true
+          }
+        }
+      }
+    })
+    return result.bookings.length;
+  }
 }
 
 module.exports = VetRepository;

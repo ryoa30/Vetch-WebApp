@@ -48,7 +48,9 @@ export function NavbarMobile() {
     }
   
     useEffect(()=>{
-      loadUncomfirmedNotifications();
+      if(isAuthenticated){
+        loadUncomfirmedNotifications();
+      }
     }, [])
 
   return (
@@ -129,7 +131,7 @@ export function NavbarMobile() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#B3D8A8] dark:bg-[#357C72] max-h-[30vh] max-w-[90vw] overflow-y-auto custom-scrollbar">
-                  {/* {notifications.length>0 && 
+                  {notifications.length>0 && 
                   <>
                     <div className="flex flex-row justify-between gap-3 p-3">
                         <span className="font-semibold text-lg">Confirm All Notification</span>
@@ -141,7 +143,7 @@ export function NavbarMobile() {
                     </div>
                     <div className="w-full h-[1px] bg-gray-500/50"></div>
                   </>
-                  } */}
+                  }
                   {notifications.map((notification)=>(
                     <DropdownMenuItem asChild key={notification.id}>
                       <NotificationCard notification={notification} onAction={loadUncomfirmedNotifications}/>

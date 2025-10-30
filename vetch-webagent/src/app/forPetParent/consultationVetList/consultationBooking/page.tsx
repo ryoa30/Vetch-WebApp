@@ -26,6 +26,7 @@ import ErrorDialog from "@/app/alert-dialog-box/ErrorDialogBox";
 import { BookingService } from "@/lib/services/BookingService";
 import { PaymentService } from "@/lib/services/PaymentService";
 import { showPaymentSnap } from "@/lib/utils/snapPayment";
+import { LocationDialog } from "@/app/alert-dialog-box/LocationDialog";
 
 export default function ConfirmBookingPage() {
   const [consultationType, setConsultationType] = useState("Online");
@@ -40,6 +41,8 @@ export default function ConfirmBookingPage() {
   const [paymentToken, setPaymentToken] = useState<string>("");
 
   const router = useRouter();
+
+  const [refresh, setRefresh] = useState(false);
 
   const bookingValidator = new BookingValidator();
   const bookingService = useMemo(() => new BookingService(), []);
@@ -58,6 +61,7 @@ export default function ConfirmBookingPage() {
   const vetService = useMemo(() => new VetService(), []);
   const userService = useMemo(() => new UserService(), []);
   const [vet, setVet] = useState<IVet>();
+  const [showLocation, setShowLocation] = useState(false);
 
   const loadVetDetails = useCallback(async () => {
     setIsLoading(true);
@@ -169,7 +173,7 @@ export default function ConfirmBookingPage() {
   useEffect(() => {
     loadVetDetails();
     loadLocation();
-  }, [loadVetDetails, loadLocation]);
+  }, [loadVetDetails, loadLocation, refresh]);
 
   return (
     <main className="bg-[#F5F5F5] dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -359,21 +363,20 @@ export default function ConfirmBookingPage() {
             </div>
           </div>
           {consultationType === "Homecare" && (
-            <div className="space-y-6 h-full">
-              <div className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] shadow h-full">
-                <div className="p-4 flex items-center gap-3">
-                  <MapPin className="w-10 h-10 flex-shrink-0 text-black mt-1 dark:text-white" />
-                  <div className="flex flex-col">
-                    <div className="font-medium">Location</div>
-                    <p className="text-sm text-gray-600 dark:text-gray-200">
-                      {location
-                        ? location.addressName
-                        : "No address found, please set your address in profile page."}
-                    </p>
-                  </div>
+            <button className="items-center gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] hover:bg-gray-100 duration-200 shadow h-full" onClick={() => setShowLocation(true)}>
+              <div className="p-4 flex items-center gap-3">
+                <MapPin className="w-10 h-10 flex-shrink-0 text-black mt-1 dark:text-white" />
+                <div className="flex flex-col items-start">
+                  <div className="font-medium">Location</div>
+                  <p className="text-sm text-gray-600 dark:text-gray-200 text-justify">
+                    {location
+                      ? location.addressName
+                      : "No address found, please set your address in profile page."}
+                  </p>
                 </div>
+                <ChevronRight className="w-5 h-5 flex-shrink-0 text-black mt-1 dark:text-white" />
               </div>
-            </div>
+            </button>
           )}
         </div>
 
@@ -470,6 +473,10 @@ export default function ConfirmBookingPage() {
         open={showError}
         onOpenChange={() => setShowError(false)}
         errors={(Object.values(errors) as string[]).filter((err) => err !== "")}
+      />
+      <LocationDialog 
+        show={showLocation} 
+        onClose={() => {setShowLocation(false); setRefresh(true);}}
       />
     </main>
   );

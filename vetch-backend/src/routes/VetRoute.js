@@ -5,10 +5,10 @@ const VetController = require('../controller/VetController');
 const vetController = new VetController();
 
 const AuthController = require('../middleware/AuthController');
-router.use(AuthController.authorize);
 
 router.post('/', vetController.getVetListConsultation);
 router.post('/emergency', vetController.getVetListEmergency);
+router.get('/stats/:userId', vetController.getVetStats);
 
 router.get('/schedule',AuthController.authorize, vetController.getVetSchedulesByDayAndId);
 router.get('/daily-schedule',AuthController.authorize, vetController.getVetSchedulesUserIdDay);

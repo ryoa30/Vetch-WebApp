@@ -119,4 +119,8 @@ export class VetService {
       isEmergencyAvailable
     });
   }
+
+  async fetchVetStats(userId: string){
+    return await this.#http.get<IResponse>(`/stats/${userId}`);
+  }
 }

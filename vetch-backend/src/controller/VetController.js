@@ -37,6 +37,7 @@ class VetController {
         this.putSchedule = this.putSchedule.bind(this);
         this.deleteSchedule = this.deleteSchedule.bind(this);
         this.putVetHomecareEmergency = this.putVetHomecareEmergency.bind(this);
+        this.getVetStats = this.getVetStats.bind(this);
     }
 
 
@@ -87,6 +88,20 @@ class VetController {
         } catch (error) {
             console.log(error);
             return res.status(500).json({ok: false, message: 'Server Problem' });
+        }
+    }
+
+    async getVetStats(req, res) {
+        try {
+            const { userId } = req.params;
+            const totalPatients = await this.#vetRepository.countTotalPatients(userId);
+            const totalIncome = await this.#vetRepository.calculateTotalIncome(userId);
+            const upcomingAppointment = await this.#vetRepository.countUpcomingAppointments(userId);
+            const pendingAppointment = await this.#vetRepository.countPendingAppointments(userId);
+            res.status(200).json({ok: true, data: { totalPatients, totalIncome, upcomingAppointment, pendingAppointment }, message: 'Vet stats fetched successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching vet stats', error: error.message });
         }
     }
 
