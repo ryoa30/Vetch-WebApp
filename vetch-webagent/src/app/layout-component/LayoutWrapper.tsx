@@ -37,6 +37,7 @@ export default function LayoutWrapper({ children, session }: { children: React.R
     "/vet/profile-and-schedules/schedules",
     "/admin/blog/set-blog",
     "/forgotpassword",
+    "/changepassword",
   ];
 
   // cek exact match atau prefix match untuk edit-blog/[id]
