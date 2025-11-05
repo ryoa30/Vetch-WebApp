@@ -11,4 +11,10 @@ export class ChatService {
     return await this.#http.post<IResponse>(`/messages`, {roomId, limit, before: before? before : new Date().toISOString()});
   }
 
+  async uploadImage(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    return await this.#http.postForm<IResponse>(`/send-image`, formData);
+  }
+
 }

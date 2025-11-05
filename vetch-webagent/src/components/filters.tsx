@@ -93,9 +93,9 @@ export default function VetFilters({
   }, [state]);
 
   return (
-    <div className="w-sm">
+    <div className="w-full sm:w-sm">
       {/* Top row */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-1 sm:gap-3">
         <PetTypePopover
           selected={state.petTypes}
           onChange={(petTypes) => update({ petTypes })}

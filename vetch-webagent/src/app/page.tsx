@@ -1,6 +1,35 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLoading } from "@/contexts/LoadingContext";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { IVet } from "./forPetParent/consultationVetList/types";
+import { VetService } from "@/lib/services/VetService";
 
 export default function Home() {
+
+  const [doctors, setDoctors] = useState<IVet[]>([]);
+  const {setIsLoading} = useLoading();
+  const vetService = new VetService();
+
+  const loadVets = async () => {
+    setIsLoading(true);
+    try {
+      const result = await vetService.fetchVets(1, 3);
+      console.log(result);
+      if (result.ok) {
+        setDoctors(result.data.vets);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(()=>{
+    loadVets(); 
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-[#3D8D7A] dark:bg-[#1F2D2A] text-white relative">
@@ -20,9 +49,9 @@ export default function Home() {
               <br />
               pet care treatment in your area today!
             </p>
-            <button className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg">
+            <Link href={"/forPetParent/consultationVetList"} className="bg-white text-green-600 hover:bg-green-600 hover:text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg">
               Consult Now
-            </button>
+            </Link>
           </div>
 
           <div className="relative w-full lg:w-1/2">
@@ -78,116 +107,39 @@ export default function Home() {
 
             <div className="grid md:grid-cols-3 gap-12 max-w-[900px] mx-auto">
               {/* Dr. Seemore */}
-              <Card className="bg-white dark:bg-[#2D4236] shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader className="pb-2">
-                  <img
-                    src="/img/doctor-seemore.png"
-                    alt="Dr. Seemore"
-                    className="w-full h-32 object-cover rounded-t"
-                    style={{ background: "url('/img/transparent-bg.png')" }}
-                  />
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-lg font-bold text-gray-800 dark:text-white">
-                      Dr. Seemore
-                    </span>
-                    <span className="text-gray-600 font-semibold">Fee</span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-600 dark:text-white">
-                      Experience: 15 years
-                    </span>
-                    <span className="text-xs text-gray-800 dark:text-white">
-                      IDR 120.000,00
-                    </span>
-                  </div>
-                  <div className="mt-2">
-                    <span className="font-semibold text-xs text-gray-800 dark:text-white">
-                      Pets Treated:
-                    </span>
-                    <span className="text-xs text-gray-700 ml-1 dark:text-white">
-                      Chincilla, Spider, Cat, Dog
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+              {doctors.map((doctor) => (
+                <Card key={doctor.id} className="bg-white dark:bg-[#2D4236] shadow-lg hover:shadow-xl transition-shadow">
+                  <CardHeader className="pb-2">
+                    <img
+                      src={doctor.profilePicture}
+                      alt="Dr Profile Picture"
+                      className="w-full h-32 object-cover rounded-t"
+                    />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-lg font-bold text-gray-800 dark:text-white">
+                        Dr. {doctor.fullName}
+                      </span>
+                      <span className="text-gray-600 font-semibold">Fee</span>
+                    </div>
+                    <div className="flex justify-end items-center mb-2">
+                      <span className="text-xs text-gray-800 dark:text-white">
+                        IDR {new Intl.NumberFormat("id-ID").format(doctor.price)}
+                      </span>
+                    </div>
+                    <div className="mt-2">
+                      <span className="font-semibold text-xs text-gray-800 dark:text-white">
+                        Pets Treated:
+                      </span>
+                      <span className="text-xs text-gray-700 ml-1 dark:text-white">
+                        Chincilla, Spider, Cat, Dog
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
 
-              {/* Dr. Raydawn */}
-              <Card className="bg-white dark:bg-[#2D4236] shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader className="pb-2">
-                  <img
-                    src="/img/doctor-raydawn.png"
-                    alt="Dr. Raydawn"
-                    className="w-full h-32 object-cover rounded-t"
-                    style={{ background: "url('/img/transparent-bg.png')" }}
-                  />
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-lg font-bold text-gray-800 dark:text-white">
-                      Dr. Raydawn
-                    </span>
-                    <span className="text-gray-600 font-semibold dark:text-white">
-                      Fee
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-600 dark:text-white">
-                      Experience: 75 years
-                    </span>
-                    <span className="text-xs text-gray-800 dark:text-white">
-                      IDR 1.200.000,00
-                    </span>
-                  </div>
-                  <div className="mt-2">
-                    <span className="font-semibold text-xs text-gray-800 dark:text-white">
-                      Pets Treated:
-                    </span>
-                    <span className="text-xs text-gray-700 ml-1 dark:text-white">
-                      Shark, Dolphin, Whale, Octopus
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Dr. Taftian */}
-              <Card className="bg-white dark:bg-[#2D4236] shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader className="pb-2">
-                  <img
-                    src="/img/doctor-taftian.png"
-                    alt="Dr. Taftian"
-                    className="w-full h-32 object-cover rounded-t"
-                    style={{ background: "url('/img/transparent-bg.png')" }}
-                  />
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-lg font-bold text-gray-800 dark:text-white">
-                      Dr. Taftian
-                    </span>
-                    <span className="text-gray-600 font-semibold dark:text-white">
-                      Fee
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-600 dark:text-white">
-                      Experience: 10 years
-                    </span>
-                    <span className="text-xs text-gray-800 dark:text-white">
-                      IDR 100.000,00
-                    </span>
-                  </div>
-                  <div className="mt-2">
-                    <span className="font-semibold text-xs text-gray-800 dark:text-white">
-                      Pets Treated:
-                    </span>
-                    <span className="text-xs text-gray-700 ml-1 dark:text-white">
-                      Monkey, Human, Apes, Aryo
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>

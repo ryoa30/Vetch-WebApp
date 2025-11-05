@@ -12,7 +12,17 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
   const { isAuthenticated } = useSession();
 
   return (
-    <div className="bg-white dark:bg-[#2D4236] rounded-2xl shadow-md overflow-hidden w-72  transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+    
+    <div onClick={() =>{
+            if(isAuthenticated){
+              router.push(
+                `/forPetParent/consultationVetList/consultationDetails?${new URLSearchParams(
+                  { id: doctor.id }
+                ).toString()}`
+              )
+            }}
+          } 
+      className="bg-white dark:bg-[#2D4236] rounded-2xl shadow-md overflow-hidden w-72  transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
       {/* Image placeholder */}
       {!isAuthenticated ? (
         <LoginConfirmDialog>

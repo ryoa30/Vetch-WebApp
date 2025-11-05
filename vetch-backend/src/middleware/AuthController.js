@@ -74,7 +74,7 @@ class AuthController {
             const refreshToken = bearer || headerToken || cookieToken;
             if (!refreshToken) {
                 return res.status(401).json({
-                    ok: true,
+                    ok: false,
                     message: "No refresh token provided. Please login again.",
                     statusCode: 401,
                 });

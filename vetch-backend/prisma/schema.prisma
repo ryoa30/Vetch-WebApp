@@ -157,7 +157,7 @@ model Booking {
   pet            Pet             @relation(fields: [petId], references: [id], onDelete: Cascade)
   location       Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
   payment        Payment?
-  concernDetails ConcernDetail[]
+  concernDetails ConcernDetail[]  
   rating         Rating?
 
   @@map("booking")

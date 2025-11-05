@@ -37,13 +37,14 @@ class SocketManager {
 
       socket.on(
         "send_message",
-        async ({ roomId, senderId, senderRole, message }, ack) => {
+        async ({ roomId, senderId, senderRole, message, type }, ack) => {
           try {
             const saved = await this.#chatRepository.addMessage({
               roomId,
               senderId,
               senderRole,
               content: message,
+              type: type,
             });
 
             // Count others in the room (works with clustered adapters)
@@ -55,7 +56,8 @@ class SocketManager {
             if (others > 0) {
               ack?.({ deliveredRealtime: true, notified: false });
             } else {
-              await this.#notificationController.sendToUserBooking([roomId], {title: "New message in your chat", body: message}, senderRole);
+              const trueMessage = type === 'message' ? saved.content : `Sent a ${type}`;
+              await this.#notificationController.sendToUserBooking([roomId], {title: "New message in your chat", body: {trueMessage}}, senderRole);
               ack?.({ deliveredRealtime: false, notified: true });
             }
           } catch (err) {

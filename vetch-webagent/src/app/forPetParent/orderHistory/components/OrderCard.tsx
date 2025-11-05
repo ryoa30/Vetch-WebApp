@@ -1,10 +1,11 @@
 import { snakeCase } from "lodash";
 import Image from "next/image";
 import React from "react";
-import { BanknoteArrowDown, History, MessageCircle, Star } from "lucide-react";
+import { BanknoteArrowDown, History, MessageCircle, Star, UserX } from "lucide-react";
 import { formatIsoJakarta } from "@/lib/utils/formatDate";
 import { PaymentService } from "@/lib/services/PaymentService";
 import { showPaymentSnap } from "@/lib/utils/snapPayment";
+import ConfirmationDialogBox from "@/app/alert-dialog-box/ConfirmationDialogBox";
 
 const OrderCard = ({
   booking,
@@ -132,9 +133,22 @@ const OrderCard = ({
           </div>
         )}
         {booking.bookingStatus === "PENDING" && (
-          <span className="text-center h-fit self-center text-yellow-600">
-            Waiting For Vet Acceptance
-          </span>
+          <div className="flex flex-col gap-4">
+            <span className="text-center h-fit self-center text-yellow-600">
+              Waiting For Vet Acceptance
+            </span>
+            <ConfirmationDialogBox message="Are you sure you want to cancel this Appointment?" subMessage="This action cannot be undone" onConfirm={() => handleAction(booking)}>
+              <button
+                // onClick={() => {
+                //   handleAction(booking);
+                // }}
+                className="bg-transparent w-full justify-center self-center h-fit text-black px-3 py-2 rounded-lg text-sm font-medium border border-black dark:hover:bg-gray-500 hover:bg-gray-100 dark:text-white dark:border-white duration-200 flex items-center gap-2"
+              >
+                <UserX className="w-5 h-5" />
+                Cancel Appointment
+              </button>
+            </ConfirmationDialogBox>
+          </div>
         )}
         {booking.bookingStatus === "ONGOING" && (
           <button

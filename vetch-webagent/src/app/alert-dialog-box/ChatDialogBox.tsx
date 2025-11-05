@@ -13,7 +13,6 @@ import { io, type Socket } from "socket.io-client";
 import {
   Send,
   Image as ImageIcon,
-  FileText,
   Video,
   X,
   NotebookText,
@@ -27,6 +26,7 @@ import {
   VideoOff,
   PhoneOff,
   Flag,
+  SendHorizonal,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChatService } from "@/lib/services/ChatService";
@@ -34,9 +34,8 @@ import { useSession } from "@/contexts/SessionContext";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import IncomingCallDialog from "./IncomingCallDialog";
-import { clear } from "console";
 import { BookingService } from "@/lib/services/BookingService";
-import { dateToHHMM, formatLocalDate } from "@/lib/utils/formatDate";
+import { formatLocalDate } from "@/lib/utils/formatDate";
 import ConfirmationDialogBox from "./ConfirmationDialogBox";
 import SuccessDialog from "./SuccessDialog";
 
@@ -62,21 +61,22 @@ const ICE_SERVERS: RTCIceServer[] = [
 ];
 
 // For production, add TURN (replace with your real TURN host/creds)
-const ICE_SERVERS_WITH_TURN: RTCIceServer[] = [
-  {
-    urls: ["stun:stun.l.google.com:19302", "stun:global.stun.twilio.com:3478"],
-  },
-  {
-    urls: "turn:turn.your-domain.com:3478?transport=udp",
-    username: "USER",
-    credential: "PASS",
-  },
-  {
-    urls: "turn:turn.your-domain.com:3478?transport=tcp",
-    username: "USER",
-    credential: "PASS",
-  },
-];
+// Example TURN servers for production (add real ones when enabling TURN)
+// const ICE_SERVERS_WITH_TURN: RTCIceServer[] = [
+//   {
+//     urls: ["stun:stun.l.google.com:19302", "stun:global.stun.twilio.com:3478"],
+//   },
+//   {
+//     urls: "turn:turn.your-domain.com:3478?transport=udp",
+//     username: "USER",
+//     credential: "PASS",
+//   },
+//   {
+//     urls: "turn:turn.your-domain.com:3478?transport=tcp",
+//     username: "USER",
+//     credential: "PASS",
+//   },
+// ];
 
 export default function ChatDialogBox({
   isOpen,
@@ -92,6 +92,8 @@ export default function ChatDialogBox({
   const { user } = useSession();
 
   // chat state
+  const [imageMessage, setImageMessage] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any[]>([]);
 
@@ -130,7 +132,7 @@ export default function ChatDialogBox({
 
   const endRef = useRef<HTMLDivElement | null>(null);
 
-  const chatService = new ChatService();
+  const chatService = useMemo(() => new ChatService(), []);
 
   // helper
   function destroyPeer() {
@@ -160,7 +162,7 @@ export default function ChatDialogBox({
 
   // -------- load chat messages when dialog opens ----------
   useEffect(() => {
-    if (!isOpen || !booking) return;
+    if (!isOpen || !booking?.id) return;
     (async () => {
       try {
         const res = await chatService.fetchMessages(booking.id, 100);
@@ -169,7 +171,7 @@ export default function ChatDialogBox({
         console.warn(e);
       }
     })();
-  }, [isOpen, booking]);
+  }, [isOpen, booking?.id, chatService]);
 
   function hardStopAllMedia() {
     // 1) state-backed local stream
@@ -223,6 +225,7 @@ export default function ChatDialogBox({
     if (!socket) return;
     const roomId = booking?.id;
     if (!roomId) return;
+    const joinedSet = joinedRef.current;
 
     // join once (dev StrictMode safe)
     if (!joinedRef.current.has(roomId)) {
@@ -265,9 +268,9 @@ export default function ChatDialogBox({
       socket.off("callUser", onIncomingCall);
       socket.off("leaveCall", onLeaveCall);
       socket.emit("leave_room", { roomId });
-      joinedRef.current.delete(roomId);
+      joinedSet.delete(roomId);
     };
-  }, [socket, booking?.id]);
+  }, [socket, booking?.id, onLeaveCall, setIsOpen]);
 
   // -------- listen for callAccepted globally (not inside callUser) ----------
   useEffect(() => {
@@ -340,6 +343,7 @@ export default function ChatDialogBox({
       senderId: user?.id,
       senderRole: user?.role,
       message,
+      type: "message",
     });
     setMessage("");
   };
@@ -448,6 +452,46 @@ export default function ChatDialogBox({
     setIsOpen(false);
     window.location.reload();
   }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageMessage(e.target.files[0]);
+      // Allow selecting the same file again by clearing the input value
+      e.target.value = "";
+    }
+  };
+
+  const handleCancelUpload = () => {
+    setImageMessage(null);
+  }
+
+  const handleSendImage = async () => {
+    if(!imageMessage || !socket || !booking) return;
+    const uploadResult = await chatService.uploadImage(imageMessage);
+    if(!uploadResult.ok){
+      return;
+    }
+    console.log(uploadResult);
+    socket.emit("send_message", {
+      roomId: booking.id,
+      senderId: user?.id,
+      senderRole: user?.role,
+      message:uploadResult.data,
+      type: "image",
+    });
+    setImageMessage(null);
+  }
+
+  // Create and clean up a preview URL to avoid memory leaks and ensure updates
+  useEffect(() => {
+    if (!imageMessage) {
+      setImagePreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(imageMessage);
+    setImagePreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [imageMessage]);
 
   // ===================== RENDER =====================
 
@@ -570,7 +614,7 @@ export default function ChatDialogBox({
             </DialogTitle>
 
             {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-700">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 bg-gray-50 dark:bg-gray-700">
               {messages.map((msg) => (
                 <div
                   key={msg._id}
@@ -609,10 +653,31 @@ export default function ChatDialogBox({
             </div>
 
             {/* Input Area */}
-            <div className="bg-white dark:bg-gray-800 border-t border-gray-200 p-3">
+            <div className="bg-white dark:bg-gray-800 border-t border-gray-200 p-3  ">
+                <div className={`absolute flex flex-col justify-start bottom-0 w-full left-0 rounded-md overflow-hidden bg-gray-50 dark:bg-gray-700 transition-all duration-300 ${imageMessage ? 'h-[65%] p-2 border border-gray-300' : 'h-0'}`}>
+                  <button onClick={handleCancelUpload} className="self-end rounded-full p-1 hover:bg-gray-500/50 mb-2 duration-200"><X className="w-5 h-5"/></button>
+                  {imageMessage && imagePreviewUrl && (
+                    <div className="relative h-[75%]">
+                      <Image
+                        src={imagePreviewUrl}
+                        alt="preview"
+                        fill
+                        className="object-contain"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                  <button
+                    onClick={handleSendImage}
+                    className="bg-white self-end font-bold mt-2 flex flex-row items-center gap-2 hover:bg-gray-50 text-teal-600 rounded-full p-2.5 border-gray-300"
+                  >
+                    Send Image <SendHorizonal size={20} />
+                  </button>
+                </div>
               <div className="flex items-center gap-2">
                 <input
                   type="text"
+                  disabled={imageMessage !== null}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
@@ -621,15 +686,20 @@ export default function ChatDialogBox({
                 />
                 <button
                   onClick={handleSend}
-                  className="bg-white hover:bg-gray-50 text-teal-600 rounded-full p-2.5 transition border border-gray-300"
+                  className="bg-white hover:bg-gray-300 duration-200 text-teal-600 rounded-full p-2.5 transition border border-gray-300"
                 >
                   <Send size={20} />
                 </button>
-                <button className="bg-white hover:bg-gray-50 text-teal-600 rounded-full p-2.5 transition border border-gray-300">
+                <button
+                  className="bg-white w-[40px] h-[40px] hover:bg-gray-300 duration-200 text-teal-600 rounded-full p-2.5 transition border border-gray-300"
+                >
+                  <input 
+                    type="file"
+                    accept="image/*"
+                    className=" absolute w-[40px] h-[40px] opacity-0 cursor-pointer"
+                    onChange={handleImageUpload}
+                  />
                   <ImageIcon size={20} />
-                </button>
-                <button className="bg-white hover:bg-gray-50 text-teal-600 rounded-full p-2.5 transition border border-gray-300">
-                  <FileText size={20} />
                 </button>
               </div>
             </div>

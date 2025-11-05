@@ -1,4 +1,5 @@
 const ChatRepository = require("../repository/ChatRepository");
+const cloudinary = require("../utils/cloudinary");
 
 class ChatController {
   #chatRepository;
@@ -8,6 +9,38 @@ class ChatController {
     // bind methods for route handlers
     this.getMessages = this.getMessages.bind(this);
     this.postMessage = this.postMessage.bind(this);
+  }
+
+  async uploadImage(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ ok: false, message: "No file uploaded" });
+      }
+      const uploadResult = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+          {
+              folder: "chat-images",
+              resource_type: "image",
+              allowed_formats: ["jpg", "jpeg", "png", "webp"],
+          },
+          (error, result) => (error ? reject(error) : resolve(result))
+          );
+          // Multer memory buffer -> upload_stream
+          stream.end(req.file.buffer);
+      });
+
+      console.log("uploadResult",uploadResult);
+
+      if(!uploadResult || !uploadResult.secure_url) {
+        return res.status(500).json({ ok: false, message: "Failed to upload image" });
+      }else{
+        return res.status(200).json({ ok: true, message: "Image uploaded successfully", data: uploadResult.secure_url });
+      }
+      
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ ok: false, message: "Error uploading image", error: error.message });
+    }
   }
 
   async getMessages(req, res) {
