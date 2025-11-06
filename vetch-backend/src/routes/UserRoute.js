@@ -30,6 +30,8 @@ router.post('/login', userController.validateLogin)
 
 router.post('/validate-otp', userController.validateOTP);
 
+router.post('/send-otp', userController.resendOTP);
+
 router.post('/register', upload.single("file"), userController.register);
 
 module.exports = router;

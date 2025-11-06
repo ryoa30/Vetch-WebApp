@@ -19,6 +19,7 @@ export default function LayoutWrapper({ children, session }: { children: React.R
   const {isAuthenticated, user} = session;
 
   const noLayoutRoutes = [
+    "/OTP",
     "/login",
     "/register/people/account",
     "/register/people/location",

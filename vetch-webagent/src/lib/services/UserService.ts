@@ -60,6 +60,10 @@ export class UserService {
     return await this.#http.post<IResponse>('/validate-otp', {email: email, otp: otp});
   }
 
+  async resendOTP (email: string) {
+    return await this.#http.post<IResponse>('/send-otp', {email: email});
+  }
+
   async login(email: string, password: string, rememberMe: boolean) {
     try {
       const result = await this.#http.post<IResponse>('/login', {email: email, password: password, rememberMe: rememberMe}, { credentials: "include" });

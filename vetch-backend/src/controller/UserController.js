@@ -35,6 +35,7 @@ class UserController {
         this.validateLogin = this.validateLogin.bind(this);
         this.updateUserDetails = this.updateUserDetails.bind(this);
         this.updateUserLocation = this.updateUserLocation.bind(this);
+        this.resendOTP = this.resendOTP.bind(this);
     }
 
     async updateUserDetails(req, res) {
@@ -170,6 +171,21 @@ class UserController {
             res.status(200).json({ok: true, message: 'OTP sent successfully' });
         } catch (error) {
             res.status(500).json({ok: false, message: 'Error Register', error: error.message });
+        }
+    }
+
+    async resendOTP(req, res) {
+        try {
+            const {email} = req.body;
+            const result = await this.#otpController.resendOTP(email)
+            if(result.success){
+                res.status(200).json({ ok: true, message: 'OTP Resent successfully' });
+            }else{
+                console.log(result);
+                res.status(400).json({ ok: false, message: 'Failed to resend OTP' });
+            }
+        } catch (error) {
+            res.status(400).json({ ok: false, message: 'Invalid OTP' });
         }
     }
     

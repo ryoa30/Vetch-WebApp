@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import OTPHeader from "@/components/OTPheader";
 import {
   InputOTP,
@@ -9,19 +8,17 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getWithExpiry, removeItem } from "@/lib/utils/localStorage";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/lib/services/UserService";
-import { HttpClient } from "@/lib/http/HttpClient";
-import { API_URL } from "@/constant/apiConstant";
 import OTPSuccess from "../alert-dialog-box/OTPSuccess";
 
 export default function OTPPage() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [dialog, setDialog] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const userService = new UserService();
   const router = useRouter();
@@ -31,6 +28,14 @@ export default function OTPPage() {
     if (email) setEmail(email);
     else router.push('/login');
   }
+
+  useEffect(()=>{
+    if(buttonDisabled){
+      setInterval(()=>{
+        setButtonDisabled(false);
+      }, 30000)
+    }
+  }, [buttonDisabled])
 
 
   useEffect(() => {
@@ -49,6 +54,14 @@ export default function OTPPage() {
           alert('Invalid OTP');
         }
       }
+    }
+
+    const handleResendOTP = async () =>{
+      const result = await userService.resendOTP(email);
+      if(!result.ok){
+        checkEmail();
+      }
+      setButtonDisabled(true)
     }
 
   return (
@@ -86,9 +99,9 @@ export default function OTPPage() {
         {/* Resend Link */}
         <p className="text-sm">
           Haven’t received it?{" "}
-          <Link href="#" className="text-blue-600 hover:underline">
+          <button disabled={buttonDisabled} onClick={handleResendOTP} className={`${buttonDisabled?"cursor-not-allowed text-gray-700":"hover:underline text-blue-600 "} `}>
             Resend OTP
-          </Link>
+          </button>
         </p>
       </div>
     </div>
