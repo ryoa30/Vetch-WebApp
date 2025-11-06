@@ -36,6 +36,7 @@ class UserController {
         this.updateUserDetails = this.updateUserDetails.bind(this);
         this.updateUserLocation = this.updateUserLocation.bind(this);
         this.resendOTP = this.resendOTP.bind(this);
+        this.forgotPassword = this.forgotPassword.bind(this);
     }
 
     async updateUserDetails(req, res) {
@@ -186,6 +187,21 @@ class UserController {
             }
         } catch (error) {
             res.status(400).json({ ok: false, message: 'Invalid OTP' });
+        }
+    }
+
+    async forgotPassword(req, res) {
+        try {
+            const {email} = req.body;
+            const result = await this.#otpController.generateAndSendForgotPassword(email)
+            if(result){
+                res.status(200).json({ ok: true, message: 'Forgot Password Email sent successfully' });
+            }else{
+                console.log(result);
+                res.status(400).json({ ok: false, message: 'Failed to sent Forgot Password Email' });
+            }
+        } catch (error) {
+            res.status(400).json({ ok: false, message: 'Invalid email' });
         }
     }
     

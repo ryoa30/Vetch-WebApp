@@ -1,4 +1,5 @@
 "use client"
+import { UserService } from "@/lib/services/UserService";
 import React, { useState } from "react";
 
 export default function ForgotPasswordPage(){
@@ -6,22 +7,25 @@ export default function ForgotPasswordPage(){
   const [error, setError] = useState<string | null>(null);
   const [isSent, setIsSent] = useState(false);
 
+  const userService = new UserService();
+
   function validateEmail(value: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (!email) {
-      setError("Email wajib diisi.");
+      setError("Email must be filled.");
       return;
     }
     if (!validateEmail(email)) {
-      setError("Format email tidak valid.");
+      setError("Invalid email format.");
       return;
     }
+    await userService.forgotPassword(email);
     setIsSent(true);
   }
 
@@ -64,16 +68,16 @@ export default function ForgotPasswordPage(){
             </form>
           ) : (
             <div className="rounded-md border border-green-200 bg-green-50/80 p-4">
-              <h2 className="text-sm font-medium text-green-800">Permintaan Terkirim</h2>
-              <p className="mt-2 text-sm text-green-700">Kami telah mengirimkan email berisi instruksi reset kata sandi (cek folder spam jika tidak terlihat).</p>
+              <h2 className="text-sm font-medium text-green-800">Request Sent</h2>
+              <p className="mt-2 text-sm text-green-700">We sent the email containing password reset instructions (check spam folder if not visible).</p>
               <button
                 onClick={() => {
                   setEmail("");
                   setIsSent(false);
                 }}
-                className="mt-4 inline-block text-sm underline"
+                className="mt-4 inline-block text-sm underline text-black"
               >
-                Kembali
+                Back
               </button>
             </div>
           )}
