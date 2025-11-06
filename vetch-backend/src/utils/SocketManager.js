@@ -57,7 +57,7 @@ class SocketManager {
               ack?.({ deliveredRealtime: true, notified: false });
             } else {
               const trueMessage = type === 'message' ? saved.content : `Sent a ${type}`;
-              await this.#notificationController.sendToUserBooking([roomId], {title: "New message in your chat", body: {trueMessage}}, senderRole);
+              await this.#notificationController.sendToUserBooking([roomId], {title: "New message in your chat", body: trueMessage}, senderRole);
               ack?.({ deliveredRealtime: false, notified: true });
             }
           } catch (err) {

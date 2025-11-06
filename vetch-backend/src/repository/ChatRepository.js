@@ -15,9 +15,9 @@ class ChatRepository {
       .toArray();
   }
 
-  async addMessage({ roomId, senderId, senderRole, content }) {
+  async addMessage({ roomId, senderId, senderRole, content, type }) {
     const db = await getDb();
-    const doc = newMessage({ roomId, senderId, senderRole, content });
+    const doc = newMessage({ roomId, senderId, senderRole, content, type });
     const { insertedId } = await db.collection("chat_collection").insertOne(doc);
     return { ...doc, _id: insertedId };
   }

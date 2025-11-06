@@ -166,6 +166,7 @@ export default function ChatDialogBox({
     (async () => {
       try {
         const res = await chatService.fetchMessages(booking.id, 100);
+        console.log(res.data);
         if (res.ok) setMessages(res.data);
       } catch (e) {
         console.warn(e);
@@ -636,7 +637,19 @@ export default function ChatDialogBox({
                           : "bg-blue-300 text-gray-800 rounded-br-none"
                       }`}
                     >
-                      <p className="text-sm leading-relaxed">{msg.content}</p>
+                      {msg.type === "image" &&  (
+                        <div className="relative w-64 h-64">
+                          <Image
+                            src={msg.content}
+                            alt="sent image"
+                            fill
+                            className="object-contain rounded-md"
+                            unoptimized
+                          />
+                        </div>
+                      )
+                      }
+                      {msg.type === "message" && <p className="text-sm leading-relaxed">{msg.content}</p>}
                     </div>
                   </div>
                   <div className="flex items-end gap-1 mt-1 px-1">
