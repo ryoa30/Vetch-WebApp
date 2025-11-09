@@ -34,6 +34,8 @@ router.post('/send-otp', userController.resendOTP);
 
 router.post('/forgot-password', userController.forgotPassword);
 
+router.post('/reset-password', userController.resetPassword);
+
 router.post('/register', upload.single("file"), userController.register);
 
 module.exports = router;

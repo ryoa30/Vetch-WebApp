@@ -37,6 +37,7 @@ class UserController {
         this.updateUserLocation = this.updateUserLocation.bind(this);
         this.resendOTP = this.resendOTP.bind(this);
         this.forgotPassword = this.forgotPassword.bind(this);
+        this.resetPassword = this.resetPassword.bind(this);
     }
 
     async updateUserDetails(req, res) {
@@ -187,6 +188,23 @@ class UserController {
             }
         } catch (error) {
             res.status(400).json({ ok: false, message: 'Invalid OTP' });
+        }
+    }
+
+    async resetPassword(req, res) {
+        try {
+            const {email, newPassword, key} = req.body;
+            const validate = await this.#otpController.validateKey(email, key);
+            if(validate){
+                const hashedPassword = await bcrypt.hash(newPassword, 10);
+                await this.#userRepository.updatePasswordByEmail(email, hashedPassword);
+                res.status(200).json({ ok: true, message: 'Password reset successfully' });
+            }else{
+                res.status(400).json({ ok: false, message: 'Invalid or expired key' });
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error resetting password', error: error.message });
         }
     }
 

@@ -176,6 +176,10 @@
 /* globals.css */
 .pac-container { z-index: 100000 !important; }
 
+.password-mask {
+  -webkit-text-security: disc; /* Chrome/Edge/Safari mask */
+  text-security: disc;         /* nonstandard alias; some engines ignore */
+}
 
 @layer base {
   * {

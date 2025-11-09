@@ -98,7 +98,8 @@ class OtpController {
 
     const url = process.env.CORS_URL;
     const encryptedKey = await bcrypt.hash(masterKey, 10);
-    const redirectUrl = url + `/changepassword/${email}/${encryptedKey}`;
+    const searchParams = new URLSearchParams({ email: email, key: encryptedKey });
+    const redirectUrl = url + `/changepassword?${searchParams.toString()}`;
 
     try {
       // Store OTP in Redis
@@ -284,6 +285,21 @@ If you didn’t request this, you can ignore this email.`,
         success: false,
         message: "An error occurred during verification.",
       };
+    }
+  }
+
+  async validateKey(email, masterKey){
+    const key = `forgotPassword:${email}`;
+    const getRedis = await this.#redisClient.get(key);
+    const storedKey = getRedis ? JSON.parse(getRedis) : null;
+    if (!storedKey) {
+      return false;
+    }
+    if(await bcrypt.compare(storedKey.masterKey, masterKey)){
+      await this.#redisClient.del(key);
+      return true;
+    }else{
+      return false;
     }
   }
 

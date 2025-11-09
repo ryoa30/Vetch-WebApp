@@ -35,6 +35,13 @@ class UserRepository extends BaseRepository {
             where: { email, isDeleted: false },
         });
     }
+
+    async updatePasswordByEmail(email, newPassword) {
+        return this._model.update({
+            where: { email },
+            data: { password: newPassword },
+        });
+    }
 }
 
 module.exports = UserRepository;

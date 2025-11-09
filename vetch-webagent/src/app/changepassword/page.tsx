@@ -1,12 +1,30 @@
 "use client"
-import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeClosed } from "lucide-react";
+import { UserService } from "@/lib/services/UserService";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordNew, setShowPasswordNew] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const router = useRouter();
+  const userService = new UserService();
+
+  const sp = useSearchParams();
+  const email = sp.get("email");
+  const key = sp.get("key");
+
+  useEffect(()=> {
+    console.log(email, key);
+    if (!email || !key) (
+      router.push("/login")
+    )
+  }, [email, key])
 
   function validate() {
     setError(null);
@@ -25,10 +43,18 @@ export default function ResetPasswordPage() {
     return true;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+    const result = await userService.resetPassword(email!, password, key!);
+    if (!result.ok) {
+      setError(result.message || "Failed to reset password. Please try again.");
+      return;
+    }
     setIsSuccess(true);
+    setInterval(()=>{
+      router.push("/login");
+    }, 5000)
   }
 
   return (
@@ -51,30 +77,41 @@ export default function ResetPasswordPage() {
               <div className="relative">
                 <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={"text"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 8 characters"
-                  className="w-full rounded-md border border-gray-200 dark:border-[#225a53] px-4 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A] dark:focus:ring-[#1f665e] transition-shadow bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
+                  className={`${showPasswordNew?"":"password-mask"} w-full rounded-md border border-gray-200 dark:border-[#225a53] px-4 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A] dark:focus:ring-[#1f665e] transition-shadow bg-white dark:bg-transparent text-gray-900 dark:text-gray-100`}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((s) => !s)}
+                  onClick={() => setShowPasswordNew((s) => !s)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-xs opacity-80"
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  {showPasswordNew && <Eye className="h-5 w-5 text-gray-500" />}
+                  {!showPasswordNew && <EyeClosed className="h-5 w-5 text-gray-500" />}
                 </button>
               </div>
 
               <label htmlFor="confirm" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mt-4 mb-2">Confirm Password</label>
-              <input
-                id="confirm"
-                type={showPassword ? "text" : "password"}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Confirm your new password"
-                className="w-full rounded-md border border-gray-200 dark:border-[#225a53] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A] dark:focus:ring-[#1f665e] transition-shadow bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
-              />
+              <div className="relative">
+                <input
+                  id="confirm"
+                  type={"text"}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder="Confirm your new password"
+                  className={`${showPasswordConfirm?"":"password-mask"} w-full rounded-md border border-gray-200 dark:border-[#225a53] px-4 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A] dark:focus:ring-[#1f665e] transition-shadow bg-white dark:bg-transparent text-gray-900 dark:text-gray-100`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordConfirm((s) => !s)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs opacity-80"
+                >
+                  {showPasswordConfirm && <Eye className="h-5 w-5 text-gray-500" />}
+                  {!showPasswordConfirm && <EyeClosed className="h-5 w-5 text-gray-500" />}
+                </button>
+              </div>
 
               {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 

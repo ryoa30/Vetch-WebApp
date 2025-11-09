@@ -68,6 +68,10 @@ export class UserService {
     return await this.#http.post<IResponse>('/forgot-password', {email});
   }
 
+  async resetPassword (email: string, newPassword: string, key: string) {
+    return await this.#http.post<IResponse>('/reset-password', {email, newPassword, key});
+  }
+
   async login(email: string, password: string, rememberMe: boolean) {
     try {
       const result = await this.#http.post<IResponse>('/login', {email: email, password: password, rememberMe: rememberMe}, { credentials: "include" });
