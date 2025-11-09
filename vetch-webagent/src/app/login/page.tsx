@@ -18,6 +18,7 @@ import ToggleTheme from "@/components/ToggleTheme";
 import { useLoading } from "@/contexts/LoadingContext";
 import { NotificationService } from "@/lib/services/NotificationService";
 import ErrorDialog from "../alert-dialog-box/ErrorDialogBox";
+import { useSession } from "@/contexts/SessionContext";
 
 interface IErrors {
   email: string;
@@ -34,21 +35,23 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<IErrors>({ email: "", password: "" });
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [role, setRole] = useState("");
-  const [userId, setUserId] = useState("");
   const router = useRouter();
   const userValidator = new UserValidator();
   const userService = new UserService();
   const { theme } = useTheme();
   const { setIsLoading } = useLoading();
-  const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
+  const {setIsNotificationPrompted} = useSession();
 
   const nc = new NotificationService("/sw.js");
 
   const subscribeNotification = async () => {
     console.log("Subscribing to notification...");
-    await nc.init();
-    await nc.ensurePermission();
-    await nc.subscribe(VAPID_PUBLIC_KEY, userId);
+    console.log(await Notification.permission);
+    if(Notification.permission === "default"){
+      setIsNotificationPrompted(true);
+      return;
+    }
+    
     console.log("Subscribing to notification 2...");
   };
 
@@ -72,7 +75,6 @@ export default function LoginPage() {
     const data = await userService.login(email, password, remember);
     if (data) {
       setRole(data.role);
-      setUserId(data.id);
       setOpenSuccess(true);
     }else{
       setOpenError(true);

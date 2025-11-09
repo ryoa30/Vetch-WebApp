@@ -6,7 +6,7 @@ import Footer2 from "@/components/footer2";
 import DoctorCard from "@/components/ui/doctorcard";
 
 export default function HomePage() {
-  const [remember, setRemember] = useState("no");
+
   const doctors = [
     {
       name: "Dr. Seemore",

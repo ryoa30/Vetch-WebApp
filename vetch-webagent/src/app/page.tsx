@@ -6,12 +6,29 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { IVet } from "./forPetParent/consultationVetList/types";
 import { VetService } from "@/lib/services/VetService";
+import { useSession } from "@/contexts/SessionContext";
+import { ToastPopup } from "@/components/NotificationToast";
+import { NotificationService } from "@/lib/services/NotificationService";
 
 export default function Home() {
+
+  const {isAuthenticated, user, isNotificationPrompted, setIsNotificationPrompted} = useSession();
 
   const [doctors, setDoctors] = useState<IVet[]>([]);
   const {setIsLoading} = useLoading();
   const vetService = new VetService();
+
+  const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
+  const nc = new NotificationService("/sw.js");
+
+  const handleNotification = async () => {
+    console.log("Handling notification subscription...");
+    setIsNotificationPrompted(false);
+    await nc.init();
+    await nc.ensurePermission();
+    await nc.subscribe(VAPID_PUBLIC_KEY, user?.id || "");
+  }
+
 
   const loadVets = async () => {
     setIsLoading(true);
@@ -144,6 +161,15 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {
+        isAuthenticated &&
+      <ToastPopup 
+        open={isNotificationPrompted || false}
+        onClose={() => {setIsNotificationPrompted(false)}}
+        onConfirm={() => handleNotification()}
+        title="Turn on notifications?"
+        description="We'll only send important ones."
+      />}
     </div>
   );
 }

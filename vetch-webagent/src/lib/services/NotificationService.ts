@@ -16,7 +16,7 @@ export class NotificationService {
   }
 
   async ensurePermission(): Promise<NotificationPermission> {
-      console.log("asking for permission 1");
+    console.log("asking for permission 1");
     const p = await window.Notification.requestPermission();
     console.log("result permission",p);
     if (p !== "granted") throw new Error("Notification permission denied");
@@ -31,6 +31,7 @@ export class NotificationService {
       userVisibleOnly: true,
       applicationServerKey: appServerKey,
     });
+    console.log("sub",sub);
     const res = await this.http.post<IResponse>("/subscribe", {sub, userId});
     console.log("subscribe result", res);
     return sub;
