@@ -13,13 +13,23 @@ const SessionContext = createContext<MinimalSession>({
   isAuthenticated: false,
   user: null,
   isNotificationPrompted: false,
+  // default noop so consumers can call this safely even without a provider
   setIsNotificationPrompted: () => {},
 });
 
-export function SessionProvider({ value, children }: { value: MinimalSession; children: React.ReactNode }) {
-  const [isNotificationPrompted, setIsNotificationPrompted] = useState(value.isNotificationPrompted ?? false);
+export function SessionProvider({ value, children }: {
+  value: {
+    isAuthenticated: boolean;
+    user: { id: string; role: string; fullName: string; email: string } | null;
+    isNotificationPrompted?: boolean;
+  };
+  children: React.ReactNode;
+}) {
+  const [isNotificationPrompted, setLocalIsNotificationPrompted] = useState(value.isNotificationPrompted ?? false);
 
-  const contextValue = {
+  const setIsNotificationPrompted = (v: boolean) => setLocalIsNotificationPrompted(v);
+
+  const contextValue: MinimalSession = {
     ...value,
     isNotificationPrompted,
     setIsNotificationPrompted,
