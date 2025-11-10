@@ -237,6 +237,7 @@ class BookingController {
             }
 
             const finishedBooking = await this.#bookingRepository.findFinishedOngoingBooking();
+            console.log("Finished bookings:", finishedBooking);
             if (finishedBooking.length > 0) {
                 const bookingIds = finishedBooking.map(b => b.id);
                 await this.#bookingRepository.updateBookingsStatus(bookingIds, "DONE");

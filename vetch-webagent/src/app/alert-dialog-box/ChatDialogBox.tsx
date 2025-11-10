@@ -92,6 +92,7 @@ export default function ChatDialogBox({
   const { user } = useSession();
 
   // chat state
+  const [isVetOptionsOpen, setIsVetOptionsOpen] = useState(false);
   const [imageMessage, setImageMessage] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -506,7 +507,7 @@ export default function ChatDialogBox({
           } flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
         >
           {user?.role === "vet" && (
-            <div className="w-2/3 bg-gray-50 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700">
+            <div className={`${isVetOptionsOpen ? "opacity-100 w-[400px]" : "opacity-0 md:block"} transition-all duration-300 md:w-2/3 h-[600px] bg-gray-50 md:relative absolute z-100 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700`}>
               <div className="mb-6">
                 <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-2">
                   <NotebookText className="w-5 h-5" />
@@ -604,6 +605,14 @@ export default function ChatDialogBox({
                         : `dr. ${booking ? booking.vet.user.fullName : ""}`)}
                   </span>
                 </div>
+                
+              <div className="flex items-center gap-2">
+                <button
+                  className="hover:bg-teal-700 rounded-full p-2 transition md:hidden"
+                  onClick={() => setIsVetOptionsOpen((prev) => !prev)}
+                >
+                  <NotebookText size={24} />
+                </button>
 
                 <button
                   className="hover:bg-teal-700 rounded-full p-2 transition"
@@ -611,6 +620,7 @@ export default function ChatDialogBox({
                 >
                   <Video size={24} />
                 </button>
+              </div>
               </div>
             </DialogTitle>
 
@@ -626,7 +636,7 @@ export default function ChatDialogBox({
                   }`}
                 >
                   <div
-                    className={`max-w-[75%] ${
+                    className={`max-w-[100%] sm:max-w-[75%] ${
                       msg.sender_id !== user?.id ? "order-1" : "order-2"
                     }`}
                   >

@@ -94,7 +94,7 @@ export default function Sidebar() {
       ></div>
       <aside
         className={cn(
-          "bg-[#3D8D7A] dark:bg-[#1F2D2A] text-white flex flex-col justify-between min-h-screen transition-all duration-300 absolute md:relative z-20",
+          "bg-[#3D8D7A] dark:bg-[#1F2D2A] text-white flex flex-col justify-between min-h-screen transition-all duration-300 fixed md:relative z-20",
           isOpen ? "w-64" : "w-0 md:w-16"
         )}
       >

@@ -247,6 +247,7 @@ export default function DoctorProfile() {
                 }}
                 selected={selectedDate}
                 onSelect={(date) => {
+                  if(date === selectedDate || !date) return;
                   setSelectedDate(date);
                   setSelectedTime("");
                 }}
