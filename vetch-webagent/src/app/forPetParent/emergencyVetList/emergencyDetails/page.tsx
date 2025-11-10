@@ -182,7 +182,7 @@ export default function DoctorProfile() {
                   </span>
                   <span className="text-xl px-2 font-semibold text-[#0F5544] dark:text-white">
                     IDR{" "}
-                    {new Intl.NumberFormat("id-ID").format(Number(vet?.price))}
+                    {new Intl.NumberFormat("id-ID").format(Number(vet?.price)*2)}
                   </span>
                 </div>
               </div>

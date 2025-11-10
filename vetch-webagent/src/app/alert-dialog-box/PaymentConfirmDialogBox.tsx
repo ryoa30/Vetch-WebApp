@@ -39,12 +39,16 @@ export function PaymentDialog({
 
         <AlertDialogFooter className="flex justify-end gap-3">
           {/* Yes button */}
-          <AlertDialogAction className="px-6 py-2 rounded-md border border-black bg-white !text-black hover:bg-transparent" onClick={handleConfirmBooking}>
+          <AlertDialogAction 
+              className="px-6 py-2 rounded-md border !text-black hover:!text-white dark:hover:!text-black hover:bg-black dark:hover:bg-gray-400 border-black dark:border-white "
+          onClick={handleConfirmBooking}>
               Yes
           </AlertDialogAction>
 
           {/* No button */}
-          <AlertDialogCancel className="px-6 py-2 rounded-md bg-red-500 text-white hover:bg-red-600">
+          <AlertDialogCancel 
+          className="px-6 py-2 rounded-md !bg-red-500 text-white hover:!bg-red-600"
+          >
             No
           </AlertDialogCancel>
         </AlertDialogFooter>

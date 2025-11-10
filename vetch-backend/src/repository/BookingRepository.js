@@ -189,6 +189,7 @@ class BookingRepository extends BaseRepository {
         bookingDate: { gte: startDate, lte: endDate },
         bookingTime: { lt: baselineDate },
         bookingStatus: { in: ["ONGOING"] },
+        bookingType: { in: ["Online"] },
       },
       include:{
         pet: true,

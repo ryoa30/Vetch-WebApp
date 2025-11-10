@@ -54,7 +54,9 @@ export function ConfirmationDialogBox({
           </AlertDialogAction>
 
           {/* No button */}
-          <AlertDialogCancel className="px-6 py-2 rounded-md !bg-red-500 text-white hover:!bg-red-600">
+          <AlertDialogCancel 
+          className="px-6 py-2 rounded-md !bg-red-500 text-white hover:!bg-red-600"
+          >
             No
           </AlertDialogCancel>
         </AlertDialogFooter>

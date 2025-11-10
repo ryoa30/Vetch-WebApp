@@ -2,10 +2,14 @@ const webpush = require("web-push");
 const NotificationSubscriptionRepository = require("../repository/NotificationSubscriptionRepository");
 const NotificationRepository = require("../repository/NotificationRepository");
 
-const logo_url = "https://res.cloudinary.com/daimddpvp/image/upload/v1760450608/logo-white_odlyob.png";
+const logo_url =
+  "https://res.cloudinary.com/daimddpvp/image/upload/v1760450608/logo-white_odlyob.png";
 const defaultPayload = {
-  icon:logo_url, badge: logo_url, image: logo_url, vibrate: [100, 50, 100]
-}
+  icon: logo_url,
+  badge: logo_url,
+  image: logo_url,
+  vibrate: [100, 50, 100],
+};
 
 class PaymentController {
   #notificationSubscriptionRepository;
@@ -22,9 +26,11 @@ class PaymentController {
     this.sendToVets = this.sendToVets.bind(this);
     this.sendToPetOwners = this.sendToPetOwners.bind(this);
     this.sendToUserBooking = this.sendToUserBooking.bind(this);
-    this.getUnconfirmedNotifications = this.getUnconfirmedNotifications.bind(this);
+    this.getUnconfirmedNotifications =
+      this.getUnconfirmedNotifications.bind(this);
     this.putConfirmNotification = this.putConfirmNotification.bind(this);
-    this.putConfirmAllNotifications = this.putConfirmAllNotifications.bind(this);
+    this.putConfirmAllNotifications =
+      this.putConfirmAllNotifications.bind(this);
   }
   async detectSubscription(req, res) {
     try {
@@ -66,8 +72,11 @@ class PaymentController {
   async getUnconfirmedNotifications(req, res) {
     try {
       const { userId } = req.params;
-      const notifications = await this.#notificationRepository.findUnconfirmedByUserId(userId);
-      res.status(200).json({ ok: true, data: notifications, message: "Got notifications" });
+      const notifications =
+        await this.#notificationRepository.findUnconfirmedByUserId(userId);
+      res
+        .status(200)
+        .json({ ok: true, data: notifications, message: "Got notifications" });
     } catch (error) {
       console.log(error);
       res.status(500).json({
@@ -81,8 +90,16 @@ class PaymentController {
   async putConfirmNotification(req, res) {
     try {
       const { id } = req.body;
-      const notification = await this.#notificationRepository.update(id, { confirmed: true });
-      res.status(200).json({ ok: true, data: notification, message: "Notification confirmed" });
+      const notification = await this.#notificationRepository.update(id, {
+        confirmed: true,
+      });
+      res
+        .status(200)
+        .json({
+          ok: true,
+          data: notification,
+          message: "Notification confirmed",
+        });
     } catch (error) {
       console.log(error);
       res.status(500).json({
@@ -96,8 +113,15 @@ class PaymentController {
   async putConfirmAllNotifications(req, res) {
     try {
       const { userId } = req.body;
-      const notification = await this.#notificationRepository.updateAllNotifications(userId);
-      res.status(200).json({ ok: true, data: notification, message: "Notification confirmed" });
+      const notification =
+        await this.#notificationRepository.updateAllNotifications(userId);
+      res
+        .status(200)
+        .json({
+          ok: true,
+          data: notification,
+          message: "Notification confirmed",
+        });
     } catch (error) {
       console.log(error);
       res.status(500).json({
@@ -118,7 +142,7 @@ class PaymentController {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({...payload, ...defaultPayload})
+            JSON.stringify({ ...payload, ...defaultPayload })
           );
           ok++;
         } catch (err) {
@@ -142,18 +166,26 @@ class PaymentController {
     );
     let ok = 0,
       fail = 0;
+
+    console.log("unique subs",[...new Map(subs.map((s) => [s.userId, s])).values()]);
+
+    [...new Map(subs.map((s) => [s.userId, s])).values()].forEach(
+      (element) => {
+        this.#notificationRepository.create({
+          userId: element.userId,
+          message: payload.title,
+          confirmed: false,
+        });
+      }
+    );
+
     await Promise.all(
       subs.map(async (s) => {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({...payload, ...defaultPayload})
+            JSON.stringify({ ...payload, ...defaultPayload })
           );
-          await this.#notificationRepository.create({
-            userId: s.userId,
-            message: payload.title,
-            confirmed: false,
-          });
           ok++;
         } catch (err) {
           // 404/410 => gone
@@ -168,23 +200,33 @@ class PaymentController {
   }
 
   async sendToUserBooking(bookingIds, payload, role) {
-    const subs = await this.#notificationSubscriptionRepository.findByBookingIds(
-      bookingIds, role
-    );
+    const subs =
+      await this.#notificationSubscriptionRepository.findByBookingIds(
+        bookingIds,
+        role
+      );
     let ok = 0,
       fail = 0;
+
+      console.log("unique subs",[...new Map(subs.map((s) => [s.userId, s])).values()]);
+
+    [...new Map(subs.map((s) => [s.userId, s])).values()].forEach(
+      (element) => {
+        this.#notificationRepository.create({
+          userId: element.userId,
+          message: payload.title,
+          confirmed: false,
+        });
+      }
+    );
+
     await Promise.all(
       subs.map(async (s) => {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({...payload, ...defaultPayload})
+            JSON.stringify({ ...payload, ...defaultPayload })
           );
-          await this.#notificationRepository.create({
-            userId: s.userId,
-            message: payload.title,
-            confirmed: false,
-          });
           ok++;
         } catch (err) {
           // 404/410 => gone
@@ -205,18 +247,26 @@ class PaymentController {
     );
     let ok = 0,
       fail = 0;
+
+    console.log("unique subs",[...new Map(subs.map((s) => [s.userId, s])).values()]);
+
+    [...new Map(subs.map((s) => [s.userId, s])).values()].forEach(
+      (element) => {
+        this.#notificationRepository.create({
+          userId: element.userId,
+          message: payload.title,
+          confirmed: false,
+        });
+      }
+    );
+
     await Promise.all(
       subs.map(async (s) => {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({...payload, ...defaultPayload})
+            JSON.stringify({ ...payload, ...defaultPayload })
           );
-          await this.#notificationRepository.create({
-            userId: s.userId,
-            message: payload.title,
-            confirmed: false,
-          }); 
           ok++;
         } catch (err) {
           // 404/410 => gone
@@ -237,19 +287,26 @@ class PaymentController {
     );
     let ok = 0,
       fail = 0;
-    
+
+    console.log("unique subs",[...new Map(subs.map((s) => [s.userId, s])).values()]);
+
+    [...new Map(subs.map((s) => [s.userId, s])).values()].forEach(
+      (element) => {
+        this.#notificationRepository.create({
+          userId: element.userId,
+          message: payload.title,
+          confirmed: false,
+        });
+      }
+    );
+
     await Promise.all(
       subs.map(async (s) => {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({...payload, ...defaultPayload})
+            JSON.stringify({ ...payload, ...defaultPayload })
           );
-          await this.#notificationRepository.create({
-            userId: s.userId,
-            message: payload.title,
-            confirmed: false,
-          }); 
           ok++;
         } catch (err) {
           // 404/410 => gone

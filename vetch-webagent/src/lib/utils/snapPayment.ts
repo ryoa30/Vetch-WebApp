@@ -34,10 +34,10 @@ export function showPaymentSnap(token: string, data: {bookingId: string}, callba
   window.snap.pay(token, {
     onSuccess: async (result: any) => {
       console.log("Success:", result);
+      callbacks?.onSuccess?.(result);
       await bookingService.changeBookingStatus(data.bookingId, "PENDING");
       const res = await paymentService.updatePaymentDetails(data.bookingId, "DONE", result.payment_type)
       console.log(res);
-      callbacks?.onSuccess?.(result);
     },
     onPending: async (result: any) => {
       console.log("Pending:", result)
