@@ -201,16 +201,15 @@ class BookingRepository extends BaseRepository {
 
   async findExpiredBooking(){
     const { timeOfDay } = nowForSchedule();
-    const startDate = new Date(`${new Date().toISOString().split("T")[0]}T00:00:00.000Z`);
     const endDate = new Date(`${new Date().toISOString().split("T")[0]}T23:59:59.999Z`);
     
     const start = new Date(`1970-01-01T${timeOfDay.toISOString().split("T")[1]}`);
 
     const bookings = await this._model.findMany({
       where:{
-        bookingDate: { gte: startDate, lte: endDate },
+        bookingDate: { lte: endDate },
         bookingTime: { lt: start },
-        bookingStatus: { in: ["PAYMENT", "PENDING"] },
+        bookingStatus: { in: ["PAYMENT", "PENDING", "ONGOING"] },
         bookingType: { in: ["Online"] },
       },
       include:{

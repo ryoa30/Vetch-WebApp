@@ -43,7 +43,9 @@ export function LogoutConfirmDialog({
           </div>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={handleLogout} className="px-4 py-2 rounded-md border border-black bg-white !text-black hover:bg-transparent">
+          <AlertDialogAction onClick={handleLogout} 
+              className="px-6 py-2 rounded-md border !text-black hover:!text-white dark:hover:!text-black border-black dark:border-white "
+          >
             Yes
           </AlertDialogAction>
           <AlertDialogCancel className="bg-red-500 text-white hover:bg-red-600">

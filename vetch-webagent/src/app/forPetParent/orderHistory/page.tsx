@@ -24,7 +24,7 @@ const tabList = [
 ];
 
 const OrderHistory: React.FC = () => {
-  const [selectedTab, setSelectedTab] = useState("PAYMENT");
+  const [selectedTab, setSelectedTab] = useState("PENDING");
   const { user } = useSession();
   const { setIsLoading } = useLoading();
 
@@ -200,6 +200,8 @@ const OrderHistory: React.FC = () => {
               handleAction={
                 selectedTab === "PAYMENT"
                   ? handlePaymentClick
+                  :selectedTab === "PENDING" 
+                  ? handleCancelAppointment
                   : () => console.log("click")
               }
             />

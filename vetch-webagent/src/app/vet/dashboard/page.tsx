@@ -19,6 +19,8 @@ import { VetService } from "@/lib/services/VetService";
 import { VetStats } from "@/app/types";
 import Lottie from "lottie-react";
 import loaderCat from "@/../public/lottie/Loader cat.json"; 
+import { ToastPopup } from "@/components/NotificationToast";
+import { NotificationService } from "@/lib/services/NotificationService";
 
 
 
@@ -32,6 +34,7 @@ const stats = [
 
 export default function DashboardPage() {
   // ✅ 1. State management diperbaiki
+
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [vetStats, setVetStats] = useState<VetStats|null>(null);
@@ -44,10 +47,21 @@ export default function DashboardPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [dateAppointments, setDateAppointments] = useState<any[]>([]);
 
-  const {user} = useSession();
+  const {isAuthenticated, user, isNotificationPrompted, setIsNotificationPrompted} = useSession();
 
   const bookingService = new BookingService();
   const vetService = new VetService();
+
+  const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
+  const nc = new NotificationService("/sw.js");
+
+  const handleNotification = async () => {
+    console.log("Handling notification subscription...");
+    setIsNotificationPrompted(false);
+    await nc.init();
+    await nc.ensurePermission();
+    await nc.subscribe(VAPID_PUBLIC_KEY, user?.id || "");
+  }
   // ✅ 3. Fungsi-fungsi handler ditambahkan
   const handleOpenDetail = (data: any) => {
     setSelectedBooking(data);
@@ -236,6 +250,16 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {
+        isAuthenticated &&
+      <ToastPopup 
+        open={isNotificationPrompted || false}
+        onClose={() => {setIsNotificationPrompted(false)}}
+        onConfirm={() => handleNotification()}
+        title="Turn on notifications?"
+        description="We'll only send important ones."
+      />}
 
       {/* ✅ 5. Props untuk Overlay diperbaiki */}
       {isDetailOpen && <OverlayPetDetail

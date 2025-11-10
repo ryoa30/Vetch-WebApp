@@ -41,8 +41,10 @@ export default function LoginPage() {
   const { theme } = useTheme();
   const { setIsLoading } = useLoading();
   const {setIsNotificationPrompted} = useSession();
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const nc = new NotificationService("/sw.js");
+  const nc = new NotificationService("/sw.js");  
+  const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 
   const subscribeNotification = async () => {
     console.log("Subscribing to notification...");
@@ -50,6 +52,9 @@ export default function LoginPage() {
     if(Notification.permission === "default"){
       setIsNotificationPrompted(true);
       return;
+    }else if(Notification.permission === "granted"){
+      await nc.init();
+      await nc.subscribe(VAPID_PUBLIC_KEY, userId || "");
     }
     
     console.log("Subscribing to notification 2...");
@@ -75,6 +80,7 @@ export default function LoginPage() {
     const data = await userService.login(email, password, remember);
     if (data) {
       setRole(data.role);
+      setUserId(data.id);
       setOpenSuccess(true);
     }else{
       setOpenError(true);

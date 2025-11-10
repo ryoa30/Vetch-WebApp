@@ -47,7 +47,7 @@ export function ConfirmationDialogBox({
           <AlertDialogAction asChild>
             <button
               onClick={onConfirm}
-              className="px-6 py-2 rounded-md border border-black dark:border-white dark:hover:text-white bg-white text-black hover:bg-transparent"
+              className="px-6 py-2 rounded-md border !text-black hover:!text-white dark:hover:!text-black hover:bg-black border-black dark:border-white "
             >
               Yes
             </button>

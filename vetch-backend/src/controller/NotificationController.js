@@ -158,7 +158,6 @@ class PaymentController {
         } catch (err) {
           // 404/410 => gone
           if (err && (err.statusCode === 404 || err.statusCode === 410)) {
-            await this.repo.remove(s.endpoint);
           }
           fail++;
         }
@@ -238,6 +237,7 @@ class PaymentController {
     );
     let ok = 0,
       fail = 0;
+    
     await Promise.all(
       subs.map(async (s) => {
         try {
