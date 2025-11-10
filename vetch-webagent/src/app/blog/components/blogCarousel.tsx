@@ -39,7 +39,7 @@ const ArticleCarousel: React.FC<Props> = ({ articles }) => {
     <div className="bg-[#B3D8A8] dark:bg-[#357C72] relative mt-5 w-full overflow-hidden z-20">
       <div className="w-screen bg-teal-400 relative left-1/2 right-1/2 -mx-[50vw]">
         <div className="relative mx-auto p-5 rounded-xl max-w-[100%] md:max-w-[90%]">
-          <h2 className="text-2xl font-bold my-2 ml-7 md:ml-0">Rekomendasi Untuk Anda</h2>
+          <h2 className="text-2xl font-bold my-2 ml-7 md:ml-0">Recommendation for You</h2>
           <div className="relative mx-auto">
             {/* Container dengan padding untuk panah pada mobile */}
             <div className="px-12 md:px-0">

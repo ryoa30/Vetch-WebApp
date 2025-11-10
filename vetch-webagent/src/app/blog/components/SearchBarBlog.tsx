@@ -62,7 +62,7 @@ const SearchFilterBar: React.FC<Props> = ({ categories, selectedCategory, onSele
                             }
                         }}
                         onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                        placeholder="Cari Pencarian"
+                        placeholder="Search articles..."
                         className="w-[80%] border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
                     />
                     <button
