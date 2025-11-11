@@ -108,7 +108,7 @@ export default function BlogPage() {
           placeholder="Search for blog"
           onChange={(e) => setQuery(e.target.value)}
           value={query}
-          className="w-full md:w-64 mt-3 md:mt-0 rounded-full bg-white dark:bg-white"
+          className="w-full md:w-64 mt-3 md:mt-0 rounded-full bg-white dark:bg-black"
         />
       </div>
 
