@@ -105,16 +105,18 @@ export default function SchedulesPage() {
     setIsLoading(true);
     try {
       const time = schedule[index].timeOfDay.slice(11, 16);
-      if(schedule[index].id === "new"){
+      if(schedule[index].id.startsWith("new")){
         const response = await vetService.postVetSchedule(
           user!.id,
           time,
           daysOfWeek.indexOf(activeDay) + 1
         );
         console.log(response);
-        const excludedSchedule = schedule.filter((_, i) => i !== index);
+        const excludedSchedule = schedule.filter((s, i) => i !== index && !s.id.startsWith("new"));
+        const newSchedules = schedule.filter((s, i) => i!==index && s.id.startsWith("new"));
         const sorted = [...excludedSchedule, response.data].sort((a, b) => a.timeOfDay.localeCompare(b.timeOfDay));
-        setSchedule(sorted);
+        setSchedule([...newSchedules,...sorted]);
+        setBaseSchedule(sorted);
       }else{
         const response = await vetService.updateVetSchedule(
           schedule[index].id,
@@ -142,12 +144,14 @@ export default function SchedulesPage() {
   const handleDeleteSchedule = async (index: number) => {
     setIsLoading(true);
     try {
-      const response = await vetService.deleteVetSchedule(
-        schedule[index].id
-      );
+      if(schedule[index].id !== "new"){
+        const response = await vetService.deleteVetSchedule(
+          schedule[index].id
+        );
+        setBaseSchedule(baseSchedule.filter((s) => s.id !== schedule[index].id));
+        console.log(response);
+      }
       setSchedule(schedule.filter((_, i) => i !== index));
-      setBaseSchedule(baseSchedule.filter((_, i) => i !== index));
-      console.log(response);
     } catch (error) {
       setOpenError(true);
       setErrorMessages(["Failed to delete schedule. Please try again later."]);
@@ -156,9 +160,14 @@ export default function SchedulesPage() {
     setIsLoading(false);
   }
 
+  useEffect(()=>{
+    console.log("Schedule updated: ", schedule);
+    console.log("Base Schedule: ", baseSchedule);
+  }, [schedule, baseSchedule])
+
   const handleAddDraftSchedule = async () => {
     const newSchedule: ScheduleData = {
-      id: `new`,
+      id: `new${Date.now()}`,
       vetId: user!.id,
       dayNumber: daysOfWeek.indexOf(activeDay) + 1,
       timeOfDay: "1970-01-01T09:00:00Z",
@@ -231,7 +240,7 @@ export default function SchedulesPage() {
                 >
                   <div className="flex items-center gap-4 text-black dark:text-white">
                     <span>•</span>
-                    <span>Time {time.id !=="new" ? index + 1 : "New"}</span>
+                    <span>Time {!time.id.startsWith("new") ? index + 1 : "New"}</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1.5 text-black">
@@ -252,14 +261,14 @@ export default function SchedulesPage() {
                     </ConfirmationDialogBox>
                     <button
                       className={`text-gray-400 text-xl ${
-                        baseSchedule.some((s) => s.id === time.id) && baseSchedule[index] &&
-                        baseSchedule[index].timeOfDay === time.timeOfDay
+                        baseSchedule.find((s) => s.id === time.id) &&
+                        baseSchedule.find((s) => s.id === time.id)!.timeOfDay === time.timeOfDay
                           ? "opacity-0"
                           : "cursor-pointer hover:text-green-500"
                       }`}
                       disabled={
-                        baseSchedule.some((s) => s.id === time.id) && baseSchedule[index] &&
-                        baseSchedule[index].timeOfDay === time.timeOfDay
+                        baseSchedule.some((s) => s.id === time.id) &&
+                        baseSchedule.find((s) => s.id === time.id)!.timeOfDay === time.timeOfDay
                       }
                       onClick={()=>handleSaveSchedule(index)}
                     >
@@ -297,6 +306,7 @@ export default function SchedulesPage() {
                 Yes!
             </Button>
             <Button 
+            variant="outline"
             onClick={() => {setIsAvailHomecare(false);setIsAvailEmergency(false)}}
             className={`
                     justify-center rounded-lg text-sm font-medium flex-1/2
@@ -332,6 +342,7 @@ export default function SchedulesPage() {
                 Yes!
             </Button>
             <Button 
+            variant="outline"
             onClick={() => setIsAvailEmergency(false)}
             disabled={!isAvailHomecare}
             className={`

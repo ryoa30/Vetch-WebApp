@@ -89,6 +89,9 @@ class SocketManager {
         if (!roomId) return;
         // ensure the caller is actually in the room (optional safety)
         if (!socket.rooms.has(roomId)) return;
+        const socketsInRoom = await this.io.in(roomId).allSockets();
+        const total = socketsInRoom.size;
+        const others = socket.rooms.has(roomId) ? Math.max(total - 1, 0) : total;
         console.log(`callUser from ${from} to room ${roomId}`);
         await this.#notificationController.sendToUserBooking([roomId], {title: "You have a new call"}, senderRole);
 
@@ -97,6 +100,7 @@ class SocketManager {
           from, // caller socket id
           name,
           roomId,
+          others,
         });
       });
 

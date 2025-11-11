@@ -55,29 +55,6 @@ export default function DashboardPage() {
   const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
   const nc = new NotificationService("/sw.js");
 
-  const handleNotification = async () => {
-    console.log("Handling notification subscription...");
-    setIsNotificationPrompted(false);
-    await nc.init();
-    await nc.ensurePermission();
-    await nc.subscribe(VAPID_PUBLIC_KEY, user?.id || "");
-  }
-  // ✅ 3. Fungsi-fungsi handler ditambahkan
-  const handleOpenDetail = (data: any) => {
-    setSelectedBooking(data);
-    setIsDetailOpen(true);
-  };
-
-  const handleCloseAll = () => {
-    setIsDetailOpen(false);
-    setIsChatOpen(false);
-  };
-
-  const handleChatOpen = () => {
-    setIsDetailOpen(false); // Tutup detail
-    setIsChatOpen(true); // Buka chat
-  };
-
   const loadAppointmentByDate = async () => {
     setIsLoading(true);
     try {
@@ -108,6 +85,48 @@ export default function DashboardPage() {
       console.log(error);
     }
     setIsLoading(false);
+  }
+
+  const handleNotification = async () => {
+    console.log("Handling notification subscription...");
+    setIsNotificationPrompted(false);
+    await nc.init();
+    await nc.ensurePermission();
+    await nc.subscribe(VAPID_PUBLIC_KEY, user?.id || "");
+  }
+  // ✅ 3. Fungsi-fungsi handler ditambahkan
+  const handleOpenDetail = (data: any) => {
+    setSelectedBooking(data);
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseAll = () => {
+    setIsDetailOpen(false);
+    setIsChatOpen(false);
+  };
+
+  const handleChatOpen = () => {
+    setIsDetailOpen(false); // Tutup detail
+    setIsChatOpen(true); // Buka chat
+  };
+  const handlePendingBooking = async (status: string) => {
+    console.log("reject booking");
+    const result = await bookingService.changeBookingStatus(selectedBooking.id, (status === "REJECTED"?"CANCELLED": selectedBooking.bookingType === "Emergency" ? "ONGOING" :"ACCEPTED"));
+    if(result.ok){
+      handleCloseAll();
+      loadAppointmentByDate();
+      loadTodayAppointments();
+    }
+  }
+
+  const handleStartAppointment = async () => {
+    const result = await bookingService.changeBookingStatus(selectedBooking.id, ("ONGOING"));
+    if(result.ok){
+      loadTodayAppointments();
+      loadAppointmentByDate();
+      setIsDetailOpen(false); // Tutup detail
+      setIsChatOpen(true); // Buka chat
+    }
   }
 
   const loadVetStats = async () =>{
@@ -168,9 +187,6 @@ export default function DashboardPage() {
                 </div>
                 <p className="text-2xl font-bold text-gray-800 dark:text-white">
                   {vetStats ? new Intl.NumberFormat("id-ID").format(vetStats[item.value as keyof VetStats]) : 0}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">
-                  Delete if not needed
                 </p>
               </div>
             </div>
@@ -262,12 +278,25 @@ export default function DashboardPage() {
       />}
 
       {/* ✅ 5. Props untuk Overlay diperbaiki */}
-      {isDetailOpen && <OverlayPetDetail
+      {/* {isDetailOpen && <OverlayPetDetail
         open={isDetailOpen}
         onClose={handleCloseAll}
         data={selectedBooking}
         onAction={handleChatOpen}
-      />}
+      />} */}
+      {isDetailOpen && 
+        <OverlayPetDetail
+          open={isDetailOpen}
+          onClose={handleCloseAll}
+          onAction={
+            selectedBooking.bookingStatus === "PENDING" ? handlePendingBooking : 
+            selectedBooking.bookingStatus === "ONGOING" ? handleChatOpen :
+            selectedBooking.bookingStatus === "ACCEPTED" ? handleStartAppointment :
+            () => console.log("Action")
+          }  
+          data={selectedBooking}
+        />
+      }
 
       { isChatOpen && <ChatDialogBox booking={selectedBooking} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>}
     </div>
