@@ -103,6 +103,23 @@ const OrderHistory: React.FC = () => {
     }
   };
 
+  const handleRefundAppointment = async (booking) => {
+    setIsLoading(true);
+    try {
+      setIsDetailOpen(false);
+      const resultCancel = await paymentService.refundPayment(
+        booking.id,
+        "Booking Cancelled"
+      );
+      if (resultCancel.ok) {
+        setReload(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <div className=" p-4 flex flex-col items-center overflow-x-hidden">
       {/* Header */}
@@ -163,7 +180,9 @@ const OrderHistory: React.FC = () => {
                   ? handlePaymentClick 
                 : selectedTab === "PENDING" 
                   ? handleCancelAppointment
-                : () => console.log("click")
+                :selectedTab === "CANCELLED"?
+                handleRefundAppointment
+                  : () => console.log("click")
               }
             />
             {index != onlineConsultations.length - 1 && (
@@ -202,6 +221,8 @@ const OrderHistory: React.FC = () => {
                   ? handlePaymentClick
                   :selectedTab === "PENDING" 
                   ? handleCancelAppointment
+                  :selectedTab === "CANCELLED"?
+                  handleRefundAppointment
                   : () => console.log("click")
               }
             />

@@ -5,7 +5,7 @@ class PaymentRepository extends BaseRepository {
         super('Payment');
     }
 
-     async findaymentByBookingId(bookingId){
+     async findPaymentByBookingId(bookingId){
         return this._model.findUnique({
             where: { bookingId: bookingId },
         });

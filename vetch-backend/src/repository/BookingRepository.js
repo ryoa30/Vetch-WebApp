@@ -55,6 +55,7 @@ class BookingRepository extends BaseRepository {
             concern: true,
           }
         },
+        payment: true,
         rating: true,
       }
     });

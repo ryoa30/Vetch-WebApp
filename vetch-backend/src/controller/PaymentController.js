@@ -18,25 +18,56 @@ class PaymentController {
 
         this.getTransactionToken = this.getTransactionToken.bind(this);
         this.putPaymentDetails = this.putPaymentDetails.bind(this);
+        this.refundTransaction = this.refundTransaction.bind(this);
     }
 
     async putPaymentDetails (req, res) { 
         try {
-            const {bookingId, status, paymentMethod} = req.body;
-            const updatedBooking = await this.#paymentRepository.updatePaymentByBookingId(bookingId, {paymentStatus: status, paymentMethod: paymentMethod});
+            const {bookingId, status, paymentMethod, transactionId} = req.body;
+            const updatedBooking = await this.#paymentRepository.updatePaymentByBookingId(bookingId, {paymentStatus: status, paymentMethod: paymentMethod, transactionId: transactionId});
             res.status(200).json({ok: true, data: updatedBooking, message: 'Booking status updated successfully'});
         } catch (error) {
             console.log(error);
             res.status(500).json({ok: false, message: 'Error updating booking status', error: error.message });
         }
     }
+
+    async refundTransaction (req, res) {
+        try {
+            const { bookingId, reason } = req.body;
+            const paymentData = await this.#paymentRepository.findPaymentByBookingId(bookingId);
+
+            if(!paymentData) {
+                return res.status(404).json({ok: false, message: 'Payment data not found for the given bookingId'});
+            }
+            const url = `https://api.sandbox.midtrans.com/v2/${paymentData.transactionId}/refund`;
+            const options = {
+            method: 'POST',
+            headers: {
+                accept: 'application/json',
+                'content-type': 'application/json',
+                authorization: 'Basic TWlkLXNlcnZlci1tX2pKZ0Z0eWZlMUlXemkzMDJ6bmFuWi06TWlkLWNsaWVudC1BSXdnOTQ1dDRlS081QVRP'
+            },
+            body: JSON.stringify({refund_key: paymentData.id, amount: paymentData.grossAmount, reason: reason})
+            };
+
+            const result = await fetch(url, options);
+            await this.#paymentRepository.updatePaymentByBookingId(bookingId, {paymentStatus: "REFUNDED"});
+            console.log(result);
+            res.status(200).json({ok: true, data: result, message: 'Refund processed successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ok: false, message: 'Error processing refund', error: error.message });
+        }
+    }
     
+
 
     async getTransactionToken(req, res) {
         try {
             const { bookingId } = req.body;
             
-            const paymentData = await this.#paymentRepository.findaymentByBookingId(bookingId);
+            const paymentData = await this.#paymentRepository.findPaymentByBookingId(bookingId);
             
             if(paymentData) {
                 return res.status(200).json({ok: true, data: paymentData.paymentToken, message: 'Midtrans Token successfully retrieved'});
@@ -87,6 +118,8 @@ class PaymentController {
 
             await this.#paymentRepository.create({
                 bookingId: bookingId,
+                grossAmount: totalPrice,
+                orderId: uuid,
                 paymentToken: transactionToken,
                 paymentMethod: "",
                 paymentStatus: "PENDING",

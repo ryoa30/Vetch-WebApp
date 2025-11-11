@@ -6,8 +6,12 @@ import { IResponse } from "../http/types";
 export class PaymentService {
   #http: HttpClient = new HttpClient({ baseUrl: API_URL.PAYMENT });
 
-  async updatePaymentDetails(bookingId: string, status: string, paymentMethod: string){
-    return await this.#http.put<IResponse>(`/`, {bookingId, status, paymentMethod});
+  async updatePaymentDetails(bookingId: string, status: string, paymentMethod: string, transactionId: string){
+    return await this.#http.put<IResponse>(`/`, {bookingId, status, paymentMethod, transactionId});
+  }
+
+  async refundPayment(bookingId: string, reason: string){
+    return await this.#http.post<IResponse>(`/refund`, {bookingId, reason});
   }
 
   async fetchTransactionToken(

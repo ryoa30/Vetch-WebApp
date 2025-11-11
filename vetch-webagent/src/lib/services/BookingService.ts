@@ -34,7 +34,7 @@ export class BookingService {
     const resultHomecare =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Homecare&status=${status}`);
     const resultEmergency =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Emergency&status=${status}`);
 
-    console.log(resultOnline, resultHomecare);
+    console.log(resultOnline, resultHomecare, resultEmergency);
 
     return {
       online: resultOnline.ok? resultOnline.data: undefined,

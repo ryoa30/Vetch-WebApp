@@ -36,12 +36,12 @@ export function showPaymentSnap(token: string, data: {bookingId: string}, callba
       console.log("Success:", result);
       callbacks?.onSuccess?.(result);
       await bookingService.changeBookingStatus(data.bookingId, "PENDING");
-      const res = await paymentService.updatePaymentDetails(data.bookingId, "DONE", result.payment_type)
+      const res = await paymentService.updatePaymentDetails(data.bookingId, "DONE", result.payment_type, result.transaction_id)
       console.log(res);
     },
     onPending: async (result: any) => {
       console.log("Pending:", result)
-      const res = await paymentService.updatePaymentDetails(data.bookingId, "PENDING", result.payment_type)
+      const res = await paymentService.updatePaymentDetails(data.bookingId, "PENDING", result.payment_type, result.transaction_id)
       console.log(res);
     },
     onError: (error) => console.error("Error:", error),

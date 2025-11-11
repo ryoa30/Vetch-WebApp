@@ -7,6 +7,8 @@ const paymentController = new PaymentController();
 const AuthController = require('../middleware/AuthController');
 router.use(AuthController.authorize);
 
+router.post('/refund', paymentController.refundTransaction);
+
 router.post('/midtrans', paymentController.getTransactionToken);
 
 router.put('/', paymentController.putPaymentDetails);
