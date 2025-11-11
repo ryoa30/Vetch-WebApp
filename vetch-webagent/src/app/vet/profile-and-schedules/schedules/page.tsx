@@ -146,6 +146,7 @@ export default function SchedulesPage() {
         schedule[index].id
       );
       setSchedule(schedule.filter((_, i) => i !== index));
+      setBaseSchedule(baseSchedule.filter((_, i) => i !== index));
       console.log(response);
     } catch (error) {
       setOpenError(true);
@@ -253,7 +254,7 @@ export default function SchedulesPage() {
                       className={`text-gray-400 text-xl ${
                         baseSchedule.some((s) => s.id === time.id) && baseSchedule[index] &&
                         baseSchedule[index].timeOfDay === time.timeOfDay
-                          ? "cursor-not-allowed"
+                          ? "opacity-0"
                           : "cursor-pointer hover:text-green-500"
                       }`}
                       disabled={
@@ -272,6 +273,7 @@ export default function SchedulesPage() {
         </div>
       </div>
 
+      <div className="w-full my-auto h-[0.5px] bg-gray-400 mt-6"></div>
 
       {/* --- Service Cards --- */}
       <div className="flex gap-3 mt-6 max-w-3xl w-full">
@@ -280,16 +282,33 @@ export default function SchedulesPage() {
           <h3 className="font-semibold text-gray-800 dark:text-white mb-3">
             Home Care Service
           </h3>
-          <RadioGroup defaultValue="" value={isAvailHomecare? "yes" : "no"} className="flex items-center gap-4 mt-1" onValueChange={(e) => {setIsAvailHomecare(e === "yes"); if(e === "no"){setIsAvailEmergency(false);}}}>
-          <div className="flex items-center space-x-2">
-              <RadioGroupItem className='bg-white dark:bg-black border border-white' value="yes" id="homecare-yes" />
-              <Label htmlFor="homecare-yes" className="text-black dark:text-white">Yes!</Label>
+          <div className="flex flex-row gap-3">
+            <Button 
+            onClick={() => setIsAvailHomecare(true)}
+            variant="outline"
+            className={`
+                    justify-center rounded-lg text-sm font-medium flex-1/2
+                    ${
+                      isAvailHomecare
+                        ? "bg-gray-800 dark:bg-white dark:text-black text-white hover:bg-gray-200 dark:hover:text-white"
+                        : "bg-white text-gray-700 dark:text-white hover:bg-gray-100 border-gray-300"
+                    }
+                  `}>
+                Yes!
+            </Button>
+            <Button 
+            onClick={() => {setIsAvailHomecare(false);setIsAvailEmergency(false)}}
+            className={`
+                    justify-center rounded-lg text-sm font-medium flex-1/2
+                    ${
+                      !isAvailHomecare
+                        ? "bg-gray-800 dark:bg-white dark:text-black text-white hover:bg-gray-200 dark:hover:text-white"
+                        : "bg-white text-gray-700 dark:text-white hover:bg-gray-100 border-gray-300"
+                    }
+                  `}>
+                No
+            </Button>
           </div>
-          <div className="flex items-center space-x-2">
-              <RadioGroupItem className='bg-white dark:bg-black border border-white' value="no" id="homecare-no" />
-              <Label htmlFor="homecare-no" className="text-black dark:text-white">No</Label>
-          </div>
-          </RadioGroup>
         </div>
 
         {/* Emergency Service Card */}
@@ -297,20 +316,42 @@ export default function SchedulesPage() {
           <h3 className="font-semibold text-gray-800 dark:text-white mb-3">
             Emergency Service
           </h3>
-          <RadioGroup defaultValue="" disabled={!isAvailHomecare} value={isAvailEmergency? "yes" : "no"} className="flex items-center gap-4 mt-1" onValueChange={(e) => setIsAvailEmergency(e === "yes")}>
-            <div className="flex items-center space-x-2">
-                <RadioGroupItem className='bg-white dark:bg-black border border-white' value="yes" id="emergency-yes" />
-                <Label htmlFor="emergency-yes" className="text-black dark:text-white">Yes!</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-                <RadioGroupItem className='bg-white dark:bg-black border border-white' value="no" id="emergency-no" />
-                <Label htmlFor="emergency-no" className="text-black dark:text-white">No</Label>
-            </div>
-            </RadioGroup>
+          <div className="flex flex-row gap-3">
+            <Button 
+            onClick={() => setIsAvailEmergency(true)}
+            disabled={!isAvailHomecare}
+            variant="outline"
+            className={`
+                    justify-center rounded-lg text-sm font-medium flex-1/2
+                    ${
+                      isAvailEmergency
+                        ? "bg-gray-800 dark:bg-white dark:text-black text-white hover:bg-gray-200 dark:hover:text-white"
+                        : "bg-white text-gray-700 dark:text-white hover:bg-gray-100 border-gray-300"
+                    }
+                  `}>
+                Yes!
+            </Button>
+            <Button 
+            onClick={() => setIsAvailEmergency(false)}
+            disabled={!isAvailHomecare}
+            className={`
+                    justify-center rounded-lg text-sm font-medium flex-1/2
+                    ${
+                      !isAvailEmergency
+                        ? "bg-gray-800 dark:bg-white dark:text-black text-white hover:bg-gray-200 dark:hover:text-white"
+                        : "bg-white text-gray-700 dark:text-white hover:bg-gray-100 border-gray-300"
+                    }
+                  `}>
+                No
+            </Button>
+          </div>
         </div>
 
-        <button className="bg-white p-3 rounded-xl flex items-center justify-center text-black hover:bg-[#1F2D2A] hover:text-white duration-200" onClick={handleSaveAvailability}>
-          <Save className="w-8 h-8 "/>
+        <button className="bg-white p-3 rounded-xl flex items-center font-semibold justify-center text-black hover:bg-[#1F2D2A] hover:text-white duration-200" onClick={handleSaveAvailability}>
+          <div className="flex flex-col gap-1 items-center">
+            <Save className="w-8 h-8 "/>
+            Save <br></br>Availability
+          </div>
         </button>
       </div>
       <ErrorDialog open={openError} onOpenChange={() => setOpenError(false)} errors={errorMessages}/>
