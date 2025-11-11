@@ -23,6 +23,9 @@ const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "sat
 function nowForSchedule(zone = BUSINESS_TZ) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: zone,
+    day: "2-digit",
+    month: "2-digit", // numeric so we can map to our custom short month
+    year: "numeric",
     weekday: "long",
     hour: "2-digit",
     minute: "2-digit",
@@ -35,10 +38,13 @@ function nowForSchedule(zone = BUSINESS_TZ) {
   const hh = Number(get("hour"));
   const mm = Number(get("minute"));
   const ss = Number(get("second"));
+  const day = get("day"); // "15"
+  const mon = Number(get("month")); // "Sep"
+  const year = get("year"); // "07"
 
   // Anchor to 1970-01-01 UTC so it matches Postgres TIME
   const timeOfDay = new Date(Date.UTC(1970, 0, 1, hh, mm, ss, 0));
-  return { weekday: Number(weekday), timeOfDay };
+  return { weekday: Number(weekday), timeOfDay, todayDate: new Date(`${year}-${String(mon).padStart(2,"0")}-${day}T00:00:00.000Z`) };
 }
 
 const hourToTime = (h) => {

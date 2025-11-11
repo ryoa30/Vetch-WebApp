@@ -152,6 +152,7 @@ class VetController {
         try {
             const { page, volume, query, filters, userId} = req.body;
             const location = await this.#locationRepository.findLocationByUserId(userId);
+            console.log(location);
             const vets = await this.#vetRepository.findVetListEmergency(Number(page), Number(volume), query, filters, location);
             res.status(200).json({ok: true, data: vets, message: 'Vet list fetched successfully'});
         } catch (error) {

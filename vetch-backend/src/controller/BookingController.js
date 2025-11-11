@@ -160,8 +160,8 @@ class BookingController {
                 this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking has been cancelled`});
                 this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} has been cancelled`});
             }else if(status === "DONE") {
-                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking has been marked as done`});
-                this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} has been marked as done`});
+                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking has been done`});
+                this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} has been done`});
             }else if(status === "ONGOING") {
                 this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now ongoing`});
                 this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now ongoing`});

@@ -85,7 +85,7 @@ class SocketManager {
       );
 
       // WebRTC signaling passthrough
-      socket.on("callUser", async ({ roomId, signalData, from, name, senderRole }) => {
+      socket.on("callUser", async ({ roomId, signalData, from, name, senderRole }, ack) => {
         if (!roomId) return;
         // ensure the caller is actually in the room (optional safety)
         if (!socket.rooms.has(roomId)) return;
@@ -94,7 +94,10 @@ class SocketManager {
         const others = socket.rooms.has(roomId) ? Math.max(total - 1, 0) : total;
         console.log(`callUser from ${from} to room ${roomId}`);
         await this.#notificationController.sendToUserBooking([roomId], {title: "You have a new call"}, senderRole);
-
+        ack?.({ deliveredRealtime: true });
+        if(others === 0) {
+          ack?.({ error: false });
+        }
         socket.to(roomId).emit("callUser", {
           signal: signalData, // offer
           from, // caller socket id

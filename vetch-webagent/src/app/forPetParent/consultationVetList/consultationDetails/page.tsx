@@ -328,7 +328,7 @@ export default function DoctorProfile() {
                 return <ReviewCard key={index} rating={rating} />;
               })}
             {showAllRating &&
-              ratings.slice(0, 6).map((rating, index) => {
+              ratings.map((rating, index) => {
                 return <ReviewCard key={index} rating={rating} />;
               })}
           </div>

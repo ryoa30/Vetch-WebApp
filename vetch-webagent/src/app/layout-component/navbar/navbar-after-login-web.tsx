@@ -204,8 +204,7 @@ export function NavbarDesktop() {
               ))}
               {notifications.length === 0 && <div className="p-4 font-semibold text-sm">
                   No New Notifications
-                </div>}
-
+              </div>}
             </DropdownMenuContent>
           </DropdownMenu>
 

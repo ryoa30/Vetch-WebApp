@@ -184,7 +184,7 @@ class PaymentController {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({ ...payload, ...defaultPayload })
+            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/forPetParent/orderHistory` })
           );
           ok++;
         } catch (err) {
@@ -225,7 +225,7 @@ class PaymentController {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({ ...payload, ...defaultPayload })
+            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/forPetParent/orderHistory` })
           );
           ok++;
         } catch (err) {
@@ -265,7 +265,7 @@ class PaymentController {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({ ...payload, ...defaultPayload })
+            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/vet/dashboard` })
           );
           ok++;
         } catch (err) {
@@ -305,7 +305,7 @@ class PaymentController {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({ ...payload, ...defaultPayload })
+            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/forPetParent/orderHistory` })
           );
           ok++;
         } catch (err) {

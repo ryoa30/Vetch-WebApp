@@ -99,7 +99,7 @@ export default function HistoryPage() {
       </div>
 
       {/* Today’s Appointments */}
-      <div className="mb-8">
+      <div className="mb-8 dark:text-white">
         <h2 className="text-xl font-semibold mb-5">Ongoing Appointments</h2>
 
         {ongoingAppointments.map((item, i) => (
@@ -116,17 +116,18 @@ export default function HistoryPage() {
                 alt={item.pet.speciesName}
                 width={40}
                 height={40}
+                className="dark:invert"
               />
               <div>
                 <p className="font-semibold">
                   {item.pet.speciesName} - {item.pet.petName}
                 </p>
-                <p className={`text-sm text-gray-700 ${item.bookingType === "Emergency"? "animate-bounce text-red-500 font-bold" : ""}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className={`text-sm dark:text-white text-gray-700 ${item.bookingType === "Emergency"? "animate-bounce text-red-500 font-bold" : ""}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <p className="font-medium">{item.bookingType}</p>
-              <ChevronRight size={18} className="text-black" />
+              <ChevronRight size={18} className="text-black dark:text-white" />
             </div>
           </div>
         ))}
@@ -136,11 +137,11 @@ export default function HistoryPage() {
       </div>
 
       {/* Divider */}
-      <div className="border-b border-black my-8" />
+      <div className="border-b dark:border-white border-black my-8" />
 
       {/* Upcoming Appointments */}
-      <div>
-        <h2 className="text-xl font-semibold mb-5">Accepted Appointments</h2>
+      <div className="dark:text-white">
+        <h2 className="text-xl font-semibold mb-5 ">Accepted Appointments</h2>
 
         {acceptedAppointments.map((item, i) => (
           <div
@@ -156,17 +157,18 @@ export default function HistoryPage() {
                 alt={item.pet.speciesName}
                 width={40}
                 height={40}
+                className="dark:invert"
               />
               <div>
                 <p className="font-semibold">
                   {item.pet.speciesName} - {item.pet.petName}
                 </p>
-                <p className={`text-sm text-gray-700 ${item.bookingType === "Emergency"? "animate-bounce text-red-500 font-bold" : ""}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className={`text-sm dark:text-white text-gray-700 ${item.bookingType === "Emergency"? "animate-bounce text-red-500 font-bold" : ""}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <p className="font-medium">{item.bookingType}</p>
-              <ChevronRight size={18} className="text-black" />
+              <ChevronRight size={18} className="text-black dark:text-white" />
             </div>
           </div>
         ))}
@@ -175,7 +177,7 @@ export default function HistoryPage() {
         ) }
       </div>
 
-      <div className="border-b border-black my-8" />
+      <div className="border-b dark:border-white border-black my-8" />
 
       {/* Upcoming Appointments */}
       <div>
@@ -195,17 +197,18 @@ export default function HistoryPage() {
                 alt={item.pet.speciesName}
                 width={40}
                 height={40}
+                className="dark:invert"
               />
               <div>
                 <p className="font-semibold">
                   {item.pet.speciesName} - {item.pet.petName}
                 </p>
-                <p className={`text-sm text-gray-700 ${item.bookingType === "Emergency"? "animate-bounce text-red-500 font-bold" : ""}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className={`text-sm dark:text-white text-gray-700 ${item.bookingType === "Emergency"? "animate-bounce text-red-500 font-bold" : ""}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <p className="font-medium">{item.bookingType}</p>
-              <ChevronRight size={18} className="text-black" />
+              <ChevronRight size={18} className="text-black dark:text-white" />
             </div>
           </div>
         ))}

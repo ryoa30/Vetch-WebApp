@@ -382,6 +382,7 @@ export default function ChatDialogBox({
         name: user?.fullName,
         senderRole: user?.role
       });
+      
     });
 
     wirePeer(peer);

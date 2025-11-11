@@ -16,7 +16,8 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification?.data?.url || "/";
+  // const url = event.notification?.data?.url || "/";
+  const url = "/";
   event.waitUntil((async () => {
     const allClients = await clients.matchAll({ type: "window", includeUncontrolled: true });
     const existing = allClients.find(c => c.url.includes(new URL(url, self.location.origin).pathname));

@@ -240,12 +240,10 @@ class VetRepository extends BaseRepository {
     userLocation
   ) {
     const offset = (page - 1) * volume;
-    const { timeOfDay } = nowForSchedule(); // current day + current time
+    const { timeOfDay, todayDate } = nowForSchedule(); // current day + current time
     const q = query?.trim();
-    const startOfDay = (d) =>
-      new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const today = startOfDay(new Date());
     const timeIn1h = new Date(timeOfDay + 60 * 60 * 1000);
+
 
     console.log(filters);
 
@@ -260,12 +258,23 @@ class VetRepository extends BaseRepository {
     const where = {
       bookings: {
         none: {
-          bookingStatus: { in: ["ACCEPTED", "ONGOING"] },
-          isDeleted: false,
-          bookingDate: { equals: today },
-          bookingTime: { gte: timeOfDay, lt: timeIn1h },
+          OR: [
+            {
+              bookingStatus: { in: ["ACCEPTED", "ONGOING"] },
+              isDeleted: false,
+              bookingDate: { equals: todayDate },
+              bookingTime: { gte: timeOfDay, lt: timeIn1h },
+            },
+            {
+              bookingStatus: { in: ["ACCEPTED", "ONGOING"] },
+              isDeleted: false,
+              bookingDate: { equals: todayDate },
+              bookingType: "Emergency",
+            },
+          ],
         },
       },
+
       user: {
         is: {
           isDeleted: false,
@@ -319,31 +328,33 @@ class VetRepository extends BaseRepository {
 
     // console.log(rows[0].user.locations[0]);
 
-    const distancedRows = (await Promise.all(
-      rows.map(async (vet) => {
-        if (!vet.user?.locations?.length) return null;
-        const loc = vet.user.locations[0];
+    const distancedRows = (
+      await Promise.all(
+        rows.map(async (vet) => {
+          if (!vet.user?.locations?.length) return null;
+          const loc = vet.user.locations[0];
 
-        const { data } = await client.distancematrix({
-          params: {
-            key: process.env.GOOGLE_MAPS_API_KEY,
-            origins: [loc.coordinates],
-            destinations: [userLocation.coordinates],
-            mode: "driving",
-            units: "metric",
-          },
-        });
+          const { data } = await client.distancematrix({
+            params: {
+              key: process.env.GOOGLE_MAPS_API_KEY,
+              origins: [loc.coordinates],
+              destinations: [userLocation.coordinates],
+              mode: "driving",
+              units: "metric",
+            },
+          });
 
-        const el = data.rows[0].elements[0];
-        if (!el?.distance?.value) return null;
+          const el = data.rows[0].elements[0];
+          if (!el?.distance?.value) return null;
 
-        return {
-          ...vet,
-          distance: el.distance, // meters
-          duration: el.duration, // seconds
-        };
-      })
-    )).filter(Boolean);
+          return {
+            ...vet,
+            distance: el.distance, // meters
+            duration: el.duration, // seconds
+          };
+        })
+      )
+    ).filter(Boolean);
 
     // sort by smallest distance (meters) ascending; undefined distances go last
     distancedRows.sort(
@@ -411,7 +422,9 @@ class VetRepository extends BaseRepository {
         isAvailEmergency: true,
         price: true,
         description: true,
-        user: { select: { profilePicture: true, fullName: true , locations: true } },
+        user: {
+          select: { profilePicture: true, fullName: true, locations: true },
+        },
         speciesHandled: {
           select: {
             speciesType: {
@@ -432,7 +445,7 @@ class VetRepository extends BaseRepository {
 
     let el = null;
 
-    if(userLocation != null){
+    if (userLocation != null) {
       const { data } = await client.distancematrix({
         params: {
           key: process.env.GOOGLE_MAPS_API_KEY,
@@ -442,7 +455,7 @@ class VetRepository extends BaseRepository {
           units: "metric",
         },
       });
-  
+
       el = data.rows[0].elements[0];
     }
 
@@ -455,8 +468,8 @@ class VetRepository extends BaseRepository {
       ...row.user,
       ratingAvg: rating[0] ? Math.round(rating[0]._avg.rating * 10) / 10 : 0,
       ratingCount: rating[0] ? rating[0]._count._all : 0,
-      distance: el? el.distance : undefined, // meters
-      duration: el? el.duration : undefined, // seconds
+      distance: el ? el.distance : undefined, // meters
+      duration: el ? el.duration : undefined, // seconds
       profilePicture:
         row.user.profilePicture ||
         "https://res.cloudinary.com/daimddpvp/image/upload/v1758101764/default-profile-pic_lppjro.jpg",
@@ -512,8 +525,11 @@ class VetRepository extends BaseRepository {
   async findVetByUserId(userId) {
     return this._model.findUnique({
       where: { userId: userId },
-      include: { user: {include: {locations: true}}, speciesHandled: { include: { speciesType: true } } },
-    })
+      include: {
+        user: { include: { locations: true } },
+        speciesHandled: { include: { speciesType: true } },
+      },
+    });
   }
 
   async findVetsConfirmedCertificates(page = 0, volume = 10, query = "") {
@@ -574,13 +590,13 @@ class VetRepository extends BaseRepository {
       where: { userId: userId },
       select: {
         bookings: {
-          distinct: ['petId'],
+          distinct: ["petId"],
           select: {
-            petId: true
-          }
-        }
-      }
-    })
+            petId: true,
+          },
+        },
+      },
+    });
     return result.bookings.length;
   }
 
@@ -590,38 +606,44 @@ class VetRepository extends BaseRepository {
       select: {
         bookings: {
           where: {
-            bookingStatus: 'DONE'
+            bookingStatus: "DONE",
           },
           select: {
-            bookingPrice: true
-          }
-        }
-      }
-    })
-    return result.bookings.reduce((sum, booking) => sum + ((booking.bookingPrice*100)/115), 0);
+            bookingPrice: true,
+          },
+        },
+      },
+    });
+    return result.bookings.reduce(
+      (sum, booking) => sum + (booking.bookingPrice * 100) / 115,
+      0
+    );
   }
 
   async countUpcomingAppointments(userId) {
     const { timeOfDay } = nowForSchedule(); // current day + current time
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
     const result = await this._model.findFirst({
       where: { userId: userId },
       select: {
         bookings: {
           where: {
-            bookingStatus: { in: ['ACCEPTED', 'ONGOING'] },
+            bookingStatus: { in: ["ACCEPTED", "ONGOING"] },
             OR: [
               { bookingDate: { gt: today } },
-              { bookingDate: { equals: today }, bookingTime: { gte: timeOfDay } }
-            ]
+              {
+                bookingDate: { equals: today },
+                bookingTime: { gte: timeOfDay },
+              },
+            ],
           },
           select: {
-            id: true
-          }
-        }
-      }
-    })
+            id: true,
+          },
+        },
+      },
+    });
     return result.bookings.length;
   }
 
@@ -631,14 +653,14 @@ class VetRepository extends BaseRepository {
       select: {
         bookings: {
           where: {
-            bookingStatus: 'PENDING'
+            bookingStatus: "PENDING",
           },
           select: {
-            id: true
-          }
-        }
-      }
-    })
+            id: true,
+          },
+        },
+      },
+    });
     return result.bookings.length;
   }
 }
