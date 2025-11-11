@@ -140,7 +140,9 @@ const BlogPage = () => {
               </>
               :
               <>
-                <LatestArticle article={latestArticle} setSelectedArticle={setSelectedArticle}/>
+                <div className="md:max-w-[50%]">
+                    <LatestArticle article={latestArticle} setSelectedArticle={setSelectedArticle}/>
+                </div>
                 <SidebarArticles articles={sidebarArticles} setSelectedArticle={setSelectedArticle}/>
               </>}
             </div>

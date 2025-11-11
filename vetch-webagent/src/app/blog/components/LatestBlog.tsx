@@ -18,7 +18,7 @@ const LatestArticle: React.FC<Props> = ({ article, setSelectedArticle }) => (
           <img
             src={article.picture}
             alt={article.title}
-            className="w-full h-auto max-h-[500px] object-cover"
+            className="w-full h-auto max-h-[500px] object-contain"
           />
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-4">
             <p className="text-base md:text-lg font-normal">

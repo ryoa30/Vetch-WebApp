@@ -4,10 +4,12 @@ import Image from "next/image";
 import { FaInstagram, FaFacebook, FaLinkedin, FaYoutube } from "react-icons/fa";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useSession } from "@/contexts/SessionContext";
 
 export function Footer() {
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const {isAuthenticated} = useSession();
 
   useEffect(() => {
     setMounted(true);
@@ -57,36 +59,36 @@ export function Footer() {
               </h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#" className="text-gray-700 dark:text-white hover:text-[#3D8D7A]">
+                  <Link href="/forPetParent/consultationVetList" className="text-gray-700 dark:text-white hover:text-[#3D8D7A]">
                     Consultation
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-gray-700 dark:text-white hover:text-[#3D8D7A]">
-                    Homecare
+                  <Link href="/forPetParent/emergencyVetList" className="text-gray-700 dark:text-white hover:text-[#3D8D7A]">
+                    Emergency
                   </Link>
                 </li>
               </ul>
             </div>
 
             {/* For Vets */}
-            <div>
+            {!isAuthenticated && <div>
               <h3 className="text-blue-600 dark:text-[#69B9FF] font-semibold mb-3">For Vets</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#" className="text-gray-700 dark:text-white hover:text-[#3D8D7A]">
+                  <Link href="/register/vet/account" className="text-gray-700 dark:text-white hover:text-[#3D8D7A]">
                     Register as Vets
                   </Link>
                 </li>
               </ul>
-            </div>
+            </div>}
 
             {/* Blog */}
             <div>
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="#"
+                    href="/blog"
                     className="text-blue-600 dark:text-[#69B9FF] font-semibold hover:underline"
                   >
                     Blog
@@ -100,7 +102,7 @@ export function Footer() {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="#"
+                    href="/aboutUs"
                     className="text-blue-600 dark:text-[#69B9FF] font-semibold hover:underline"
                   >
                     About Us
