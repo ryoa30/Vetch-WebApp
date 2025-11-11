@@ -40,7 +40,7 @@ export function PaymentDialog({
         <AlertDialogFooter className="flex justify-end gap-3">
           {/* Yes button */}
           <AlertDialogAction 
-              className="px-6 py-2 rounded-md border !text-black hover:!text-white dark:hover:!text-black hover:bg-black dark:hover:bg-gray-400 border-black dark:border-white "
+              className="px-6 py-2 rounded-md border dark:!text-black  dark:hover:!text-black border-black dark:border-white "
           onClick={handleConfirmBooking}>
               Yes
           </AlertDialogAction>

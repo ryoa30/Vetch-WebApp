@@ -36,7 +36,7 @@ export function LoginConfirmDialog({
           <AlertDialogAction asChild>
             <Link
               href="/login"
-              className="px-4 py-2 rounded-md border border-black bg-white !text-black hover:bg-transparent"
+              className="px-6 py-2 rounded-md border dark:!text-black  dark:hover:!text-black border-black dark:border-white "
             >
               Yes
             </Link>
