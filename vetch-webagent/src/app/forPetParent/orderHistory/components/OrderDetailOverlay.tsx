@@ -17,6 +17,7 @@ import {
   ClockFading,
   BanknoteArrowDown,
   Ambulance,
+  Star,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -130,7 +131,20 @@ export default function OrderDetailOverlay({
           )}
           {booking?.rating && (
             <div className="flex flex-col gap-2">
-              {booking.rating.rating}
+              <div className="flex flex-row gap-2 items-center">
+                <Star className="w-6 h-6 text-black dark:text-white" />
+                <p className="text-lg font-semibold text-gray-800 dark:text-white">
+                  Rating
+                </p>
+              </div>
+              <span className="text-xl px-2 font-semibold text-yellow-500 dark:text-yellow-400">
+                {booking.rating.rating} <Star fill="yellow" className="inline-block w-5 h-5 text-yellow-400 mb-1" />
+              </span>
+              <textarea
+                disabled
+                value={booking?.rating?.context}
+                className="w-full p-2 border min-h-[100px] border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white"
+              />
             </div>
           )}
         </div>

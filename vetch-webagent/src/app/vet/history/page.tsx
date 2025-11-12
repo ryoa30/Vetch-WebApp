@@ -10,7 +10,7 @@ import { BookingService } from "@/lib/services/BookingService";
 import { BookingData, BookingWithRelations } from "@/app/types";
 import { snakeCase } from "lodash";
 import { formatIsoJakarta } from "@/lib/utils/formatDate";
-import { History, MessageCircle } from "lucide-react";
+import { History, MessageCircle, Star } from "lucide-react";
 import ChatHistoryDialogBox from "@/app/alert-dialog-box/ChatHistoryDialog";
 import OrderDetailOverlay from "@/app/forPetParent/orderHistory/components/OrderDetailOverlay";
 
@@ -89,16 +89,23 @@ export default function HistoryPage() {
                   {item.pet?.petName}{" "}
                   <span className="font-normal">| {item.pet?.speciesName}</span>
                 </p>
-                <p className="text-sm mt-1">
-                  <span className="font-semibold">Time:</span>{" "}
-                  {item.bookingType === "Emergency"
-                    ? "EMERGENCY"
-                    : `${formatIsoJakarta(
-                        item.bookingDate.split("T")[0] +
-                          "T" +
-                          item.bookingTime.split("T")[1]
-                      )} (${item.bookingType})`} 
-                </p>
+                <div className="flex flex-row items-end">
+                  <p className="text-sm mt-1">
+                    <span className="font-semibold">Time:</span>{" "}
+                    {item.bookingType === "Emergency"
+                      ? "EMERGENCY"
+                      : `${formatIsoJakarta(
+                          item.bookingDate.split("T")[0] +
+                            "T" +
+                            item.bookingTime.split("T")[1]
+                        )} (${item.bookingType})`} 
+                  </p>
+                  {item.rating && (
+                    <span className="ml-4 text-sm px-2 font-semibold text-yellow-500 dark:text-yellow-400">
+                      {item.rating.rating} <Star fill="yellow" className="inline-block w-4 h-4 text-yellow-400 mb-1" />
+                    </span>
+                  )}
+                </div>
                 <div className="flex flex-row gap-3 mt-3">
                   <button
                     className="text-[#3674B5] dark:text-[#a1bef1] text-sm font-medium cursor-pointer hover:underline"
