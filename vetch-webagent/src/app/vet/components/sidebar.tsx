@@ -125,62 +125,21 @@ export default function Sidebar() {
                 <h1 className="font-bold text-xl">Vetch</h1>
               </div>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20"
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              {isOpen ? <X /> : <Menu />}
-            </Button>
-          </div>
-
-          <Separator className="bg-white/30" />
-
-          {/* Menu */}
-          <nav className="space-y-3 mt-4 px-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const active = pathname === item.href;
-              return (
-                <Link key={item.href} href={item.href} className="block">
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "w-full justify-start gap-2 text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20",
-                      active && "bg-white/30"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {isOpen && item.label}
-                  </Button>
-                </Link>
-              );
-            })}
-            <div>
-              <LogoutConfirmDialog>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start gap-2 text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20",
-                    ""
-                  )}
-                >
-                  <LogOutIcon className="h-4 w-4" />
-                  {isOpen && "Logout"}
-                </Button>
-              </LogoutConfirmDialog>
-            </div>
-            <div>
+            <div className={`flex gap-2 ${isOpen?"flex-row-reverse":"flex-col "}`}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20"
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                {isOpen ? <X /> : <Menu />}
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={cn(
-                      "w-full py-2 px-3 justify-start gap-2 text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20",
-                      ""
-                    )}
+                    className="text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20"
                   >
                     <div className="relative">
                       <Bell className="h-5 w-5" />
@@ -188,7 +147,6 @@ export default function Sidebar() {
                         <div className="w-1 h-1 rounded full absolute top-0 right-0 bg-red-500"></div>
                       )}
                     </div>
-                    {isOpen && "Notifications"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -229,6 +187,48 @@ export default function Sidebar() {
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+          </div>
+
+          <div>
+              
+            </div>
+
+          <Separator className="bg-white/30" />
+
+          {/* Menu */}
+          <nav className="space-y-3 mt-4 px-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const active = pathname === item.href;
+              return (
+                <Link key={item.href} href={item.href} className="block">
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start gap-2 text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20",
+                      active && "bg-white/30"
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {isOpen && item.label}
+                  </Button>
+                </Link>
+              );
+            })}
+            <div>
+              <LogoutConfirmDialog>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start gap-2 text-white dark:hover:bg-white dark:hover:text-black hover:bg-white/20",
+                    ""
+                  )}
+                >
+                  <LogOutIcon className="h-4 w-4" />
+                  {isOpen && "Logout"}
+                </Button>
+              </LogoutConfirmDialog>
             </div>
             <div className="p-4 flex justify-center">
               {/* ToggleTheme akan berubah berdasarkan state isOpen */}
