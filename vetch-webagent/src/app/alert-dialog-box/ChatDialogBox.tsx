@@ -518,12 +518,17 @@ export default function ChatDialogBox({
           } flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
         >
           {user?.role === "vet" && (
-            <div className={`${isVetOptionsOpen ? "opacity-100 w-[400px]" : "opacity-0 md:opacity-100 md:block"} transition-all duration-300 md:w-2/3 h-[600px] bg-gray-50 md:relative absolute z-100 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700`}>
+            <div className={`${isVetOptionsOpen ? "opacity-100 w-full" : "opacity-0 w-0 md:opacity-100 hidden md:block"} transition-all duration-300 md:w-2/3 h-[600px] bg-gray-50 md:relative absolute z-100 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700`}>
               <div className="mb-6">
-                <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-2">
-                  <NotebookText className="w-5 h-5" />
-                  Conclusion
-                </h3>
+                <div className="flex flex-row justify-between">
+                  <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-2">
+                    <NotebookText className="w-5 h-5" />
+                    Conclusion
+                  </h3>
+                  <button onClick={()=>setIsVetOptionsOpen(false)}>
+                    <X className="w-5 h-5 md:hidden "/> 
+                  </button>
+                </div>
                 <textarea
                   className="w-full h-32 p-2 border rounded-md min-h-[100px] bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
                   placeholder="Write conclusion here..."
@@ -740,7 +745,7 @@ export default function ChatDialogBox({
           </div>
           <IncomingCallDialog
             open={receivingCall}
-            callerName="testuser"
+            callerName="Your Consultation"
             onAccept={answerCall}
             onDecline={endCall}
           />

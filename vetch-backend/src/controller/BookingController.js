@@ -155,15 +155,15 @@ class BookingController {
             if(status === "PENDING") {
                 this.#notificationController.sendToVets([updatedBooking.vetId], {title:`You have a new ${updatedBooking.bookingType} booking request on ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)}`});
             }else if(status === "ACCEPTED") {
-                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your booking has been accepted by the vet for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)}`});
+                this.#notificationController.sendToPetOwners(status,[updatedBooking.petId], {title:`Your booking has been accepted by the vet for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)}`});
             }else if(status === "CANCELLED") {
-                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking has been cancelled`});
+                this.#notificationController.sendToPetOwners(status,[updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking has been cancelled`});
                 this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} has been cancelled`});
             }else if(status === "DONE") {
-                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking has been done`});
+                this.#notificationController.sendToPetOwners(status,[updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking has been done`});
                 this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} has been done`});
             }else if(status === "ONGOING") {
-                this.#notificationController.sendToPetOwners([updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now ongoing`});
+                this.#notificationController.sendToPetOwners(status,[updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now ongoing`});
                 this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now ongoing`});
             }
             res.status(200).json({ok: true, data: updatedBooking, message: 'Booking status updated successfully'});
@@ -199,26 +199,26 @@ class BookingController {
                 const vetIds = bookings30Minute.filter(item => item.bookingStatus != "PAYMENT").map(b => b.vetId);
                 if(vetIds.length > 0){
                     this.#notificationController.sendToVets(vetIds, {title: "You have a booking in under 30 minutes, please prepare"});
-                    this.#notificationController.sendToUsers(bookings30Minute.filter(item => item.bookingStatus !== "PAYMENT").map(b => b.pet.userId), {title: "Your booking is in under 30 minutes, please prepare"});
+                    this.#notificationController.sendToUsers("ACCEPTED",bookings30Minute.filter(item => item.bookingStatus !== "PAYMENT").map(b => b.pet.userId), {title: "Your booking is in under 30 minutes, please prepare"});
                 }
                 if(bookings30Minute.filter(item => item.bookingStatus == "PAYMENT").length > 0){
-                    this.#notificationController.sendToUsers(bookings30Minute.filter(item => item.bookingStatus == "PAYMENT").map(b => b.pet.userId), {title: "You have a booking pending payment, please complete your payment to proceed"});
+                    this.#notificationController.sendToUsers("PAYMENT",bookings30Minute.filter(item => item.bookingStatus == "PAYMENT").map(b => b.pet.userId), {title: "You have a booking pending payment, please complete your payment to proceed"});
                 }
             }
             if(bookings15Minute.length > 0) {
                 const vetIds = bookings15Minute.filter(item => item.bookingStatus != "PAYMENT").map(b => b.vetId);
                 this.#notificationController.sendToVets(vetIds, {title: "You have a booking in under 15 minutes, please prepare"});
-                this.#notificationController.sendToUsers(bookings15Minute.map(b => b.pet.userId), {title: "Your booking is in under 15 minutes, please prepare"});
+                this.#notificationController.sendToUsers("ACCEPTED",bookings15Minute.map(b => b.pet.userId), {title: "Your booking is in under 15 minutes, please prepare"});
                 if(bookings30Minute.filter(item => item.bookingStatus == "PAYMENT").length > 0){
-                    this.#notificationController.sendToUsers(bookings5Minute.filter(item => item.bookingStatus == "PAYMENT").map(b => b.pet.userId), {title: "You have a booking pending payment, please complete your payment to proceed"});
+                    this.#notificationController.sendToUsers("PAYMENT",bookings5Minute.filter(item => item.bookingStatus == "PAYMENT").map(b => b.pet.userId), {title: "You have a booking pending payment, please complete your payment to proceed"});
                 }
             }
             if(bookings5Minute.length > 0) {
                 const vetIds = bookings5Minute.filter(item => item.bookingStatus != "PAYMENT").map(b => b.vetId);
                 this.#notificationController.sendToVets(vetIds, {title: "You have a booking in under 5 minutes, please prepare"});
-                this.#notificationController.sendToUsers(bookings5Minute.map(b => b.pet.userId), {title: "Your booking is in under 5 minutes, please prepare"});
+                this.#notificationController.sendToUsers("ACCEPTED",bookings5Minute.map(b => b.pet.userId), {title: "Your booking is in under 5 minutes, please prepare"});
                 if(bookings30Minute.filter(item => item.bookingStatus == "PAYMENT").length > 0){
-                    this.#notificationController.sendToUsers(bookings5Minute.filter(item => item.bookingStatus == "PAYMENT").map(b => b.pet.userId), {title: "You have a booking pending payment, please complete your payment to proceed"});
+                    this.#notificationController.sendToUsers("PAYMENT",bookings5Minute.filter(item => item.bookingStatus == "PAYMENT").map(b => b.pet.userId), {title: "You have a booking pending payment, please complete your payment to proceed"});
                 }
             }
             if(bookingsStart.length > 0) {
@@ -226,14 +226,14 @@ class BookingController {
                 const vetIds = bookingsStart.map(b => b.vetId);
                 await this.#bookingRepository.updateBookingsStatus(bookingIds, "ONGOING");
                 this.#notificationController.sendToVets(vetIds, {title: "Your booking is starting now, please begin the consultation"});
-                this.#notificationController.sendToUsers(bookingsStart.map(b => b.pet.userId), {title: "Your booking is starting now, please begin the consultation"});
+                this.#notificationController.sendToUsers("ONGOING",bookingsStart.map(b => b.pet.userId), {title: "Your booking is starting now, please begin the consultation"});
             }
 
             const expiredBooking = await this.#bookingRepository.findExpiredBooking();
             if (expiredBooking.length > 0) {
                 const bookingIds = expiredBooking.map(b => b.id);
                 await this.#bookingRepository.updateBookingsStatus(bookingIds, "CANCELLED");
-                this.#notificationController.sendToUsers(expiredBooking.map(b => b.pet.userId), {title: "Your booking has expired"});
+                this.#notificationController.sendToUsers("CANCELLED",expiredBooking.map(b => b.pet.userId), {title: "Your booking has expired"});
             }
 
             const finishedBooking = await this.#bookingRepository.findFinishedOngoingBooking();
@@ -241,7 +241,7 @@ class BookingController {
             if (finishedBooking.length > 0) {
                 const bookingIds = finishedBooking.map(b => b.id);
                 await this.#bookingRepository.updateBookingsStatus(bookingIds, "DONE");
-                this.#notificationController.sendToUsers(finishedBooking.map(b => b.pet.userId), {title: "Your booking has ended"});
+                this.#notificationController.sendToUsers("DONE",finishedBooking.map(b => b.pet.userId), {title: "Your booking has ended"});
                 this.#notificationController.sendToVets(finishedBooking.map(b => b.vetId), {title: "Your booking has ended"});
             }
         } catch (error) {
