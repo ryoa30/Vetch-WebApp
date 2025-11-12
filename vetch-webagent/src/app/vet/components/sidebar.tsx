@@ -110,8 +110,8 @@ export default function Sidebar() {
         </DraggableSnapFab>
         <div
           className={`${
-            isOpen ? "block" : "hidden md:block"
-          } flex flex-col h-full`}
+            isOpen ? "w-64" : "md:fixed md:w-16 max-[768px]:hidden"
+          } flex flex-col h-full transition-all duration-300`}
         >
           <div className="flex items-center justify-between px-4 py-4">
             {isOpen && (
