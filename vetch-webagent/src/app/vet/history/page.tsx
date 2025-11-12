@@ -17,6 +17,8 @@ import OrderDetailOverlay from "@/app/forPetParent/orderHistory/components/Order
 export default function HistoryPage() {
   const { setIsLoading } = useLoading();
   const [appointments, setAppointments] = useState<BookingWithRelations[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<BookingWithRelations[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const { user } = useSession();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -33,6 +35,7 @@ export default function HistoryPage() {
         console.log(result.data);
         if (result.ok) {
           setAppointments(result.data);
+          setFilteredBookings(result.data);
         }
       }
     } catch (error) {
@@ -41,6 +44,21 @@ export default function HistoryPage() {
 
     setIsLoading(false);
   };
+
+   useEffect(() => {
+      if (searchTerm) {
+        setFilteredBookings(
+          appointments.filter(
+            (p) =>
+              p.pet?.petName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              p.pet?.speciesName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              p.bookingType.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        );
+      }else{
+        setFilteredBookings(appointments);
+      }
+    }, [searchTerm]);
 
   useEffect(() => {
     loadAppointments();
@@ -53,6 +71,8 @@ export default function HistoryPage() {
         <h1 className="text-4xl font-bold text-white">History</h1>
         <input
           placeholder="Search for Veterinarian"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full md:w-[500px] mt-3 md:mt-0 rounded-full px-4 py-2 bg-white border-none text-black placeholder:text-gray-500"
         />
       </div>
@@ -70,7 +90,7 @@ export default function HistoryPage() {
 
       {/* Appointment List */}
       <div className="space-y-4">
-        {appointments.map((item, idx) => (
+        {filteredBookings.map((item, idx) => (
           <div
             key={idx}
             className="flex justify-between items-center border-b dark:text-white border-black pb-3"

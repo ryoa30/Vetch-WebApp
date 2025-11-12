@@ -1,13 +1,7 @@
 "use client";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  X,
-} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChatService } from "@/lib/services/ChatService";
 import { useSession } from "@/contexts/SessionContext";
@@ -32,11 +26,10 @@ export default function ChatHistoryDialogBox({
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-      if ( isOpen) {
-        endRef.current?.scrollIntoView({ behavior: "instant" });
-      }
-    }, [messages, isOpen]);
-
+    if (isOpen) {
+      endRef.current?.scrollIntoView({ behavior: "instant" });
+    }
+  }, [messages, isOpen]);
 
   // -------- load chat messages when dialog opens ----------
   useEffect(() => {
@@ -57,7 +50,6 @@ export default function ChatHistoryDialogBox({
         showCloseButton={false}
         className={` sm:max-w-lg flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
       >
-
         <div className="flex flex-col h-[600px] w-full">
           <DialogTitle>
             <div className="bg-teal-600 dark:bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
@@ -89,12 +81,11 @@ export default function ChatHistoryDialogBox({
                       : `dr. ${booking ? booking.vet.user.fullName : ""}`)}
                 </span>
               </div>
-
             </div>
           </DialogTitle>
 
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-700">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 bg-gray-50 dark:bg-gray-700">
             {messages.map((msg) => (
               <div
                 key={msg._id}
@@ -105,7 +96,7 @@ export default function ChatHistoryDialogBox({
                 }`}
               >
                 <div
-                  className={`max-w-[75%] ${
+                  className={`max-w-[100%] sm:max-w-[75%] ${
                     msg.sender_id !== user?.id ? "order-1" : "order-2"
                   }`}
                 >
@@ -116,7 +107,20 @@ export default function ChatHistoryDialogBox({
                         : "bg-blue-300 text-gray-800 rounded-br-none"
                     }`}
                   >
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                    {msg.type === "image" && (
+                      <div className="relative w-64 h-64">
+                        <Image
+                          src={msg.content}
+                          alt="sent image"
+                          fill
+                          className="object-contain rounded-md"
+                          unoptimized
+                        />
+                      </div>
+                    )}
+                    {msg.type === "message" && (
+                      <p className="text-sm leading-relaxed">{msg.content}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-end gap-1 mt-1 px-1">
@@ -135,7 +139,10 @@ export default function ChatHistoryDialogBox({
           {/* Input Area */}
           <div className="bg-[#3D8D7A] dark:bg-gray-800 border-t border-gray-200 p-3">
             <div className="flex items-center gap-2">
-              <span className="text-black w-[80%] py-2 text-2xl bg-white rounded-lg text-center mx-auto font-medium"> Chat History </span>
+              <span className="text-black w-[80%] py-2 text-2xl bg-white rounded-lg text-center mx-auto font-medium">
+                {" "}
+                Chat History{" "}
+              </span>
             </div>
           </div>
         </div>

@@ -38,6 +38,7 @@ import { BookingService } from "@/lib/services/BookingService";
 import { formatLocalDate } from "@/lib/utils/formatDate";
 import ConfirmationDialogBox from "./ConfirmationDialogBox";
 import SuccessDialog from "./SuccessDialog";
+import ErrorDialog from "./ErrorDialogBox";
 
 // ---------- socket singleton (prevents duplicates in Next dev/HMR) ----------
 let _socket: Socket | null = null;
@@ -102,6 +103,7 @@ export default function ChatDialogBox({
   const [vaccinationDate, setVaccinationDate] = useState("");
   const [consultationDate, setConsultationDate] = useState("");
   const [isConsultationEnded, setIsConsultationEnded] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   // call state
   const [isVideoCall, setIsVideoCall] = useState(false);
@@ -249,7 +251,6 @@ export default function ChatDialogBox({
     };
 
     const onFinishBooking = () => {
-      setIsOpen(false);
       setIsConsultationEnded(true);
     }
 
@@ -438,22 +439,31 @@ export default function ChatDialogBox({
 
   const handleUpdateConclusion = async () => {
     if(!booking?.id) return;
+    if(conclussion.trim() === ""){
+      setIsError(true);
+      return;
+    }
     const result = await bookingService.changeBookingConclusionDate(booking.id, conclussion);
 
-    if(result.ok){
-      // alert("Conclusion updated successfully");
+    if(!result.ok){
+      setIsError(true);
     }
   }
 
   const handleFinishConsultation = async () => {
     if(!booking?.id) return;
+    if(conclussion.trim() === ""){
+      setIsError(true);
+      return;
+    }
+    handleUpdateConclusion();
     await bookingService.changeBookingStatus(booking.id, "DONE");
     if (!socket || !booking) return;
     socket.emit("finishBooking", {
       roomId: booking.id
     });
-    setIsOpen(false);
-    window.location.reload();
+    setIsConsultationEnded(true);
+    // window.location.reload();
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -575,7 +585,7 @@ export default function ChatDialogBox({
             </div>
           )}
 
-          <div className="flex flex-col h-[600px] w-full">
+          <div className="flex flex-col h-[600px] w-full relative">
             <DialogTitle>
               <div className="bg-teal-600 dark:bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -734,6 +744,8 @@ export default function ChatDialogBox({
             onAccept={answerCall}
             onDecline={endCall}
           />
+          <SuccessDialog message="Your Consultation is ended" open={isConsultationEnded} onOpenChange={() => {window.location.reload(); setIsOpen(false)}}/>
+          <ErrorDialog errors={["Conclussion is not valid or empty"]} onOpenChange={() => setIsError(false)} open={isError}/>
         </DialogContent>
       </Dialog>
     );
@@ -866,8 +878,6 @@ export default function ChatDialogBox({
             </Button>
           </div>
         </div>
-
-        <SuccessDialog message="Your Consultation is ended" open={isConsultationEnded} onOpenChange={() => window.location.reload()}/>
         
       </DialogContent>
     </Dialog>
