@@ -122,7 +122,7 @@ export default function HistoryPage() {
                 <p className="font-semibold">
                   {item.pet.speciesName} - {item.pet.petName}
                 </p>
-                <p className={`text-sm dark:text-white text-gray-700 ${item.bookingType === "Emergency"? "animate-bounce text-red-500 font-bold" : ""}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className={`text-sm ${item.bookingType === "Emergency"? "animate-bounce text-red-500 dark:text-red-600 font-bold" : "dark:text-white text-gray-700"}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -132,7 +132,7 @@ export default function HistoryPage() {
           </div>
         ))}
         { ongoingAppointments.length === 0 && (
-          <p className="text-gray-700">No ongoing appointments.</p>
+          <p className="text-gray-700 dark:text-white">No ongoing appointments.</p>
         ) }
       </div>
 
@@ -163,7 +163,7 @@ export default function HistoryPage() {
                 <p className="font-semibold">
                   {item.pet.speciesName} - {item.pet.petName}
                 </p>
-                <p className={`text-sm dark:text-white text-gray-700 ${item.bookingType === "Emergency"? "animate-bounce text-red-500 font-bold" : ""}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className={`text-sm ${item.bookingType === "Emergency"? "animate-bounce text-red-500 dark:text-red-600 font-bold" : "dark:text-white text-gray-700"}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -173,14 +173,14 @@ export default function HistoryPage() {
           </div>
         ))}
         { acceptedAppointments.length === 0 && (
-          <p className="text-gray-700">No accepted appointments.</p>
+          <p className="text-gray-700 dark:text-white">No accepted appointments.</p>
         ) }
       </div>
 
       <div className="border-b dark:border-white border-black my-8" />
 
       {/* Upcoming Appointments */}
-      <div>
+      <div className="dark:text-white">
         <h2 className="text-xl font-semibold mb-5">Pending Appointments</h2>
 
         {pendingAppointments.map((item, i) => (
@@ -203,7 +203,7 @@ export default function HistoryPage() {
                 <p className="font-semibold">
                   {item.pet.speciesName} - {item.pet.petName}
                 </p>
-                <p className={`text-sm dark:text-white text-gray-700 ${item.bookingType === "Emergency"? "animate-bounce text-red-500 font-bold" : ""}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className={`text-sm ${item.bookingType === "Emergency"? "animate-bounce text-red-500 dark:text-red-600 font-bold" : "text-gray-700 dark:text-white"}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -213,7 +213,7 @@ export default function HistoryPage() {
           </div>
         ))}
         { pendingAppointments.length === 0 && (
-          <p className="text-gray-700">No pending appointments.</p>
+          <p className="text-gray-700 dark:text-white">No pending appointments.</p>
         ) }
       </div>
 

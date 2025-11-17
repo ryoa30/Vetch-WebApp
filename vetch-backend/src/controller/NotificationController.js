@@ -160,12 +160,14 @@ class PaymentController {
     });
   }
 
-  async sendToUsers(userIds, payload) {
+  async sendToUsers(status, userIds, payload) {
     const subs = await this.#notificationSubscriptionRepository.findByUserIds(
       userIds
     );
     let ok = 0,
       fail = 0;
+    
+    const searchParams = new URLSearchParams({ selectedMenu: status });
 
     console.log("unique subs",[...new Map(subs.map((s) => [s.userId, s])).values()]);
 
@@ -184,7 +186,7 @@ class PaymentController {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/forPetParent/orderHistory` })
+            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/forPetParent/orderHistory?${searchParams}` })
           );
           ok++;
         } catch (err) {
@@ -207,6 +209,7 @@ class PaymentController {
       );
     let ok = 0,
       fail = 0;
+      const searchParams = new URLSearchParams({ selectedMenu: "ONGOING" });
 
       console.log("unique subs",[...new Map(subs.map((s) => [s.userId, s])).values()]);
 
@@ -225,7 +228,7 @@ class PaymentController {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/forPetParent/orderHistory` })
+            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/forPetParent/orderHistory?${searchParams}` })
           );
           ok++;
         } catch (err) {
@@ -281,12 +284,13 @@ class PaymentController {
     return { ok, fail };
   }
 
-  async sendToPetOwners(petIds, payload) {
+  async sendToPetOwners(status,petIds, payload) {
     const subs = await this.#notificationSubscriptionRepository.findByPetIds(
       petIds
     );
     let ok = 0,
       fail = 0;
+    const searchParams = new URLSearchParams({ selectedMenu: status });
 
     console.log("unique subs",[...new Map(subs.map((s) => [s.userId, s])).values()]);
 
@@ -305,7 +309,7 @@ class PaymentController {
         try {
           await webpush.sendNotification(
             { endpoint: s.endpoint, keys: s.keys },
-            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/forPetParent/orderHistory` })
+            JSON.stringify({ ...payload, ...defaultPayload, url: `${process.env.CORS_URL}/forPetParent/orderHistory?${searchParams.toString()}` })
           );
           ok++;
         } catch (err) {

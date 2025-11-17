@@ -10,13 +10,15 @@ import { BookingService } from "@/lib/services/BookingService";
 import { BookingData, BookingWithRelations } from "@/app/types";
 import { snakeCase } from "lodash";
 import { formatIsoJakarta } from "@/lib/utils/formatDate";
-import { History, MessageCircle } from "lucide-react";
+import { History, MessageCircle, Star } from "lucide-react";
 import ChatHistoryDialogBox from "@/app/alert-dialog-box/ChatHistoryDialog";
 import OrderDetailOverlay from "@/app/forPetParent/orderHistory/components/OrderDetailOverlay";
 
 export default function HistoryPage() {
   const { setIsLoading } = useLoading();
   const [appointments, setAppointments] = useState<BookingWithRelations[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<BookingWithRelations[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const { user } = useSession();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -33,6 +35,7 @@ export default function HistoryPage() {
         console.log(result.data);
         if (result.ok) {
           setAppointments(result.data);
+          setFilteredBookings(result.data);
         }
       }
     } catch (error) {
@@ -41,6 +44,21 @@ export default function HistoryPage() {
 
     setIsLoading(false);
   };
+
+   useEffect(() => {
+      if (searchTerm) {
+        setFilteredBookings(
+          appointments.filter(
+            (p) =>
+              p.pet?.petName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              p.pet?.speciesName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              p.bookingType.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        );
+      }else{
+        setFilteredBookings(appointments);
+      }
+    }, [searchTerm]);
 
   useEffect(() => {
     loadAppointments();
@@ -53,6 +71,8 @@ export default function HistoryPage() {
         <h1 className="text-4xl font-bold text-white">History</h1>
         <input
           placeholder="Search for Veterinarian"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full md:w-[500px] mt-3 md:mt-0 rounded-full px-4 py-2 bg-white border-none text-black placeholder:text-gray-500"
         />
       </div>
@@ -70,7 +90,7 @@ export default function HistoryPage() {
 
       {/* Appointment List */}
       <div className="space-y-4">
-        {appointments.map((item, idx) => (
+        {filteredBookings.map((item, idx) => (
           <div
             key={idx}
             className="flex justify-between items-center border-b dark:text-white border-black pb-3"
@@ -89,16 +109,23 @@ export default function HistoryPage() {
                   {item.pet?.petName}{" "}
                   <span className="font-normal">| {item.pet?.speciesName}</span>
                 </p>
-                <p className="text-sm mt-1">
-                  <span className="font-semibold">Time:</span>{" "}
-                  {item.bookingType === "Emergency"
-                    ? "EMERGENCY"
-                    : `${formatIsoJakarta(
-                        item.bookingDate.split("T")[0] +
-                          "T" +
-                          item.bookingTime.split("T")[1]
-                      )} (${item.bookingType})`} 
-                </p>
+                <div className="flex flex-row items-end">
+                  <p className="text-sm mt-1">
+                    <span className="font-semibold">Time:</span>{" "}
+                    {item.bookingType === "Emergency"
+                      ? "EMERGENCY"
+                      : `${formatIsoJakarta(
+                          item.bookingDate.split("T")[0] +
+                            "T" +
+                            item.bookingTime.split("T")[1]
+                        )} (${item.bookingType})`} 
+                  </p>
+                  {item.rating && (
+                    <span className="ml-4 text-sm px-2 font-semibold text-yellow-500 dark:text-yellow-400">
+                      {item.rating.rating} <Star fill="yellow" className="inline-block w-4 h-4 text-yellow-400 mb-1" />
+                    </span>
+                  )}
+                </div>
                 <div className="flex flex-row gap-3 mt-3">
                   <button
                     className="text-[#3674B5] dark:text-[#a1bef1] text-sm font-medium cursor-pointer hover:underline"

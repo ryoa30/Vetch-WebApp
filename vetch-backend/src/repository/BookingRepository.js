@@ -109,6 +109,7 @@ class BookingRepository extends BaseRepository {
       where,
       orderBy: [ {bookingDate: "desc"}, {bookingTime: "desc"} ],
       include: {
+        rating: true,
         pet: {
           include: {
             user: true,

@@ -38,6 +38,7 @@ import { BookingService } from "@/lib/services/BookingService";
 import { formatLocalDate } from "@/lib/utils/formatDate";
 import ConfirmationDialogBox from "./ConfirmationDialogBox";
 import SuccessDialog from "./SuccessDialog";
+import ErrorDialog from "./ErrorDialogBox";
 
 // ---------- socket singleton (prevents duplicates in Next dev/HMR) ----------
 let _socket: Socket | null = null;
@@ -102,6 +103,7 @@ export default function ChatDialogBox({
   const [vaccinationDate, setVaccinationDate] = useState("");
   const [consultationDate, setConsultationDate] = useState("");
   const [isConsultationEnded, setIsConsultationEnded] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   // call state
   const [isVideoCall, setIsVideoCall] = useState(false);
@@ -249,7 +251,6 @@ export default function ChatDialogBox({
     };
 
     const onFinishBooking = () => {
-      setIsOpen(false);
       setIsConsultationEnded(true);
     }
 
@@ -438,22 +439,31 @@ export default function ChatDialogBox({
 
   const handleUpdateConclusion = async () => {
     if(!booking?.id) return;
+    if(conclussion.trim() === ""){
+      setIsError(true);
+      return;
+    }
     const result = await bookingService.changeBookingConclusionDate(booking.id, conclussion);
 
-    if(result.ok){
-      // alert("Conclusion updated successfully");
+    if(!result.ok){
+      setIsError(true);
     }
   }
 
   const handleFinishConsultation = async () => {
     if(!booking?.id) return;
+    if(conclussion.trim() === ""){
+      setIsError(true);
+      return;
+    }
+    handleUpdateConclusion();
     await bookingService.changeBookingStatus(booking.id, "DONE");
     if (!socket || !booking) return;
     socket.emit("finishBooking", {
       roomId: booking.id
     });
-    setIsOpen(false);
-    window.location.reload();
+    setIsConsultationEnded(true);
+    // window.location.reload();
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -508,12 +518,17 @@ export default function ChatDialogBox({
           } flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
         >
           {user?.role === "vet" && (
-            <div className={`${isVetOptionsOpen ? "opacity-100 w-[400px]" : "opacity-0 md:opacity-100 md:block"} transition-all duration-300 md:w-2/3 h-[600px] bg-gray-50 md:relative absolute z-100 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700`}>
+            <div className={`${isVetOptionsOpen ? "opacity-100 w-full" : "opacity-0 w-0 md:opacity-100 hidden md:block"} transition-all duration-300 md:w-2/3 h-[600px] bg-gray-50 md:relative absolute z-100 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700`}>
               <div className="mb-6">
-                <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-2">
-                  <NotebookText className="w-5 h-5" />
-                  Conclusion
-                </h3>
+                <div className="flex flex-row justify-between">
+                  <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-2">
+                    <NotebookText className="w-5 h-5" />
+                    Conclusion
+                  </h3>
+                  <button onClick={()=>setIsVetOptionsOpen(false)}>
+                    <X className="w-5 h-5 md:hidden "/> 
+                  </button>
+                </div>
                 <textarea
                   className="w-full h-32 p-2 border rounded-md min-h-[100px] bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
                   placeholder="Write conclusion here..."
@@ -575,7 +590,7 @@ export default function ChatDialogBox({
             </div>
           )}
 
-          <div className="flex flex-col h-[600px] w-full">
+          <div className="flex flex-col h-[600px] w-full relative">
             <DialogTitle>
               <div className="bg-teal-600 dark:bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -730,10 +745,12 @@ export default function ChatDialogBox({
           </div>
           <IncomingCallDialog
             open={receivingCall}
-            callerName="testuser"
+            callerName="Your Consultation"
             onAccept={answerCall}
             onDecline={endCall}
           />
+          <SuccessDialog message="Your Consultation is ended" open={isConsultationEnded} onOpenChange={() => {window.location.reload(); setIsOpen(false)}}/>
+          <ErrorDialog errors={["Conclussion is not valid or empty"]} onOpenChange={() => setIsError(false)} open={isError}/>
         </DialogContent>
       </Dialog>
     );
@@ -866,8 +883,6 @@ export default function ChatDialogBox({
             </Button>
           </div>
         </div>
-
-        <SuccessDialog message="Your Consultation is ended" open={isConsultationEnded} onOpenChange={() => window.location.reload()}/>
         
       </DialogContent>
     </Dialog>

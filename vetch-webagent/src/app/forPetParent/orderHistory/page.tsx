@@ -13,6 +13,8 @@ import { showPaymentSnap } from "@/lib/utils/snapPayment";
 import { PaymentService } from "@/lib/services/PaymentService";
 import { RatingDialog } from "./components/RatingDialog";
 import ChatHistoryDialogBox from "@/app/alert-dialog-box/ChatHistoryDialog";
+import { useSearchParams } from "next/navigation";
+import { set } from "lodash";
 
 const tabList = [
   { id: "PAYMENT", label: "Payment" },
@@ -32,6 +34,8 @@ const OrderHistory: React.FC = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   // const [isChatOpen, setIsChatOpen] = useState(true);
+  const sp = useSearchParams();
+  const seletedMenu = sp.get("selectedMenu") || "PENDING";
 
   const [selectedBooking, setSelectedBooking] = useState(null);
 
@@ -59,6 +63,12 @@ const OrderHistory: React.FC = () => {
     setIsLoading(false);
     setReload(false);
   };
+
+  useEffect(()=>{
+    if(seletedMenu){
+      setSelectedTab(seletedMenu);
+    }
+  }, [])
 
   useEffect(() => {
     loadBookings();
