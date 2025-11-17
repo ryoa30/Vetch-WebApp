@@ -164,7 +164,9 @@ const AccountForm:FC<IProps> = ({onClickNext, role}) => {
           {/* Next Button */}
           <div className="absolute bottom-4 right-16">
             {/* <Link href="/register/people/pet"> */}
-              <Button className="w-32 bg-[#3D8D7A] text-white hover:bg-[#356f61]" onClick={handleNext}>
+              <Button 
+                className="w-32 bg-white text-black hover:bg-[#356f61]"
+                onClick={handleNext}>
                 Next
               </Button>
             {/* </Link> */}
