@@ -52,7 +52,7 @@ export function ConcernDialog({ show, onClose, selected, setSelected }: { show: 
     <Dialog open={show} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg lg:max-w-2xl max-h-[70vh] bg-white overflow-y-auto dark:bg-[#1F2D2A] text-black rounded-xl shadow-lg">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-[#0F5544] font-semibold">Concerns</DialogTitle>
+          <DialogTitle className="text-2xl text-[#0F5544] dark:text-white font-semibold">Concerns</DialogTitle>
         </DialogHeader>
 
         <div className="grid md:grid-cols-2 gap-4 py-4">
