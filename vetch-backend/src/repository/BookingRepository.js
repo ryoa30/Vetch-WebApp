@@ -212,8 +212,16 @@ class BookingRepository extends BaseRepository {
       where:{
         bookingDate: { lte: endDate },
         bookingTime: { lt: start },
-        bookingStatus: { in: ["PAYMENT", "PENDING", "ONGOING"] },
-        bookingType: { in: ["Online"] },
+        OR:[
+          {
+            bookingStatus: { in: ["PAYMENT", "PENDING", "ONGOING"] },
+            bookingType: { in: ["Online"] },
+          },
+          {
+            bookingStatus: { in: ["PAYMENT"] },
+            bookingType: { in: ["Homecare", "Emergency"] },
+          }
+        ]
       },
       include:{
         pet: true,
