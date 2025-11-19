@@ -8,6 +8,8 @@ import { UserValidator } from "@/lib/validators/UserValidator";
 import { useRouter } from "next/navigation";
 import { UserService } from "@/lib/services/UserService";
 import { setWithExpiry } from "@/lib/utils/localStorage";
+import SuccessDialog from "@/app/alert-dialog-box/SuccessDialog";
+import { useLoading } from "@/contexts/LoadingContext";
 
 interface IErrors {
   address?: string;
@@ -30,9 +32,11 @@ const LocationForm:FC<IProps> = ({role}) => {
     libraries: ["places"],
   });
   const userValidator = new UserValidator();
+  const [openDialog, setOpenDialog] = useState(false);
   const userService = new UserService();
   const autoCompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const router = useRouter();
+  const {setIsLoading} = useLoading();
   const [errors, setErrors] = useState<IErrors>({
     address: "",
     addressNotes: "",
@@ -87,6 +91,7 @@ const LocationForm:FC<IProps> = ({role}) => {
   }, [address])
 
   const handleFinish = async () => {
+    setIsLoading(true);
     const result = userValidator.validateLocation(
       address,
       addressNotes,
@@ -106,12 +111,13 @@ const LocationForm:FC<IProps> = ({role}) => {
         const result: any = await userService.register(context, role);
         if (result.ok) {
           setWithExpiry("email", context.email, 300000);
-          router.push("/OTP");
+          setOpenDialog(true);
         }
       } catch (error) {
         console.log(error);
       }
     }
+    setIsLoading(false);
   };
   const handlePlaceChanged = () => {
     const place = autoCompleteRef.current?.getPlace();
@@ -300,6 +306,8 @@ const LocationForm:FC<IProps> = ({role}) => {
           Back
         </Button>
       </div>
+
+      <SuccessDialog onOpenChange={()=>{setOpenDialog(false);router.push("/OTP");}} open={openDialog} message="OTP Sent to Your Email, please check your email"/>
     </div>
   );
 };

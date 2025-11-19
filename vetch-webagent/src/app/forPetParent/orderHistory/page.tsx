@@ -236,7 +236,7 @@ const OrderHistory: React.FC = () => {
                   : () => console.log("click")
               }
             />
-            {index != onlineConsultations.length - 1 && (
+            {index != homecareConsultations.length - 1 && (
               <div className="w-full my-4 h-[1px] bg-gray-200"></div>
             )}
           </div>
