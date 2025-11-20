@@ -210,8 +210,15 @@ class BookingRepository extends BaseRepository {
 
     const bookings = await this._model.findMany({
       where:{
-        bookingDate: { lte: endDate },
-        bookingTime: { lt: start },
+        OR:[
+          {
+            bookingDate: endDate,
+            bookingTime: { lt: start },
+          },
+          {
+            bookingDate: { lt: endDate },
+          }
+        ],
         OR:[
           {
             bookingStatus: { in: ["PAYMENT", "PENDING", "ONGOING"] },
