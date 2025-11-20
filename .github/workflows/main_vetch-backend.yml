@@ -11,11 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-      issues: write
-      pull-requests: write
+    permissions: write-all
 
     defaults:
       run:
@@ -95,6 +91,7 @@ jobs:
           app-name: "vetch-backend"
           slot-name: "Production"
           package: ./deploy    # deploy only this folder
+
 
 
 
