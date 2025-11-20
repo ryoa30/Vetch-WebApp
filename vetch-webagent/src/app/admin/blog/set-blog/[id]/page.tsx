@@ -64,6 +64,7 @@ export default function AddBlogPage() {
   const handlePublish = async () => {
     const result = blogValidator.validateBlogInfo({ title, categoryId, content, image: image as File, id });
     if (!result.ok) {
+      setIsLoading(false);
       setErrors(result.errors);
       setOpenError(true);
     } else {
