@@ -33,6 +33,7 @@ class BookingController {
         this.getPastBookingsByPetId = this.getPastBookingsByPetId.bind(this);
         this.syncBookings = this.syncBookings.bind(this);
         this.putConclussionDates = this.putConclussionDates.bind(this);
+        this.getBookingById = this.getBookingById.bind(this);
     }
 
     async createBookingRating (req, res) {
@@ -71,6 +72,17 @@ class BookingController {
         } catch (error) {
             console.log(error);
             res.status(500).json({ ok: false, message: 'Error fetching bookings', error: error.message });
+        }
+    }
+
+    async getBookingById(req, res) {
+        try {
+            const {bookingId} = req.params;
+            const booking = await this.#bookingRepository.findBookingById(bookingId);
+            res.status(200).json({ok: true, data: booking, message: 'Booking fetched successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ ok: false, message: 'Error fetching booking', error: error.message });
         }
     }
 

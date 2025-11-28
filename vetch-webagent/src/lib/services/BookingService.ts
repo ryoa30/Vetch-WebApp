@@ -23,6 +23,10 @@ export class BookingService {
     return await this.#http.get<IResponse>("/concern-types");
   }
 
+  async fetchBookingById(bookingId: string) {
+    return await this.#http.get<IResponse>(`/byId/${bookingId}`);
+  }
+
   async fetchBookingByUserDateTime(userId: string, date: string, time: string) {
     return await this.#http.get<IResponse>(
       `/by-user-date-time?userId=${userId}&bookingDate=${date}&bookingTime=${time}`

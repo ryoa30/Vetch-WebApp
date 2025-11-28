@@ -11,6 +11,7 @@ router.use(AuthController.authorize);
 router.get('/', bookingController.getBookingsByUserId);
 router.get('/past-booking', bookingController.getPastBookingsByPetId);
 router.get('/vet', bookingController.getBookingByVetId);
+router.get('/byId/:bookingId', bookingController.getBookingById);
 router.get('/concern-types', bookingController.getConcernTypes);
 router.get('/by-user-date-time', bookingController.getBookingByUserIdDateTime);
 

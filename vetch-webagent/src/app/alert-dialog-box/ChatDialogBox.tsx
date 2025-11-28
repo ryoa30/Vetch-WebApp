@@ -39,6 +39,8 @@ import { formatLocalDate } from "@/lib/utils/formatDate";
 import ConfirmationDialogBox from "./ConfirmationDialogBox";
 import SuccessDialog from "./SuccessDialog";
 import ErrorDialog from "./ErrorDialogBox";
+import { useLoading } from "@/contexts/LoadingContext";
+import { set } from "lodash";
 
 // ---------- socket singleton (prevents duplicates in Next dev/HMR) ----------
 let _socket: Socket | null = null;
@@ -82,11 +84,11 @@ const ICE_SERVERS: RTCIceServer[] = [
 export default function ChatDialogBox({
   isOpen,
   setIsOpen,
-  booking,
+  bookingId,
 }: {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  booking: any;
+  bookingId: any;
 }) {
 
   const socket = useMemo(() => getSocket(), []);
@@ -98,11 +100,16 @@ export default function ChatDialogBox({
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any[]>([]);
+  const [booking, setBooking] = useState<any>(null);
+  const {setIsLoading} = useLoading();
+  // console.log("xkx", booking);
 
-  const [conclussion, setConclussion] = useState(booking?.bookingConclusion || "");
+  const [conclussion, setConclussion] = useState( "");
   const [vaccinationDate, setVaccinationDate] = useState("");
   const [consultationDate, setConsultationDate] = useState("");
-  const [isConsultationEnded, setIsConsultationEnded] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [successAction, setSuccessAction] = useState<() => void>(() => () => { console.log("click"); });
   const [isError, setIsError] = useState(false);
 
   // call state
@@ -165,17 +172,22 @@ export default function ChatDialogBox({
 
   // -------- load chat messages when dialog opens ----------
   useEffect(() => {
-    if (!isOpen || !booking?.id) return;
+    if (!isOpen) return;
     (async () => {
+      setIsLoading(true);
       try {
-        const res = await chatService.fetchMessages(booking.id, 100);
-        console.log(res.data);
+        const booking = await bookingService.fetchBookingById(bookingId);
+        const res = await chatService.fetchMessages(bookingId, 100);
+        setBooking(booking.ok ? booking.data : null);
+        setConclussion(booking.ok ? booking.data.bookingConclusion || "" : "");
+        console.log(booking.data);
         if (res.ok) setMessages(res.data);
       } catch (e) {
         console.warn(e);
       }
+      setIsLoading(false);
     })();
-  }, [isOpen, booking?.id, chatService]);
+  }, [isOpen, bookingId, chatService]);
 
   function hardStopAllMedia() {
     // 1) state-backed local stream
@@ -219,15 +231,15 @@ export default function ChatDialogBox({
 
   // local ender stays the same, but reuse the same cleanup path
   const endCall = () => {
-    if (!socket || !booking?.id) return;
-    socket.emit("leaveCall", { roomId: booking.id });
+    if (!socket || !bookingId) return;
+    socket.emit("leaveCall", { roomId: bookingId });
     onLeaveCall();
   };
 
   // -------- join room + minimal listeners tied to the room ----------
   useEffect(() => {
     if (!socket) return;
-    const roomId = booking?.id;
+    const roomId = bookingId;
     if (!roomId) return;
     const joinedSet = joinedRef.current;
 
@@ -251,7 +263,9 @@ export default function ChatDialogBox({
     };
 
     const onFinishBooking = () => {
-      setIsConsultationEnded(true);
+      setSuccessMessage("Your Consultation is ended");
+      setIsSuccessOpen(true);
+      setSuccessAction(() => () => { window.location.reload(); setIsOpen(false); });
     }
 
     socket.off("receive_message", onReceive);
@@ -438,16 +452,23 @@ export default function ChatDialogBox({
   const bookingService = new BookingService();
 
   const handleUpdateConclusion = async () => {
-    if(!booking?.id) return;
+    setIsLoading(true);
+    if(!booking?.id) {setIsLoading(false);return};
     if(conclussion.trim() === ""){
       setIsError(true);
+      setIsLoading(false);
       return;
     }
     const result = await bookingService.changeBookingConclusionDate(booking.id, conclussion);
 
     if(!result.ok){
       setIsError(true);
+    }else{
+      setSuccessMessage("Consultation details updated successfully");
+      setIsSuccessOpen(true);
+      setSuccessAction(() => () => { console.log("click"); });
     }
+    setIsLoading(false);
   }
 
   const handleFinishConsultation = async () => {
@@ -462,7 +483,9 @@ export default function ChatDialogBox({
     socket.emit("finishBooking", {
       roomId: booking.id
     });
-    setIsConsultationEnded(true);
+    setSuccessMessage("Your Consultation is ended");
+    setIsSuccessOpen(true);
+    setSuccessAction(() => () => { window.location.reload(); setIsOpen(false); });
     // window.location.reload();
   }
 
@@ -575,7 +598,7 @@ export default function ChatDialogBox({
                   <Save className="w-5 h-5" />
                   Save Details
                 </button>
-                <ConfirmationDialogBox 
+                {booking && <ConfirmationDialogBox 
                   message={"Are you sure you want to end the consultation? This action cannot be undone."} 
                   subMessage={`${new Date(new Date(booking?.bookingDate.split("T")[0] +"T"+ (booking?.bookingTime.split("T")[1]).split("Z")[0]).getTime() + 30*60000) > new Date() ? "There is still time for the booking" : ""}`}
                   onConfirm={handleFinishConsultation}
@@ -585,7 +608,7 @@ export default function ChatDialogBox({
                     <Flag className="w-5 h-5" />
                     End Consultation
                   </button>
-                </ConfirmationDialogBox>
+                </ConfirmationDialogBox>}
               </div>
             </div>
           )}
@@ -749,7 +772,16 @@ export default function ChatDialogBox({
             onAccept={answerCall}
             onDecline={endCall}
           />
-          <SuccessDialog message="Your Consultation is ended" open={isConsultationEnded} onOpenChange={() => {window.location.reload(); setIsOpen(false)}}/>
+          <SuccessDialog
+            message={successMessage}
+            open={isSuccessOpen}
+            onOpenChange={(open) => {
+              setIsSuccessOpen(open);
+              if (!open) {
+                try { successAction(); } catch (e) { console.error(e); }
+              }
+            }}
+          />
           <ErrorDialog errors={["Conclussion is not valid or empty"]} onOpenChange={() => setIsError(false)} open={isError}/>
         </DialogContent>
       </Dialog>

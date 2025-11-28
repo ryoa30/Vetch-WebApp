@@ -27,7 +27,7 @@ export default function HistoryPage() {
       try {
         if(user){
           const result = await bookingService.fetchVetBookings(user?.id, ["PENDING","ACCEPTED", "ONGOING"]);
-          console.log(result.data);
+          console.log(result);
           if(result.ok){
             setAppointments(result.data);
           }
@@ -76,9 +76,9 @@ export default function HistoryPage() {
   }
 
   // 🔍 Filter berdasarkan section
-  const pendingAppointments = appointments.filter(a => lowerCase(a.bookingStatus) === "pending");
-  const acceptedAppointments = appointments.filter(a => lowerCase(a.bookingStatus) === "accepted");
-  const ongoingAppointments = appointments.filter(a => lowerCase(a.bookingStatus) === "ongoing");
+  const pendingAppointments = appointments? appointments.filter(a => lowerCase(a.bookingStatus) === "pending"): [];
+  const acceptedAppointments = appointments? appointments.filter(a => lowerCase(a.bookingStatus) === "accepted") : [];
+  const ongoingAppointments = appointments?appointments.filter(a => lowerCase(a.bookingStatus) === "ongoing"):[];
 
   return (
     <div className="p-6 min-h-screen text-black">
@@ -232,7 +232,7 @@ export default function HistoryPage() {
         />
       }
 
-      {isChatOpen && <ChatDialogBox booking={selectedBooking} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>}
+      {isChatOpen && <ChatDialogBox bookingId={selectedBooking?.id} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>}
     </div>
   );
 }

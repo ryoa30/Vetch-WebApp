@@ -6,6 +6,33 @@ class BookingRepository extends BaseRepository {
     super("Booking");
   }
 
+  async findBookingById(bookingId) {
+    const booking = await this._model.findUnique({
+      where: { id: bookingId, isDeleted: false },
+      include: {
+        pet: {
+          include: {
+            user: true,
+          },
+        },
+        vet: {
+          include: {
+            user: true,
+          },
+        },
+        concernDetails: {
+          include: {
+            concern: true,
+          },
+        },
+        payment: true,
+        rating: true,
+      },
+    });
+
+    return booking;
+  }
+
   async findBookingByUserIdDateTime(userId, bookingDate, bookingTime) {
     const start = new Date(`${bookingDate}T00:00:00.000Z`);
     const end = new Date(`${bookingDate}T23:59:59.999Z`);
