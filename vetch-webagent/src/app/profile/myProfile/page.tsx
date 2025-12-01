@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User } from "lucide-react";
+import { ChevronRight, MapPin, User } from "lucide-react";
 import Image from "next/image";
 import { UserService } from "@/lib/services/UserService";
 import { useSession } from "@/contexts/SessionContext";
@@ -9,6 +9,7 @@ import { UserValidator } from "@/lib/validators/UserValidator";
 import SuccessDialog from "@/app/alert-dialog-box/SuccessDialog";
 import ErrorDialog from "@/app/alert-dialog-box/ErrorDialogBox";
 import { useLoading } from "@/contexts/LoadingContext";
+import { LocationDialog } from "@/app/alert-dialog-box/LocationDialog";
 
 interface ProfileData {
   firstName: string;
@@ -34,6 +35,7 @@ export default function ProfilePage() {
 
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openFail, setOpenFail] = useState(false);
+  const [showLocation, setShowLocation] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -172,6 +174,16 @@ export default function ProfilePage() {
             />
           </div>
 
+        <button className="items-center mt-4 gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] hover:bg-gray-100 duration-200 shadow h-full w-full" onClick={() => setShowLocation(true)}>
+          <div className="px-4 py-1 flex items-center gap-3">
+            <MapPin className="w-5 h-5 flex-shrink-0 text-black mt-1 dark:text-white" />
+            <div className="flex flex-col items-start">
+              <div className="font-medium">Location</div>
+            </div>
+            <ChevronRight className="w-5 h-5 flex-shrink-0 text-black mt-1 dark:text-white" />
+          </div>
+        </button>
+
           {/* Buttons */}
           <div className="flex justify-end mt-6">
             <button
@@ -183,6 +195,10 @@ export default function ProfilePage() {
           </div>
         <SuccessDialog open={openSuccess} onOpenChange={setOpenSuccess} message="Profile updated successfully!" />
         <ErrorDialog open={openFail} onOpenChange={setOpenFail} errors={["Failed to update profile!"]} />
+        <LocationDialog 
+          show={showLocation} 
+          onClose={() => {setShowLocation(false);}}
+        />
       </div>
     </div>
   );
