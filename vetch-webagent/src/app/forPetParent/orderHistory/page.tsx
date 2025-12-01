@@ -15,6 +15,7 @@ import { RatingDialog } from "./components/RatingDialog";
 import ChatHistoryDialogBox from "@/app/alert-dialog-box/ChatHistoryDialog";
 import { useSearchParams } from "next/navigation";
 import { set } from "lodash";
+import { BookingData } from "@/app/types";
 
 const tabList = [
   { id: "PAYMENT", label: "Payment" },
@@ -247,7 +248,7 @@ const OrderHistory: React.FC = () => {
         <ChatDialogBox
           isOpen={isChatOpen}
           setIsOpen={setIsChatOpen}
-          booking={selectedBooking}
+          bookingId={selectedBooking ? (selectedBooking as BookingData).id : null}
         />
       )}
       {selectedBooking && isDetailOpen && (
