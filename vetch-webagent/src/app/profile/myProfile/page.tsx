@@ -174,13 +174,13 @@ export default function ProfilePage() {
             />
           </div>
 
-        <button className="items-center mt-4 gap-4 p-4 rounded-xl bg-white dark:bg-[#2D4236] hover:bg-gray-100 duration-200 shadow h-full w-full" onClick={() => setShowLocation(true)}>
+        <button className="items-center mt-4 gap-4 p-4 rounded-xl bg-[#fcffe5] dark:bg-[#2E4F4A] hover:bg-gray-100 duration-200 shadow h-full w-full" onClick={() => setShowLocation(true)}>
           <div className="px-4 py-1 flex items-center gap-3">
             <MapPin className="w-5 h-5 flex-shrink-0 text-black mt-1 dark:text-white" />
             <div className="flex flex-col items-start">
               <div className="font-medium">Location</div>
             </div>
-            <ChevronRight className="w-5 h-5 flex-shrink-0 text-black mt-1 dark:text-white" />
+            <ChevronRight className="w-5 h-5 flex-shrink-0 ml-auto text-black mt-1 dark:text-white" />
           </div>
         </button>
 
