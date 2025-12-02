@@ -298,7 +298,7 @@ export default function DashboardPage() {
         />
       }
 
-      { isChatOpen && <ChatDialogBox booking={selectedBooking} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>}
+      { isChatOpen && <ChatDialogBox bookingId={selectedBooking ? selectedBooking.id : null} isOpen={isChatOpen} setIsOpen={setIsChatOpen}/>}
     </div>
   );
 }

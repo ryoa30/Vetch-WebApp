@@ -51,7 +51,7 @@ const ArticleCarousel: React.FC<Props> = ({ articles, setSelectedArticle }) => {
                     <button
                       onClick={() => setSelectedArticle(article)}
                       key={article.id}
-                      className="flex-shrink-0 article-card block cursor-pointer rounded-lg shadow border overflow-hidden w-[270px] md:w-[338px] bg-white hover:shadow-lg transition"
+                      className="flex-shrink-0 article-card block cursor-pointer rounded-lg shadow border overflow-hidden w-[270px] md:w-[338px] bg-white dark:bg-black hover:shadow-lg transition"
                     >
                       <img
                         src={article.picture}
@@ -62,7 +62,7 @@ const ArticleCarousel: React.FC<Props> = ({ articles, setSelectedArticle }) => {
                         <span className="text-base text-teal-600 font-medium">{article.categoryName}</span>
                         <h4 className="text-lg font-semibold mt-1 line-clamp-2">{article.title}</h4>
                         <p className="text-sm font-normal mt-1">{formatDateArticle(article.date)}</p>
-                        <div className="text-base text-gray-500 mt-2 line-clamp-3" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.context) }}></div>
+                        <div className="text-base text-gray-500 dark:text-white mt-2 line-clamp-3" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.context) }}></div>
                       </div>
                     </button>
                   ))}
