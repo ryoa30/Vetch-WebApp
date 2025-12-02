@@ -30,6 +30,11 @@ export function PetDialog({ show, onClose, pet, setPet }: { show: boolean; onClo
     }
   }
 
+  const handleSelectPet=(pet) => {
+    setPet(pet); 
+    onClose();
+  }
+
   useEffect(() => {
     loadPets();
   },[])
@@ -45,7 +50,7 @@ export function PetDialog({ show, onClose, pet, setPet }: { show: boolean; onClo
         <div className="flex flex-col justify-between flex-1">
           <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4 py-4">
             {pets.map(pet => (
-              <button className="flex items-center cursor-pointer" key={pet.id} onClick={() => {setPet(pet); onClose();}}>
+              <button className="flex items-center cursor-pointer" key={pet.id} onClick={() => handleSelectPet(pet)}>
                   <img
                     src={`/img/pet-logo/${snakeCase(pet.speciesName)}.png`}
                     alt="Pet"

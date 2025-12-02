@@ -158,16 +158,19 @@ export default function ConfirmBookingPage() {
   };
 
   useEffect(() => {
-    const price = vet?.price ?? 0;
-    if (consultationType === "Homecare") {
-      const base = price * 1.5;
-      setConsultationPrice(base);
-      setTotalPrice(base + base * 0.1 + base * 0.05);
-    } else {
-      const base = price;
-      setConsultationPrice(base);
-      setTotalPrice(base + base * 0.1 + base * 0.05);
+    const calculatePrice = () => {
+      const price = vet?.price ?? 0;
+      if (consultationType === "Homecare") {
+        const base = price * 1.5;
+        setConsultationPrice(base);
+        setTotalPrice(base + base * 0.1 + base * 0.05);
+      } else {
+        const base = price;
+        setConsultationPrice(base);
+        setTotalPrice(base + base * 0.1 + base * 0.05);
+      }
     }
+    calculatePrice();
   }, [consultationType, vet?.price]);
 
   useEffect(() => {

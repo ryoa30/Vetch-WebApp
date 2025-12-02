@@ -65,7 +65,7 @@ export default function LoginPage() {
       setIsFirstLoad(false);
       return;
     }
-    const response = userValidator.validateLogin(email, password);
+    const response = userValidator.validateLoginFormat(email, password);
     if (!response.ok) {
       setAllowLogin(false);
       setErrors({ ...errors, ...response.errors });

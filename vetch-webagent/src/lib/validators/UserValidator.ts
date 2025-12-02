@@ -149,7 +149,7 @@ export class UserValidator {
     };
   }
 
-  validateLogin(email: string, password: string): ValidationResult<LoginInput> {
+  validateLoginFormat(email: string, password: string): ValidationResult<LoginInput> {
     const errors: Record<string, string> = {};
 
     if (!email) errors.email = "Email is required";
