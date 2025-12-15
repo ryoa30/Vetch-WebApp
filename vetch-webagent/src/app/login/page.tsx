@@ -66,9 +66,13 @@ export default function LoginPage() {
       return;
     }
     const response = userValidator.validateLoginFormat(email, password);
+    console.log(response);
     if (!response.ok) {
       setAllowLogin(false);
-      setErrors({ ...errors, ...response.errors });
+      setErrors({
+        email: response.errors.email || "",
+        password: response.errors.password || "",
+      });
     } else {
       setAllowLogin(true);
       setErrors({ email: "", password: "" });

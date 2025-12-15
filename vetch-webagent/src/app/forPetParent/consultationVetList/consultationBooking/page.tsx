@@ -363,6 +363,12 @@ export default function ConfirmBookingPage() {
                   Online
                 </button>
               </div>
+              {consultationType === "Homecare" && (
+                <p className="text-sm text-gray-600 dark:text-gray-200 mt-3">
+                  * Homecare consultation will incur a 50% additional fee from
+                  the base price.
+                </p>
+              )}
             </div>
           </div>
           {consultationType === "Homecare" && (

@@ -4,6 +4,11 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 // 1. Impor komponen modal yang baru dibuat
 import AddSpeciesModal from "@/app/vet/components/overlay/OverlayPetAddSpecies";
@@ -187,7 +192,17 @@ export default function ProfilePage() {
         {/* Price and Location */}
         <div className="mb-4 flex gap-2">
           <div className="flex-1">
-            <label className="block font-medium mb-1">Price</label>
+            <div className="flex flex-row gap-2 items-center my-1">
+              <label className="block font-medium">Price</label>
+              <Tooltip >
+                <TooltipTrigger asChild>
+                  <button className="text-xs font-bold text-black border px-2 py-0.5 rounded-full dark:border-white dark:text-white ">?</button>
+                </TooltipTrigger>
+                <TooltipContent align="start">
+                  <p>Homecare cost 1.5x the regular price. Emergency cost 2x the regular price.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <PriceInput
               value={vetDetails?.price}
               onChange={(value) =>

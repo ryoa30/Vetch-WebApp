@@ -16,15 +16,15 @@ const months = [
 export function formatIsoJakarta(iso: string) {
 
   const parts = new Intl.DateTimeFormat("id-ID", {
-    timeZone: "Asia/Jakarta",
+    timeZone: "Asia/Jakarta", 
     day: "2-digit",
-    month: "2-digit", // numeric so we can map to our custom short month
+    month: "2-digit",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
   })
-    .formatToParts(new Date(iso.split("Z")[0]))
+    .formatToParts(new Date(iso))
     .reduce<Record<string, string>>((acc, p) => {
       if (p.type !== "literal") acc[p.type] = p.value;
       return acc;
