@@ -52,6 +52,9 @@ export default function HomePage() {
     <div className="min-h-screen w-full bg-[#FBFFE4] dark:bg-[#2E4F4A] text-white pb-4">
       <div className="flex flex-1">
         <div className="flex-1 p-8 bg-[#FBFFE4] dark:bg-[#2E4F4A]">
+          <div className="flex items-center justify-center mb-2">
+            <h1 className="text-3xl font-bold mb-4 text-black dark:text-white text-center">Book Your Online Or Homecare Consultation</h1>
+          </div>
           <div className="flex gap-10 pb-10 flex-col-reverse md:flex-row">
             {/* <PetTypeButton />
             <ScheduleButton />

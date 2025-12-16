@@ -19,6 +19,7 @@ import { useLoading } from "@/contexts/LoadingContext";
 import { NotificationService } from "@/lib/services/NotificationService";
 import ErrorDialog from "../alert-dialog-box/ErrorDialogBox";
 import { useSession } from "@/contexts/SessionContext";
+import { Eye, EyeClosed } from "lucide-react";
 
 interface IErrors {
   email: string;
@@ -42,6 +43,7 @@ export default function LoginPage() {
   const { setIsLoading } = useLoading();
   const {setIsNotificationPrompted} = useSession();
   const [userId, setUserId] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const nc = new NotificationService("/sw.js");  
   const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
@@ -66,9 +68,13 @@ export default function LoginPage() {
       return;
     }
     const response = userValidator.validateLoginFormat(email, password);
+    console.log(response);
     if (!response.ok) {
       setAllowLogin(false);
-      setErrors({ ...errors, ...response.errors });
+      setErrors({
+        email: response.errors.email || "",
+        password: response.errors.password || "",
+      });
     } else {
       setAllowLogin(true);
       setErrors({ email: "", password: "" });
@@ -145,17 +151,25 @@ export default function LoginPage() {
 
           {/* Password */}
           <div className="flex-col mb-4">
-            <div className="relative space-y-3">
-              <IoLockClosedOutline className="absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="********"
-                className="bg-[#F4F9F4] w-full rounded-lg p-2 h-fit dark:bg-[#2E4F4A]/100 border-none pl-10"
-              />
-            </div>
+            <div className="relative">
+                <IoLockClosedOutline className="absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="********"
+                  className={`${showPassword?"":"password-mask"} bg-[#F4F9F4] w-full rounded-lg p-2 h-fit dark:bg-[#2E4F4A]/100 border-none pl-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs opacity-80"
+                >
+                  {showPassword && <Eye className="h-5 w-5 text-gray-500" />}
+                  {!showPassword && <EyeClosed className="h-5 w-5 text-gray-500" />}
+                </button>
+              </div>
             {errors.password && (
               <span className="text-red-500 text-xs">{errors.password}</span>
             )}

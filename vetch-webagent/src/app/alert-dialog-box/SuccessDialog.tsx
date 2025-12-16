@@ -21,7 +21,7 @@ interface SuccessLoginProps {
 export default function SuccessDialog({ open, onOpenChange, message }: SuccessLoginProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="flex flex-col items-center text-center bg-white">
+      <AlertDialogContent className="flex flex-col items-center text-center bg-white dark:bg-black">
         {/* Animasi Lottie */}
         <div className="w-32 h-32">
           <Lottie animationData={successAnimation} loop={false} />
