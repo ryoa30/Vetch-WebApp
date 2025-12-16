@@ -48,7 +48,7 @@ class AdminController {
 
         const result = await this.#vetRepository.updateVetCertificateStatus(vetId, status);
         console.log(result);
-        this.#notificationController.sendToVets([vetId], {title: `Your vet certificate has been ${status ? 'approved' : 'rejected'}`});
+        await this.#notificationController.sendToVets([vetId], {title: `Your vet certificate has been ${status ? 'approved' : 'rejected'}`});
         res.status(200).json({ok: true, message: 'Success', data: result});
     }
 }

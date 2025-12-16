@@ -21,6 +21,9 @@ import Lottie from "lottie-react";
 import loaderCat from "@/../public/lottie/Loader cat.json"; 
 import { ToastPopup } from "@/components/NotificationToast";
 import { NotificationService } from "@/lib/services/NotificationService";
+import { capitalize } from "lodash";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import Link from "next/link";
 
 
 
@@ -38,6 +41,7 @@ export default function DashboardPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [vetStats, setVetStats] = useState<VetStats|null>(null);
+  const [verified, setVerified] = useState<string>("");
   const {setIsLoading} = useLoading();
 
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
@@ -138,6 +142,7 @@ export default function DashboardPage() {
         console.log("Vet Stats: ",result.data);
         if(result.ok){
           setVetStats(result.data);
+          setVerified(result.data.verified);
         }
       }
     } catch (error) {
@@ -160,7 +165,17 @@ export default function DashboardPage() {
       {/* Header Welcome */}
       <div className="w-full bg-[#F7FBEF] dark:bg-[#2E4F4A] py-6 px-6">
         <h1 className="text-2xl font-bold text-black dark:text-white">
-          Welcome Back Dr.{user?.fullName}
+          Welcome Back Dr.{user?.fullName} {verified !== "verified" && 
+          <Tooltip >
+            <TooltipTrigger asChild>
+              <span className={verified === "unverified"?"text-yellow-500":"text-red-500"}>({capitalize(verified)})</span>
+            </TooltipTrigger>
+            <TooltipContent align="start">
+              {verified === "unverified" && <p>Your certificate is waiting verification. While waiting for verification, you cannot accept any bookings.</p>}
+              {verified === "denied" && <p>Your certificate is denied by the admin. <br></br> Please reupload your certificate in profile menu or click <Link href="/vet/profile-and-schedules/profile" className="text-blue-500 underline">here</Link></p>}
+            </TooltipContent>
+          </Tooltip>
+          }
         </h1>
       </div>
 

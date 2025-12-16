@@ -23,6 +23,8 @@ import { UserService } from "@/lib/services/UserService";
 import { LocationDialog } from "@/app/alert-dialog-box/LocationDialog";
 import { ChevronRight, MapPin, X } from "lucide-react";
 import ConfirmationDialogBox from "@/app/alert-dialog-box/ConfirmationDialogBox";
+import { ReuploadCertificate } from "@/app/alert-dialog-box/ReuploadCertificate";
+import SuccessDialog from "@/app/alert-dialog-box/SuccessDialog";
 
 export default function ProfilePage() {
   const { user } = useSession();
@@ -37,6 +39,9 @@ export default function ProfilePage() {
   const [errors, setErrors] = useState<any>({});
   const [isErrorVisible, setIsErrorVisible] = useState(false);
   const [locationVisible, setLocationVisible] = useState(false);
+  const [reuploadCertificateVisible, setReuploadCertificateVisible] = useState(false);
+  const [successVisible, setSuccessVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const loadVetDetails = async () => {
     try {
@@ -138,6 +143,18 @@ export default function ProfilePage() {
             />
           </div>
         </div>
+
+        {!vetDetails?.verified && 
+          <Tooltip >
+            <TooltipTrigger asChild>
+              <span className={!vetDetails?.verifiedDate?"text-yellow-500":"text-red-500"}>(Certificate {!vetDetails?.verifiedDate ? "Unverified" : "Denied"})</span>
+            </TooltipTrigger>
+            <TooltipContent align="start">
+              {!vetDetails?.verifiedDate && <p>Your certificate is waiting verification. While waiting for verification, you cannot accept any bookings.</p>}
+              {vetDetails?.verifiedDate && <p>Your certificate is denied by the admin. <br></br> Please reupload your certificate below</p>}
+            </TooltipContent>
+          </Tooltip>
+          }
 
         {/* Email */}
         <div className="mb-4">
@@ -295,7 +312,16 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div>
+        <div className="flex flex-col gap-3">
+          {
+            vetDetails?.verified === false && vetDetails?.verifiedDate !== null && 
+            <button
+              className="w-full bg-white hover:bg-gray-200 text-black py-2 rounded-md font-semibold duration-200 border border-gray-200"
+              onClick={() => setReuploadCertificateVisible(true)}
+            >
+              Reupload Certificate
+            </button>
+          }
           <button
             className="w-full bg-teal-700 hover:bg-teal-800 text-white py-2 rounded-md font-semibold duration-200"
             onClick={handleSaveChanges}
@@ -329,6 +355,13 @@ export default function ProfilePage() {
           }}
           show={locationVisible}
         />
+        <ReuploadCertificate
+          vetId={vetDetails?.id || ""}
+          show={reuploadCertificateVisible}
+          onAction={() => {setReuploadCertificateVisible(false); setSuccessVisible(true); setSuccessMessage("Certificate reuploaded successfully")}}
+          onClose={() => setReuploadCertificateVisible(false)}
+        />
+        <SuccessDialog onOpenChange={() => {setSuccessVisible(false); loadVetDetails()}} open={successVisible} message={successMessage} />
       </div>
     </div>
   );

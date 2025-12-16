@@ -58,6 +58,7 @@ export default function CertificatesPage() {
 
   const handleApprove = async () => {
     if (selected) { 
+      console.log("selected", selected);
       await adminService.changeVetCertificateStatus(selected.id, true);
       setOpenApproved(false);
       setSelected(null);
@@ -83,7 +84,7 @@ export default function CertificatesPage() {
         <h1 className="text-4xl font-bold text-white">Certificates</h1>
         <Input
           placeholder="Search for Veterinarian"
-          className="w-full md:w-64 mt-3 md:mt-0 rounded-full bg-white dark:bg-white"
+          className="w-full md:w-64 mt-3 md:mt-0 rounded-full bg-white dark:bg-white text-black"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -141,7 +142,7 @@ export default function CertificatesPage() {
 
       {/* Dialog confirm */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="sm:max-w-lg lg:max-w-4xl bg-[#1c2d29] text-white">
+        <DialogContent className="sm:max-w-lg lg:max-w-4xl max-h-[90vh] overflow-y-auto bg-[#1c2d29] text-white">
           <DialogHeader>
             <DialogTitle>Confirm Certificate</DialogTitle>
             <DialogDescription asChild>

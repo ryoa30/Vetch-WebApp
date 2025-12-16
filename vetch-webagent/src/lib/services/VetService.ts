@@ -120,6 +120,23 @@ export class VetService {
     });
   }
 
+  async updateVetCertificate (id: string, sipNumber: string, certificate: File | string | null){
+    const formData = new FormData();
+
+    if(certificate && typeof certificate !== "string"){
+      formData.append("file", certificate);
+    }
+    formData.append('data', JSON.stringify({
+      id: id,
+      sipNumber: sipNumber,
+      verifiedDate: null
+    }));
+
+    console.log("formData", formData.getAll("data"));
+    return await this.#http.putForm<IResponse>('/reupload-certificate', formData);
+    // return null;
+  }
+
   async fetchVetStats(userId: string){
     return await this.#http.get<IResponse>(`/stats/${userId}`);
   }

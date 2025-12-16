@@ -5,6 +5,7 @@ const RatingRepository = require('../repository/RatingRepository');
 const SpeciesRepository = require('../repository/SpeciesRepository');
 const SpeciesTypeRepository = require('../repository/SpeciesTypeRepository');
 const { hhmmToUTCDate, dateToHHMM } = require('../utils/dateUtils');
+const cloudinary = require("../utils/cloudinary");
 
 class VetController {
     #vetRepository;
@@ -30,6 +31,7 @@ class VetController {
         this.getVetListEmergency = this.getVetListEmergency.bind(this);
         this.getVetByUserId = this.getVetByUserId.bind(this);
         this.putVetDetails = this.putVetDetails.bind(this);
+        this.putCertificateReupload = this.putCertificateReupload.bind(this);
         this.getAllSpeciesTypes = this.getAllSpeciesTypes.bind(this);
         this.addVetSpeciesType = this.addVetSpeciesType.bind(this);
         this.deleteSpecies = this.deleteSpecies.bind(this);
@@ -79,6 +81,38 @@ class VetController {
         }
     }
 
+    async putCertificateReupload(req, res) {
+        try {
+            const vetDetails = req.body.data ? JSON.parse(req.body.data) : req.body;
+            
+            if (req.file) {
+                // stream the buffer into Cloudinary
+                const uploadResult = await new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: "my-app",
+                        resource_type: "image",
+                        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+                    },
+                    (error, result) => (error ? reject(error) : resolve(result))
+                    );
+                    // Multer memory buffer -> upload_stream
+                    stream.end(req.file.buffer);
+                });
+
+                console.log("uploadResult",uploadResult);
+
+                vetDetails.uploadCertificate = uploadResult.secure_url;
+            }
+
+            const updatedVet = await this.#vetRepository.updateVetDetails(vetDetails);
+            res.status(200).json({ok: true, data: updatedVet, message: 'Vet certificate reuploaded successfully'});
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ok: false, message: 'Server Problem' });
+        }
+    }
+
     async deleteSchedule(req, res) {
         try {
             const { id } = req.params;
@@ -98,7 +132,10 @@ class VetController {
             const totalIncome = await this.#vetRepository.calculateTotalIncome(userId);
             const upcomingAppointment = await this.#vetRepository.countUpcomingAppointments(userId);
             const pendingAppointment = await this.#vetRepository.countPendingAppointments(userId);
-            res.status(200).json({ok: true, data: { totalPatients, totalIncome, upcomingAppointment, pendingAppointment }, message: 'Vet stats fetched successfully'});
+            const vet = await this.#vetRepository.findVetByUserId(userId);
+            const verified = vet.verified && vet.verifiedDate ? "verified" : !vet.verified && vet.verifiedDate ? "denied" : "unverified";
+            // console.log(vet)
+            res.status(200).json({ok: true, data: { totalPatients, totalIncome, upcomingAppointment, pendingAppointment, verified: verified }, message: 'Vet stats fetched successfully'});
         } catch (error) {
             console.log(error);
             res.status(500).json({ ok: false, message: 'Error fetching vet stats', error: error.message });

@@ -5,6 +5,7 @@ const VetController = require('../controller/VetController');
 const vetController = new VetController();
 
 const AuthController = require('../middleware/AuthController');
+const upload = require("../utils/multer");
 
 router.post('/', vetController.getVetListConsultation);
 router.post('/emergency', vetController.getVetListEmergency);
@@ -23,6 +24,7 @@ router.post('/add-species',AuthController.authorize, vetController.addVetSpecies
 router.put('/',AuthController.authorize, vetController.putVetDetails);
 router.put('/availability',AuthController.authorize, vetController.putVetHomecareEmergency);
 router.put('/schedule',AuthController.authorize, vetController.putSchedule);
+router.put('/reupload-certificate',AuthController.authorize, upload.single("file"), vetController.putCertificateReupload);
 
 router.delete('/delete-species',AuthController.authorize, vetController.deleteSpecies);
 router.delete('/schedule/:id',AuthController.authorize, vetController.deleteSchedule);

@@ -514,8 +514,8 @@ class VetRepository extends BaseRepository {
     const totalPages = total === 0 ? 0 : Math.ceil(total / volume);
 
     const flattened = vets.map((vet) => ({
-      ...vet,
       ...vet.user,
+      ...vet,
       user: undefined, // optional: remove nested user
     }));
 
@@ -559,8 +559,8 @@ class VetRepository extends BaseRepository {
     const totalPages = total === 0 ? 0 : Math.ceil(total / volume);
 
     const flattened = vets.map((vet) => ({
-      ...vet,
       ...vet.user,
+      ...vet,
       user: undefined, // optional: remove nested user
     }));
 
@@ -569,7 +569,7 @@ class VetRepository extends BaseRepository {
 
   async updateVetCertificateStatus(vetId, status) {
     return this._model.update({
-      where: { userId: vetId },
+      where: { id: vetId },
       data: {
         verified: status,
         verifiedDate: new Date(),

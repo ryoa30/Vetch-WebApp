@@ -6,11 +6,36 @@ export type VetInfoInput = {
   description: string;
 }
 
+export type CertificateDetailInput = {
+  sipNumber: string;
+  certificate: File | null;
+};
+
 export type ValidationResult<T> =
    { ok: true; data: T }
   | { ok: false; errors: Record<string, string> };
 
 export class VetValidator {
+
+  validateCertificateInfo(input: Partial<CertificateDetailInput>): ValidationResult<CertificateDetailInput> {
+      const errors: Record<string, string> = {};
+
+      const certificate = input.certificate;
+      if(!certificate) errors.certificate = "Certificate is required";
+
+      const sipNumber = input.sipNumber;
+      if(!sipNumber) errors.sipNumber = "SIP Number is required";
+  
+      if (Object.keys(errors).length) return { ok: false, errors: errors };
+  
+      return {
+        ok: true,
+        data: {
+          sipNumber: input.sipNumber || "",
+          certificate: input.certificate || null,
+        },
+      };
+    }
 
   validateVetInfo(firstName:string, lastName:string, price:number, description: string): ValidationResult<VetInfoInput> {
     const errors: Record<string, string> = {};

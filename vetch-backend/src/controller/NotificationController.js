@@ -251,6 +251,8 @@ class PaymentController {
     let ok = 0,
       fail = 0;
 
+    console.log("subs",subs);
+
     console.log("unique subs",[...new Map(subs.map((s) => [s.userId, s])).values()]);
 
     [...new Map(subs.map((s) => [s.userId, s])).values()].forEach(
