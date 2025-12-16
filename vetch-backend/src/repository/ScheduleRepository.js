@@ -92,7 +92,7 @@ class ScheduleRepository extends BaseRepository {
     }));
   }
 
-  async findVetShcedulesUserIdDay(userId, day) {
+  async findVetSchedulesUserIdDay(userId, day) {
     const result = await this._model.findMany({
       where: {
         vet: {
