@@ -40,6 +40,33 @@ export function formatIsoJakarta(iso: string) {
   return `${day} ${mon} ${year} at ${hh}:${mm}`;
 }
 
+export function formatIso(iso: string) {
+
+  const parts = new Intl.DateTimeFormat("en-GB", { // en-GB usually formats closer to expected standard, but en-EN works too
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "UTC" // <--- This stops the Jakarta shift
+  })
+    .formatToParts(new Date(iso))
+    .reduce<Record<string, string>>((acc, p) => {
+      if (p.type !== "literal") acc[p.type] = p.value;
+      return acc;
+    }, {});
+
+  const day = parts.day; // "15"
+  const mon = months[Number(parts.month) - 1]; // "Sep"
+  const year = parts.year; // "2025"
+  const hh = parts.hour; // "11"
+  const mm = parts.minute;
+
+
+  return `${day} ${mon} ${year} at ${hh}:${mm}`;
+}
+
 export function hourMinuteFromString(iso: string) {
 
   const parts = new Intl.DateTimeFormat("id-ID", {

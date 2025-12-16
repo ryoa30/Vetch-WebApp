@@ -9,7 +9,7 @@ import { useSession } from "@/contexts/SessionContext";
 import { BookingService } from "@/lib/services/BookingService";
 import { BookingData, BookingWithRelations } from "@/app/types";
 import { snakeCase } from "lodash";
-import { formatIsoJakarta } from "@/lib/utils/formatDate";
+import { formatIso, formatIsoJakarta } from "@/lib/utils/formatDate";
 import { History, MessageCircle, Star } from "lucide-react";
 import ChatHistoryDialogBox from "@/app/alert-dialog-box/ChatHistoryDialog";
 import OrderDetailOverlay from "@/app/forPetParent/orderHistory/components/OrderDetailOverlay";
@@ -114,7 +114,7 @@ export default function HistoryPage() {
                     <span className="font-semibold">Time:</span>{" "}
                     {item.bookingType === "Emergency"
                       ? "EMERGENCY"
-                      : `${formatIsoJakarta(
+                      : `${formatIso(
                           item.bookingDate.split("T")[0] +
                             "T" +
                             item.bookingTime.split("T")[1]

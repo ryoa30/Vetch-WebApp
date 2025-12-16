@@ -9,7 +9,7 @@ import { useLoading } from "@/contexts/LoadingContext";
 import { BookingService } from "@/lib/services/BookingService";
 import OverlayPetDetail from "../components/overlay/OverlayPetDetail";
 import { lowerCase, snakeCase } from "lodash";
-import { formatIsoJakarta } from "@/lib/utils/formatDate";
+import { formatIso, formatIsoJakarta } from "@/lib/utils/formatDate";
 import ChatDialogBox from "@/app/alert-dialog-box/ChatDialogBox";
 
 export default function HistoryPage() {
@@ -122,7 +122,7 @@ export default function HistoryPage() {
                 <p className="font-semibold">
                   {item.pet.speciesName} - {item.pet.petName}
                 </p>
-                <p className={`text-sm ${item.bookingType === "Emergency"? "animate-bounce text-red-500 dark:text-red-600 font-bold" : "dark:text-white text-gray-700"}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className={`text-sm ${item.bookingType === "Emergency"? "animate-bounce text-red-500 dark:text-red-600 font-bold" : "dark:text-white text-gray-700"}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -163,7 +163,7 @@ export default function HistoryPage() {
                 <p className="font-semibold">
                   {item.pet.speciesName} - {item.pet.petName}
                 </p>
-                <p className={`text-sm ${item.bookingType === "Emergency"? "animate-bounce text-red-500 dark:text-red-600 font-bold" : "dark:text-white text-gray-700"}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className={`text-sm ${item.bookingType === "Emergency"? "animate-bounce text-red-500 dark:text-red-600 font-bold" : "dark:text-white text-gray-700"}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -203,7 +203,7 @@ export default function HistoryPage() {
                 <p className="font-semibold">
                   {item.pet.speciesName} - {item.pet.petName}
                 </p>
-                <p className={`text-sm ${item.bookingType === "Emergency"? "animate-bounce text-red-500 dark:text-red-600 font-bold" : "text-gray-700 dark:text-white"}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className={`text-sm ${item.bookingType === "Emergency"? "animate-bounce text-red-500 dark:text-red-600 font-bold" : "text-gray-700 dark:text-white"}`}>{item.bookingType === "Emergency" ? "EMERGENCY" :formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

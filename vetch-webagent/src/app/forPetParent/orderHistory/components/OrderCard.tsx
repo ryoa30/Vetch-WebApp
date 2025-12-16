@@ -2,7 +2,7 @@ import { snakeCase } from "lodash";
 import Image from "next/image";
 import React from "react";
 import { BanknoteArrowDown, GitCompareArrows, History, MessageCircle, Star, UserX } from "lucide-react";
-import { formatIsoJakarta } from "@/lib/utils/formatDate";
+import { formatIso, formatIsoJakarta } from "@/lib/utils/formatDate";
 import { PaymentService } from "@/lib/services/PaymentService";
 import { showPaymentSnap } from "@/lib/utils/snapPayment";
 import ConfirmationDialogBox from "@/app/alert-dialog-box/ConfirmationDialogBox";
@@ -37,7 +37,7 @@ const OrderCard = ({
               </h4>
               <p className="text-sm text-black font-semibold dark:text-white">
                 <span className="font-bold text-[#3D8D7A] dark:text-white">Time:</span>{" "}
-                {booking.bookingType!=="Emergency"?formatIsoJakarta(
+                {booking.bookingType!=="Emergency"?formatIso(
                   booking.bookingDate.split("T")[0] +
                     "T" +
                     booking.bookingTime.split("T")[1]

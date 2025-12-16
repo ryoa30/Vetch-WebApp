@@ -2,7 +2,7 @@
 "use client";
 import { PetData } from "@/app/types";
 import { BookingService } from "@/lib/services/BookingService";
-import { ageFromDob, formatAge, formatIsoJakarta } from "@/lib/utils/formatDate";
+import { ageFromDob, formatAge, formatIso, formatIsoJakarta } from "@/lib/utils/formatDate";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Loader } from "lucide-react";
@@ -108,7 +108,7 @@ export default function OverlayPetDetail({
             {medicalHistory?.map((item, idx) => (
               <li key={idx} className="flex items-center justify-between">
                 <span className="flex-[30%]">
-                  {formatIsoJakarta(
+                  {formatIso(
                     item.bookingDate.split("T")[0] +
                       "T" +
                       item.bookingTime.split("T")[1]

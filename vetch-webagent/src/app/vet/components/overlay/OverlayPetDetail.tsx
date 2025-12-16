@@ -1,7 +1,7 @@
 // components/OverlayPetDetail.tsx
 "use client";
 import { BookingService } from "@/lib/services/BookingService";
-import { ageFromDob, formatAge, formatIsoJakarta } from "@/lib/utils/formatDate";
+import { ageFromDob, formatAge, formatIso, formatIsoJakarta } from "@/lib/utils/formatDate";
 import { capitalize, snakeCase } from "lodash";
 import { ClipboardPlus, X, AlignLeft } from "lucide-react";
 import Image from "next/image";
@@ -131,7 +131,7 @@ export default function OverlayPetDetail({
             {medicalHistory?.map((item, idx) => (
               <li key={idx} className="flex items-center justify-between text-black dark:text-white">
                 <span className="flex-[30%]">
-                  {formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}
+                  {formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}
                 </span>
                 <span className="flex-[50%] px-2">
                   {item.concernDetails.map((c: any) => c.concern.concernName).join(", ")}
@@ -155,7 +155,7 @@ export default function OverlayPetDetail({
             {medicalHistoryWithVet?.map((item, idx) => (
               <li key={idx} className="flex items-center justify-between text-black dark:text-white">
                 <span className="flex-[30%]">
-                  {formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}
+                  {formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}
                 </span>
                 <span className="flex-[50%] px-2">
                   {item.concernDetails.map((c: any) => c.concern.concernName).join(", ")}

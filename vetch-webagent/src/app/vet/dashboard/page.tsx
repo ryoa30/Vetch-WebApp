@@ -13,7 +13,7 @@ import OverlayPetDetail from "../components/overlay/OverlayPetDetail";
 import ChatDialogBox from "@/app/alert-dialog-box/ChatDialogBox";
 import { BookingService } from "@/lib/services/BookingService";
 import { useSession } from "@/contexts/SessionContext";
-import { formatIsoJakarta, formatLocalDate } from "@/lib/utils/formatDate";
+import { formatIso, formatIsoJakarta, formatLocalDate } from "@/lib/utils/formatDate";
 import { useLoading } from "@/contexts/LoadingContext";
 import { VetService } from "@/lib/services/VetService";
 import { VetStats } from "@/app/types";
@@ -208,7 +208,7 @@ export default function DashboardPage() {
             >
               <div>
                 <p className="font-semibold">{item.pet.petName}</p>
-                <p className="text-sm text-gray-500">{formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className="text-sm text-gray-500">{formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
               <div className="flex items-center gap-2">
                 <p className="text-sm">{item.bookingType}</p>
@@ -243,7 +243,7 @@ export default function DashboardPage() {
               <div>
                 <p className="font-semibold">{item.pet.petName}</p>
                 <p className="text-sm text-gray-500 dark:text-white font-semibold">{`Status: ${item.bookingStatus}`}</p>
-                <p className="text-sm text-gray-500 dark:text-white">{formatIsoJakarta(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
+                <p className="text-sm text-gray-500 dark:text-white">{formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}</p>
               </div>
               <div className="flex items-center gap-2">
                 <p className="text-sm">{item.bookingType}</p>

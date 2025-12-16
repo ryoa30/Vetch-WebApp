@@ -6,6 +6,7 @@ import { BookingService } from "@/lib/services/BookingService";
 import {
   ageFromDob,
   formatAge,
+  formatIso,
   formatIsoJakarta,
 } from "@/lib/utils/formatDate";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -60,7 +61,7 @@ export default function OrderDetailOverlay({
             <ClockFading className="w-10 h-10 text-black dark:text-white" />
             <div>
               <p className="text-lg font-semibold text-gray-800 dark:text-white">
-                {booking?.bookingType!=="Emergency"?formatIsoJakarta(
+                {booking?.bookingType!=="Emergency"?formatIso(
                   booking?.bookingDate.split("T")[0] +
                     "T" +
                     booking?.bookingTime.split("T")[1]
