@@ -245,8 +245,8 @@ class BookingController {
             console.log("Expired bookings:", expiredBooking);
             if (expiredBooking.length > 0) {
                 const bookingIds = expiredBooking.map(b => b.id);
-                // await this.#bookingRepository.updateBookingsStatus(bookingIds, "CANCELLED");
-                // this.#notificationController.sendToUsers("CANCELLED",expiredBooking.map(b => b.pet.userId), {title: "Your booking has expired"});
+                await this.#bookingRepository.updateBookingsStatus(bookingIds, "CANCELLED");
+                this.#notificationController.sendToUsers("CANCELLED",expiredBooking.map(b => b.pet.userId), {title: "Your booking has expired"});
             }
 
             const finishedBooking = await this.#bookingRepository.findFinishedOngoingBooking();

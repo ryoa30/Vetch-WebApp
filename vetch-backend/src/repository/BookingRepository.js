@@ -54,7 +54,6 @@ class BookingRepository extends BaseRepository {
     return result;
   }
 
-
   async findBookingsByUserId(userId, status, type) {
     const where = {
       pet: {
@@ -181,7 +180,6 @@ class BookingRepository extends BaseRepository {
     return bookings;
   }
 
-  
   async findBookingByIntervalStatusType(interval, status){
     const { timeOfDay } = nowForSchedule();
     const startDate = new Date(`${new Date().toISOString().split("T")[0]}T00:00:00.000Z`);

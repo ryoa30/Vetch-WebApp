@@ -182,9 +182,10 @@ export function EditPetDialog({
             <div className="flex items-center gap-2">
               <input
                 type="number"
-                value={form.weight}
-                onChange={(e) => handleChange("weight", e.target.value)}
                 className="flex-1 dark:text-white border border-gray-300 rounded-lg px-3 py-2"
+                placeholder="Weight in KG, must at least be 1 gram"
+                value={form.weight}
+                onChange={(e) => {if((Number(e.target.value)>=0 || e.target.value === "") && !e.target.value.includes("-")){handleChange("weight", e.target.value)}}}
               />
               <span className="text-black dark:text-white font-semibold">KG</span>
             </div>

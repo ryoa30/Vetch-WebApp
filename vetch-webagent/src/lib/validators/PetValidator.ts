@@ -4,14 +4,14 @@ export type PetInfoInput = {
   petSpecies: string;
   petColor: string;
   petGender: string;
-  petWeight: number;
+  petWeight: number | string;
   petNeutered: boolean;
   petDob: Date | undefined;
 };
 export type PetEditInfoInput = {
   petName: string;
   petColor: string;
-  petWeight: number;
+  petWeight: number | string;
 };
 
 export type ValidationResult<T> =
@@ -32,7 +32,7 @@ export class PetValidator {
 
     const petWeight = input.petWeight;
     if (!petWeight) errors.weight = "Pet weight is required";
-    else if (petWeight < 0.001) {
+    else if (Number(petWeight) < 0.001) {
       errors.weight = "Pet weight must be at least 1 gram";
     }
 
@@ -68,7 +68,7 @@ export class PetValidator {
 
     const petWeight = input.petWeight;
     if (!petWeight) errors.weight = "Pet weight is required";
-    else if (petWeight < 0.001) {
+    else if (Number(petWeight) < 0.001) {
       errors.weight = "Pet weight must be at least 1 gram";
     }
 

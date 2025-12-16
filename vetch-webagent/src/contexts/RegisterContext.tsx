@@ -30,8 +30,8 @@ type RegisterPeopleContextType = {
   setPetGender: (petGender: string) => void;
   petNeutered: boolean;
   setPetNeutered: (petNeutered: boolean) => void;
-  petWeight: number;
-  setPetWeight: (petWeight: number) => void;
+  petWeight: number | string;
+  setPetWeight: (petWeight: number | string) => void;
   petDob: Date | undefined;
   setPetDob: (petDob: Date | undefined) => void;
   address: string;
@@ -80,7 +80,7 @@ export function RegisterContextProvider({ children }: { children: ReactNode }) {
   const [petColor, setPetColor] = useState('');
   const [petGender, setPetGender] = useState('male');
   const [petNeutered, setPetNeutered] = useState(false);
-  const [petWeight, setPetWeight] = useState(0);
+  const [petWeight, setPetWeight] = useState<number | string>("");
   const [petDob, setPetDob] = useState<Date | undefined>();
   const [address, setAddress] = useState('');
   const [addressNotes, setAddressNotes] = useState<string>('');

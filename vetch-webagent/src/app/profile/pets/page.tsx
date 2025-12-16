@@ -74,7 +74,7 @@ export default function PetsPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center py-10">
+    <div className="min-h-screen w-full flex flex-col items-center py-10 px-4">
       {/* Title */}
       <h1 className="text-3xl font-bold text-green-900 dark:text-white mb-4">Pets</h1>
 

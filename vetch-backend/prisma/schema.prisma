@@ -167,7 +167,7 @@ model Payment {
   id            String   @id @default(cuid())
   bookingId     String   @unique @map("booking_id")
   grossAmount   Int      @map("gross_amount") 
-  orderId       String   @map("order_id") @db.VarChar(100)
+  orderId       String   @unique @map("order_id") @db.VarChar(100)
   transactionId String?  @map("transaction_id") @db.VarChar(100)
   paymentToken  String   @map("payment_token") @db.Text
   paymentMethod String   @map("payment_method") @db.VarChar(65)

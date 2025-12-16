@@ -70,7 +70,7 @@ export function PetDialog({ show, onClose, onSubmit }: PetDialogProps) {
     primaryColor: "",
     gender: "male",
     neuterStatus: true,
-    weight: 0,
+    weight: "",
     dob: undefined,
   });
 
@@ -302,7 +302,7 @@ export function PetDialog({ show, onClose, onSubmit }: PetDialogProps) {
                 type="number"
                 placeholder="Weight in KG, must at least be 1 gram"
                 value={form.weight}
-                onChange={(e) => handleChange("weight", Number(e.target.value))}
+                onChange={(e) => {if((Number(e.target.value)>=0 || e.target.value === "") && !e.target.value.includes("-")){handleChange("weight", e.target.value)}}}
               />
               <span className="ml-2 font-medium">KG</span>
             </div>

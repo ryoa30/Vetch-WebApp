@@ -5,12 +5,14 @@ const PaymentController = require('../controller/PaymentController');
 const paymentController = new PaymentController();
 
 const AuthController = require('../middleware/AuthController');
-router.use(AuthController.authorize);
+// router.use(AuthController.authorize);
 
-router.post('/refund', paymentController.refundTransaction);
+router.post('/', paymentController.receivePaymentNotification);
 
-router.post('/midtrans', paymentController.getTransactionToken);
+router.post('/refund', AuthController.authorize, paymentController.refundTransaction);
 
-router.put('/', paymentController.putPaymentDetails);
+router.post('/midtrans', AuthController.authorize, paymentController.getTransactionToken);
+
+router.put('/', AuthController.authorize, paymentController.putPaymentDetails);
 
 module.exports = router;

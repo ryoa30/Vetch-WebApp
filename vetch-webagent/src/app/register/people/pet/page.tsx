@@ -238,13 +238,22 @@ const RegisterPeoplePetPage = () => {
                 Pet&apos; Weight<span className="text-red-500">*</span>
               </Label>
               <div className="relative mb-0">
-                <Input
+                {/* <Input
                   type="number"
                   id="petWeight"
                   placeholder="Weight in KG, must at least be 1 gram"
                   className="!bg-[#FBFFE4] pr-12"
                   value={petWeight}
                   onChange={(e) => {if(Number(e.target.value) >=0)setPetWeight(Number(e.target.value))}}
+                  /> */}
+                <Input
+                  type="number"
+                  id="petWeight"
+                  // className="flex-1 dark:text-white border border-gray-300 rounded-lg px-3 py-2"
+                  className="!bg-[#FBFFE4] pr-12"
+                  placeholder="Weight in KG, must at least be 1 gram"
+                  value={petWeight}
+                  onChange={(e) => {if((Number(e.target.value)>=0 || e.target.value === "") && !e.target.value.includes("-")){setPetWeight(e.target.value)}}}
                 />
                 <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 font-medium">
                   KG

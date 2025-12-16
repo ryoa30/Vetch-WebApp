@@ -22,8 +22,8 @@ declare global {
   }
 }
 
-const bookingService = new BookingService()
-const paymentService = new PaymentService()
+// const bookingService = new BookingService()
+// const paymentService = new PaymentService()
 
 export function showPaymentSnap(token: string, data: {bookingId: string}, callbacks?: SnapCallbacks) {
   if (typeof window === "undefined") return; // SSR guard
@@ -35,14 +35,9 @@ export function showPaymentSnap(token: string, data: {bookingId: string}, callba
     onSuccess: async (result: any) => {
       console.log("Success:", result);
       callbacks?.onSuccess?.(result);
-      await bookingService.changeBookingStatus(data.bookingId, "PENDING");
-      const res = await paymentService.updatePaymentDetails(data.bookingId, "DONE", result.payment_type, result.transaction_id)
-      console.log(res);
     },
     onPending: async (result: any) => {
       console.log("Pending:", result)
-      const res = await paymentService.updatePaymentDetails(data.bookingId, "PENDING", result.payment_type, result.transaction_id)
-      console.log(res);
     },
     onError: (error) => console.error("Error:", error),
     onClose: () => console.warn("Buyer closed the popup without finishing the payment"),

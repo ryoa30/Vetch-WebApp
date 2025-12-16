@@ -140,7 +140,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="my-email-example@email-provider.com"
+                placeholder="user@mail.com"
                 className="bg-[#F4F9F4]/100 w-full rounded-lg p-2 placeholder:text-wrap dark:bg-[#2E4F4A]/100 border-none pl-10"
               />
             </div>

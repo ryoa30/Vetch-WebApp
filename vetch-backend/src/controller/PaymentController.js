@@ -1,10 +1,12 @@
 const midtransClient = require('midtrans-client');
 const PaymentRepository = require('../repository/PaymentRepository');
+const BookingRepository = require('../repository/BookingRepository');
 const { randomUUID } = require('crypto');
 
 class PaymentController {
     #snap;
     #paymentRepository;
+    #bookingRepository;
 
     constructor() {
         this.#snap = new midtransClient.Snap({
@@ -15,10 +17,38 @@ class PaymentController {
         });;
 
         this.#paymentRepository = new PaymentRepository();
+        this.#bookingRepository = new BookingRepository();
 
         this.getTransactionToken = this.getTransactionToken.bind(this);
         this.putPaymentDetails = this.putPaymentDetails.bind(this);
         this.refundTransaction = this.refundTransaction.bind(this);
+        this.receivePaymentNotification = this.receivePaymentNotification.bind(this);
+    }
+
+    async receivePaymentNotification(req, res) {
+        try {
+            const body = req.body;
+            console.log('Payment notification received:', body.order_id, body.transaction_status, body.payment_type, body.transaction_id);
+            const payment = await this.#paymentRepository.findPaymentByOrderId(body.order_id);
+            console.log("get Payment",payment);
+            if(!payment) {
+                return res.status(404).json({ok: false, message: 'Payment data not found for the given orderId'});
+            }
+            if(body.transaction_status === 'settlement' || body.transaction_status === 'capture') {
+                await this.#paymentRepository.updatePaymentByBookingId(payment.bookingId, {paymentStatus: 'DONE', paymentMethod: body.payment_type, transactionId: body.transaction_id});
+                await this.#bookingRepository.updateBookingsStatus([payment.bookingId], 'PENDING');
+            }else if(body.transaction_status === 'deny' || body.transaction_status === 'cancel' || body.transaction_status === 'expire') {
+                await this.#paymentRepository.updatePaymentByBookingId(payment.bookingId, {paymentStatus: 'FAILED', paymentMethod: body.payment_type, transactionId: body.transaction_id});
+                await this.#bookingRepository.updateBookingsStatus([payment.bookingId], 'CANCELLED');
+            }else if(body.transaction_status === 'pending') {
+                await this.#paymentRepository.updatePaymentByBookingId(payment.bookingId, {paymentStatus: 'PENDING', paymentMethod: body.payment_type});
+            }
+
+            res.status(200).json({ok: true, data: true, message: 'Booking status updated successfully'});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ok: false, message: 'Error receiving notification', error: error.message });
+        }
     }
 
     async putPaymentDetails (req, res) { 
