@@ -43,7 +43,7 @@ export function PetDialog({ show, onClose, pet, setPet }: { show: boolean; onClo
 
   return (
     <Dialog open={show} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg lg:max-w-3xl min-h-[70vh] flex flex-col bg-white dark:bg-[#1F2D2A] text-black rounded-xl shadow-lg">
+      <DialogContent className="sm:max-w-lg lg:max-w-2xl max-h-[70vh] bg-white overflow-y-auto dark:bg-[#1F2D2A] text-black rounded-xl shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-2xl text-[#0F5544] font-semibold dark:text-white">Who is this appointment for?</DialogTitle>
         </DialogHeader>

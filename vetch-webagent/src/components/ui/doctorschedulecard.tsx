@@ -22,17 +22,25 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
               )
             }}
           } 
-      className="bg-white dark:bg-[#2D4236] rounded-2xl shadow-md overflow-hidden w-72  transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+      className="bg-white dark:bg-[#2D4236] rounded-2xl shadow-md overflow-hidden w-[45vw] sm:w-72 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
       {/* Image placeholder */}
       {!isAuthenticated ? (
         <LoginConfirmDialog>
-          <button className="w-full h-48 pb-2 flex items-center justify-center">
+          <button className="w-full h-[40vw] sm:h-48 pb-2 flex items-center justify-center">
             <Image
               src={doctor.profilePicture} // replace with your actual image
               alt="Doctor"
               width={200}
               height={200}
-              className="object-cover h-full w-full"
+              className="hidden sm:block object-cover h-full w-full"
+            />
+
+            <Image
+              src={doctor.profilePicture} // replace with your actual image
+              alt="Doctor"
+              width={100}
+              height={100}
+              className="block sm:hidden object-cover h-full w-full"
             />
           </button>
         </LoginConfirmDialog>
@@ -45,25 +53,34 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
               ).toString()}`
             )
           }
-          className="w-full h-48 pb-2 flex items-center justify-center"
+          className="w-full h-[40vw] sm:h-48 pb-2 flex items-center justify-center"
         >
           <Image
             src={doctor.profilePicture} // replace with your actual image
             alt="Doctor"
             width={200}
             height={200}
-            className="object-cover h-full w-full"
+            className="hidden sm:block object-cover h-full w-full"
           />
+
+          <Image
+            src={doctor.profilePicture} // replace with your actual image
+            alt="Doctor"
+            width={100}
+            height={100}
+            className="block sm:hidden object-cover h-full w-full"
+          />
+          
         </button>
       )}
 
       {/* Content */}
       <div className="p-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-gray-800 dark:text-white text-2xl font-semibold">
+          <h3 className="text-gray-800 dark:text-white text-base sm:text-2xl font-semibold">
             {doctor.fullName}
           </h3>
-          <span className="text-gray-800 dark:text-white font-medium">Fee</span>
+          <span className="text-gray-800 dark:text-white text-sm sm:text-base font-medium">Fee</span>
         </div>
 
         <div className="flex justify-between items-center mt-1">
@@ -83,8 +100,8 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
       </div>
 
       {/* Schedule */}
-      <div className="bg-[#f6ffd8] dark:bg-[#2D4236] px-4 py-3">
-        <p className="text-sm  text-gray-800 dark:text-white font-medium mb-2">
+      <div className="bg-[#f6ffd8] dark:bg-[#2D4236] px-2 sm:px-4 py-3">
+        <p className="text-xs sm:text-sm text-gray-800 dark:text-white font-medium mb-2">
           {new Date().toLocaleDateString("en-US", {
             weekday: "long",
             month: "long",
@@ -97,7 +114,7 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
               return (
                 <button
                   key={index}
-                  className="bg-[#3D8D7A] dark:bg-[#000000] text-white px-4 py-1 rounded-full hover:bg-green-600 hover:dark:bg-[#3D8D7A] transition-colors"
+                  className="bg-[#3D8D7A] dark:bg-[#000000] text-xs sm:text-base text-white px-2 sm:px-2 py-1 rounded-full hover:bg-green-600 hover:dark:bg-[#3D8D7A] transition-colors"
                   onClick={() => {
                     router.push(
                       `/forPetParent/consultationVetList/consultationDetails?${new URLSearchParams(
@@ -113,7 +130,7 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
               return (
                 <LoginConfirmDialog key={index}>
                   <button
-                    className="bg-[#3D8D7A] dark:bg-[#000000] text-white px-4 py-1 rounded-full hover:bg-green-600 hover:dark:bg-[#3D8D7A] transition-colors"
+                    className="bg-[#3D8D7A] dark:bg-[#000000] text-xs sm:text-base text-white px-2 sm:px-4 py-1 rounded-full hover:bg-green-600 hover:dark:bg-[#3D8D7A] transition-colors"
                   >
                     {schedule.timeOfDay}
                   </button>
@@ -123,7 +140,7 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
           })}
         </div>
         {isAuthenticated && 
-        (<button className="text-center w-full font-medium text-gray-800 hover:underline">
+        (<button className="text-center w-full font-medium text-xs sm:text-base text-gray-800 hover:underline">
           <a
             href={`/forPetParent/consultationVetList/consultationDetails?${new URLSearchParams(
               { id: doctor.id }
@@ -137,7 +154,7 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
         {!isAuthenticated && 
         (
         <LoginConfirmDialog>
-          <button className="text-center w-full font-medium text-gray-800 hover:underline">
+          <button className="text-center w-full font-medium text-xs sm:text-base text-gray-800 hover:underline">
             <a
               className="block px-4 py-2 text-gray-800 dark:text-white"
             >

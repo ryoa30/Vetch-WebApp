@@ -31,7 +31,9 @@ const SearchFilterBar: React.FC<Props> = ({ categories, selectedCategory, onSele
             )
             .map((article) => article.title);
 
-        setSuggestions(matches.slice(1, 5));
+        console.log(matches);
+
+        setSuggestions(matches.slice(0, 4));
     }, [inputValue, articles]);
 
     const handleSearch = () => {
@@ -63,17 +65,17 @@ const SearchFilterBar: React.FC<Props> = ({ categories, selectedCategory, onSele
                         }}
                         onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                         placeholder="Search Articles..."
-                        className="w-[80%] border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        className="w-[80%] border border-gray-500 dark:border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
                     />
                     <button
-                        className="px-4 py-2 w-[20%] bg-teal-500 text-white font-semibold hover:bg-teal-600 transition"
+                        className="sm:px-4 py-2 w-[20%] text-sm sm:text-base bg-teal-500 border border-teal-500 text-white font-semibold hover:bg-teal-600 transition"
                         onClick={handleSearch}
                     >
                         Search
                     </button>
 
                     {showSuggestions && suggestions.length > 0 && (
-                        <div className="absolute top-full left-0 mt-1 w-[80%] bg-white border border-gray-300 rounded shadow z-10">
+                        <div className="absolute top-full left-0 mt-1 w-[80%] bg-white dark:bg-gray-900 border border-gray-300 rounded shadow z-10">
                             {suggestions.map((suggestion, index) => (
                                 <div
                                     key={index}

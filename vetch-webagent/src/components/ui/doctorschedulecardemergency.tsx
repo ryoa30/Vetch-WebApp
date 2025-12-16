@@ -12,17 +12,28 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
   const { isAuthenticated } = useSession();
 
   return (
-    <div className="bg-white dark:bg-[#2D4236] rounded-2xl shadow-md overflow-hidden w-72  transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+    <div className="bg-white dark:bg-[#2D4236] rounded-2xl shadow-md overflow-hidden w-[45vw] sm:w-72 transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
       {/* Image placeholder */}
       {!isAuthenticated ? (
         <LoginConfirmDialog>
-          <button className="w-full h-48 pb-2 flex items-center justify-center">
+          <button className="w-full h-[40vw] sm:h-48 pb-2 flex items-center justify-center">
+            <div className="absolute top-0 right-0 bg-black text-white p-1 sm:p-2 rounded-bl-lg">
+              <span className="font-medium text-xs sm:text-base">{doctor.distance.text}</span>
+            </div>
             <Image
               src={doctor.profilePicture} // replace with your actual image
               alt="Doctor"
               width={200}
               height={200}
-              className="object-cover h-full w-full"
+              className="hidden sm:block object-cover h-full w-full"
+            />
+
+            <Image
+              src={doctor.profilePicture} // replace with your actual image
+              alt="Doctor"
+              width={100}
+              height={100}
+              className="block sm:hidden object-cover h-full w-full"
             />
           </button>
         </LoginConfirmDialog>
@@ -35,18 +46,25 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
               ).toString()}`
             )
           }
-          className="w-full h-48 pb-2 flex items-center justify-center relative"
+          className="w-full h-[40vw] sm:h-48 pb-2 flex items-center justify-center relative"
         >
-          <div className="absolute top-0 right-0 bg-black text-white p-2 rounded-bl-lg">
-            <span className="font-medium">{doctor.distance.text}</span>
-            
+          <div className="absolute top-0 right-0 bg-black text-white p-1 sm:p-2 rounded-bl-lg">
+            <span className="font-medium text-xs sm:text-base">{doctor.distance.text}</span>
           </div>
           <Image
             src={doctor.profilePicture} // replace with your actual image
             alt="Doctor"
             width={200}
             height={200}
-            className="object-cover h-full w-full"
+            className="hidden sm:block object-cover h-full w-full"
+          />
+
+          <Image
+            src={doctor.profilePicture} // replace with your actual image
+            alt="Doctor"
+            width={100}
+            height={100}
+            className="block sm:hidden object-cover h-full w-full"
           />
         </button>
       )}
@@ -54,10 +72,10 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
       {/* Content */}
       <div className="p-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-gray-800 dark:text-white text-2xl font-semibold">
+          <h3 className="text-gray-800 dark:text-white text-base sm:text-2xl font-semibold">
             {doctor.fullName}
           </h3>
-          <span className="text-gray-800 dark:text-white font-medium">Fee</span>
+          <span className="text-gray-800 dark:text-white text-sm sm:text-base font-medium">Fee</span>
         </div>
 
         <div className="flex justify-between items-center mt-1">
@@ -78,7 +96,7 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
 
       {/* Schedule */}
       <div className="bg-[#f6ffd8] dark:bg-[#2D4236] px-4 py-3">
-        <p className="text-sm  text-gray-800 dark:text-white font-medium mb-2">
+        <p className="text-xs sm:text-sm text-gray-800 dark:text-white font-medium mb-2">
           {new Date().toLocaleDateString("en-US", {
             weekday: "long",
             month: "long",
@@ -117,7 +135,7 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
           })} */}
         </div>
         {isAuthenticated && 
-        (<button className="text-center w-full font-medium text-gray-800 hover:underline">
+        (<button className="text-center w-full font-medium text-xs sm:text-base text-gray-800 hover:underline">
           <a
             href={`/forPetParent/emergencyVetList/emergencyDetails?${new URLSearchParams(
               { id: doctor.id }
@@ -131,7 +149,7 @@ export default function DoctorScheduleCard({ doctor }: { doctor: IVet }) {
         {!isAuthenticated && 
         (
         <LoginConfirmDialog>
-          <button className="text-center w-full font-medium text-gray-800 hover:underline">
+          <button className="text-center w-full font-medium text-xs sm:text-base text-gray-800 hover:underline">
             <a
               className="block px-4 py-2 text-gray-800 dark:text-white"
             >

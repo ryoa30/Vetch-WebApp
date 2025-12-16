@@ -125,8 +125,8 @@ const BlogPage = () => {
       )}
       {latestArticle && (
         <>
-          <div className="px-6 md:px-16 py-10 font-sans">
-            <div className="flex flex-col md:flex-row gap-6">
+          <div className="px-2 md:px-16 py-10 font-sans">
+            <div className="flex flex-col lg:flex-row items-center gap-6">
               {selectedArticle?
               <>
               <div className="flex flex-col gap-5">
@@ -140,7 +140,7 @@ const BlogPage = () => {
               </>
               :
               <>
-                <div className="md:max-w-[50%]">
+                <div className="w-full lg:max-w-[50%]">
                     <LatestArticle article={latestArticle} setSelectedArticle={setSelectedArticle}/>
                 </div>
                 <SidebarArticles articles={sidebarArticles} setSelectedArticle={setSelectedArticle}/>

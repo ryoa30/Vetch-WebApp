@@ -44,8 +44,8 @@ const ArticleCarousel: React.FC<Props> = ({ articles, setSelectedArticle }) => {
           <h2 className="text-2xl font-bold my-2 ml-7 md:ml-0">Recommendation for You</h2>
           <div className="relative mx-auto">
             {/* Container dengan padding untuk panah pada mobile */}
-            <div className="px-12 md:px-0">
-              <div ref={scrollRef} className="overflow-hidden scroll-smooth scrollbar-hide">
+            <div className="px-2 sm:px-12 md:px-0">
+              <div ref={scrollRef} className="overflow-auto sm:overflow-hidden scroll-smooth scrollbar-hide">
                 <div className="flex gap-6 py-4 w-max">
                   {articles.map((article) => (
                     <button
@@ -73,9 +73,9 @@ const ArticleCarousel: React.FC<Props> = ({ articles, setSelectedArticle }) => {
             {/* Panah kiri - sekarang berada di luar scroll area */}
             <button
               onClick={() => scroll("left")}
-              className="absolute left-0 md:left-[-28px] top-1/2 transform -translate-y-1/2 
+              className="hidden absolute left-0 md:left-[-28px] top-1/2 transform -translate-y-1/2 
               w-12 h-12 md:w-14 md:h-20 text-white z-30
-              rounded-l-full flex items-center justify-center
+              rounded-l-full sm:flex items-center justify-center
               md:-translate-x-1/2"
             >
               <img src="/img/left-arrow.png" alt="Kiri" />
@@ -86,7 +86,7 @@ const ArticleCarousel: React.FC<Props> = ({ articles, setSelectedArticle }) => {
               onClick={() => scroll("right")}
               className="absolute right-0 md:right-[-55px] top-1/2 transform -translate-y-1/2 
               w-12 h-12 md:w-14 md:h-20  text-white z-30
-              rounded-r-full flex items-center justify-center 
+              rounded-r-full hidden sm:flex items-center justify-center 
               md:translate-x-0"
             >
               <img src="/img/right-arrow.png" alt="Kanan" />

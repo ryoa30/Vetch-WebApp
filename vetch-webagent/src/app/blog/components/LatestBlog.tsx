@@ -24,7 +24,7 @@ const LatestArticle: React.FC<Props> = ({ article, setSelectedArticle }) => (
             <p className="text-base md:text-lg font-normal">
               {formatDateArticle(article.date)}
             </p>
-            <h3 className="text-xl text-black dark:text-white md:text-3xl font-bold mt-1">
+            <h3 className="text-xl text-white md:text-3xl font-bold mt-1">
               {article.title}
             </h3>
           </div>

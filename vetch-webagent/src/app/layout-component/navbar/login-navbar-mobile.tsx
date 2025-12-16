@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -20,38 +21,41 @@ import NotificationCard from "./components/notificationCard";
 export function NavbarMobile() {
   const [open, setOpen] = useState(false);
   const { isAuthenticated, user } = useSession();
-  const notificationService = new NotificationService();
-    const [notifications, setNotifications] = useState<any[]>([]);
+  const pathname = usePathname();
+  const notificationService = useMemo(() => new NotificationService(), []);
+  const [notifications, setNotifications] = useState<any[]>([]);
   
-    const handleConfirmAll = async()=>{
-      try {
-          const res = await notificationService.confirmAllNotifications(user?.id || "");
-          console.log(res);
-          if(res.ok){
-              loadUncomfirmedNotifications();
-          }
-      } catch (error) {
-          console.log(error);
-      }
-    }
-    
-    const loadUncomfirmedNotifications = async()=>{
-      try {
-        const notifications = await notificationService.getUncomfirmedNotifications(user?.id || "");
-        console.log("uncomfirmed notifications",notifications);
-        if(notifications.ok){
-          setNotifications(notifications.data || []);
+  const handleConfirmAll = async()=>{
+    try {
+        const res = await notificationService.confirmAllNotifications(user?.id || "");
+        console.log(res);
+        if(res.ok){
+            loadUncomfirmedNotifications();
         }
-      } catch (error) {
-        console.log("error fetching uncomfirmed notifications",error);
-      }
+    } catch (error) {
+        console.log(error);
     }
+  }
   
-    useEffect(()=>{
-      if(isAuthenticated){
-        loadUncomfirmedNotifications();
+  const loadUncomfirmedNotifications = async()=>{
+    try {
+      const notifications = await notificationService.getUncomfirmedNotifications(user?.id || "");
+      console.log("uncomfirmed notifications",notifications);
+      if(notifications.ok){
+        setNotifications(notifications.data || []);
       }
-    }, [])
+    } catch (error) {
+      console.log("error fetching uncomfirmed notifications",error);
+    }
+  }
+
+  useEffect(()=>{
+    if(isAuthenticated && user?.id){
+      loadUncomfirmedNotifications();
+    }
+    setOpen(false);
+    // Re-run when route changes so navbar effects can refresh on navigation
+  }, [isAuthenticated, user?.id, pathname])
 
   return (
     <nav className="flex md:hidden w-full bg-[#3D8D7A] dark:bg-[#1F2D2A] text-white shadow-sm relative">
