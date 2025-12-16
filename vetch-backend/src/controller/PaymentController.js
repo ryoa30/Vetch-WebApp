@@ -141,7 +141,18 @@ class PaymentController {
                         "name": "Service Fee",
                         "quantity": 1
                     },
-                ]
+                ],
+                "gopay": {
+                    "enable_callback": true,                // Essential for GoPay app redirect
+                    "callback_url": "https://vetch-webagent.vercel.app/forPetParent/orderHistory" 
+                },
+                "shopeepay": {
+                    "callback_url": "https://vetch-webagent.vercel.app/forPetParent/orderHistory"
+                },
+                "callbacks": {
+                    "finish": "https://vetch-webagent.vercel.app/forPetParent/orderHistory",
+                    "error": "https://vetch-webagent.vercel.app/forPetParent/orderHistory"
+                }
             };
 
             let transactionToken = await this.#snap.createTransactionToken(parameter);
