@@ -253,7 +253,7 @@ class BookingRepository extends BaseRepository {
           },
           {
             bookingStatus: { in: ["PAYMENT", "PENDING"] },
-            bookingType: { in: ["Homecare", "Emergency"] },
+            bookingType: { in: ["Homecare"] },
             OR:[
               {
                 bookingDate: endDate,
@@ -263,6 +263,11 @@ class BookingRepository extends BaseRepository {
                 bookingDate: { lt: endDate },
               }
             ]
+          },
+          {
+            bookingStatus: { in: ["PAYMENT", "PENDING"] },
+            bookingType: { in: ["Emergency"] },
+            bookingDate: { lt: endDate },
           }
         ]
       },
