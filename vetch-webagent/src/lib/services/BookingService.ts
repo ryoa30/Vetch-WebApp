@@ -15,8 +15,8 @@ export class BookingService {
     return await this.#http.put<IResponse>(`/status`, {id: bookingId, status });
   }
 
-  async changeBookingConclusionDate(bookingId: string, conclusion: string) {
-    return await this.#http.put<IResponse>(`/conclusion`, {id: bookingId, conclusion });
+  async changeBookingConclusionDate(bookingId: string, conclusion: string, consultationDate: string, vaccineDate: string) {
+    return await this.#http.put<IResponse>(`/conclusion`, {id: bookingId, conclusion, consultationDate, vaccineDate });
   }
 
   async fetchConcernTypes() {

@@ -180,6 +180,8 @@ export default function ChatDialogBox({
         const res = await chatService.fetchMessages(bookingId, 100);
         setBooking(booking.ok ? booking.data : null);
         setConclussion(booking.ok ? booking.data.bookingConclusion || "" : "");
+        setConsultationDate(booking.ok ? booking.data.pet.reminderConsultationDate.split("T")[0] || "" : "");
+        setVaccinationDate(booking.ok ? booking.data.pet.reminderVaccineDate.split("T")[0] || "" : "");
         console.log(booking.data);
         if (res.ok) setMessages(res.data);
       } catch (e) {
@@ -459,7 +461,9 @@ export default function ChatDialogBox({
       setIsLoading(false);
       return;
     }
-    const result = await bookingService.changeBookingConclusionDate(booking.id, conclussion);
+
+    console.log(consultationDate, vaccinationDate);
+    const result = await bookingService.changeBookingConclusionDate(booking.id, conclussion, consultationDate.toString(), vaccinationDate.toString());
 
     if(!result.ok){
       setIsError(true);
@@ -586,7 +590,7 @@ export default function ChatDialogBox({
                       type="date"
                       value={consultationDate}
                       className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#3D8D7A]"
-                      onChange={(e) => {if(e.target.value > formatLocalDate(new Date())) setConsultationDate(e.target.value)}}
+                      onChange={(e) => {if(e.target.value > formatLocalDate(new Date())) setConsultationDate(e.target.value);}}
                     />
                   </div>
                 </div>

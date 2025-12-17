@@ -242,7 +242,7 @@ class BookingController {
             }
 
             const expiredBooking = await this.#bookingRepository.findExpiredBooking();
-            console.log("Expired bookings:", expiredBooking);
+            // console.log("Expired bookings:", expiredBooking);
             if (expiredBooking.length > 0) {
                 const bookingIds = expiredBooking.map(b => b.id);
                 await this.#bookingRepository.updateBookingsStatus(bookingIds, "CANCELLED");
@@ -250,7 +250,7 @@ class BookingController {
             }
 
             const finishedBooking = await this.#bookingRepository.findFinishedOngoingBooking();
-            console.log("Finished bookings:", finishedBooking);
+            // console.log("Finished bookings:", finishedBooking);
             if (finishedBooking.length > 0) {
                 const bookingIds = finishedBooking.map(b => b.id);
                 await this.#bookingRepository.updateBookingsStatus(bookingIds, "DONE");
