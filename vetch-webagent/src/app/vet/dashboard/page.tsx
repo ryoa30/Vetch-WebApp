@@ -63,7 +63,7 @@ export default function DashboardPage() {
     setIsLoading(true);
     try {
       if(user){
-        const result = await bookingService.fetchVetBookings(user?.id, ["PENDING","ACCEPTED", "ONGOING", "DONE"], formatLocalDate(selectedDate));
+        const result = await bookingService.fetchVetBookings(user?.id, ["PENDING","ACCEPTED", "ONGOING", "OTW", "ARRIVED", "DONE"], formatLocalDate(selectedDate));
         console.log(result.data);
         if(result.ok){
           setDateAppointments(result.data);
@@ -79,7 +79,7 @@ export default function DashboardPage() {
     setIsLoading(true);
     try {
       if(user){
-        const result = await bookingService.fetchVetBookings(user?.id, ["ACCEPTED", "ONGOING"], formatLocalDate(new Date()));
+        const result = await bookingService.fetchVetBookings(user?.id, ["ACCEPTED", "ONGOING", "OTW", "ARRIVED"], formatLocalDate(new Date()));
         console.log(result.data);
         if(result.ok){
           setAppointments(result.data);
