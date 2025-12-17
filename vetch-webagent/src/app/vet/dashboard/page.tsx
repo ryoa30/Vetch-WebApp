@@ -109,10 +109,20 @@ export default function DashboardPage() {
     setIsChatOpen(false);
   };
 
-  const handleChatOpen = () => {
-    setIsDetailOpen(false); // Tutup detail
-    setIsChatOpen(true); // Buka chat
+  const handleChatOpen = async (isUpdateHomecare: boolean) => {
+    if(isUpdateHomecare){
+      const result = await bookingService.changeBookingStatus(selectedBooking.id, ("ARRIVED"));
+      if(result.ok){
+        handleCloseAll();
+        loadAppointmentByDate();
+        loadTodayAppointments();
+      }
+    }else{
+      setIsDetailOpen(false); // Tutup detail
+      setIsChatOpen(true); // Buka chat
+    }
   };
+
   const handlePendingBooking = async (status: string) => {
     console.log("reject booking");
     const result = await bookingService.changeBookingStatus(selectedBooking.id, (status === "REJECTED"?"CANCELLED": selectedBooking.bookingType === "Emergency" ? "ONGOING" :"ACCEPTED"));
@@ -124,7 +134,7 @@ export default function DashboardPage() {
   }
 
   const handleStartAppointment = async () => {
-    const result = await bookingService.changeBookingStatus(selectedBooking.id, ("ONGOING"));
+    const result = await bookingService.changeBookingStatus(selectedBooking.id, (selectedBooking.bookingType === "Homecare" ? "OTW" :"ONGOING"));
     if(result.ok){
       loadTodayAppointments();
       loadAppointmentByDate();
@@ -305,7 +315,7 @@ export default function DashboardPage() {
           onClose={handleCloseAll}
           onAction={
             selectedBooking.bookingStatus === "PENDING" ? handlePendingBooking : 
-            selectedBooking.bookingStatus === "ONGOING" ? handleChatOpen :
+            selectedBooking.bookingStatus === "ONGOING" || selectedBooking.bookingStatus === "OTW" || selectedBooking.bookingStatus === "ARRIVED" ? handleChatOpen :
             selectedBooking.bookingStatus === "ACCEPTED" ? handleStartAppointment :
             () => console.log("Action")
           }  

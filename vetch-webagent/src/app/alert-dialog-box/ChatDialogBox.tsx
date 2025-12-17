@@ -180,9 +180,10 @@ export default function ChatDialogBox({
         const res = await chatService.fetchMessages(bookingId, 100);
         setBooking(booking.ok ? booking.data : null);
         setConclussion(booking.ok ? booking.data.bookingConclusion || "" : "");
-        setConsultationDate(booking.ok ? booking.data.pet.reminderConsultationDate.split("T")[0] || "" : "");
-        setVaccinationDate(booking.ok ? booking.data.pet.reminderVaccineDate.split("T")[0] || "" : "");
+        setConsultationDate(booking.ok && booking.data.pet.reminderConsultationDate ? booking.data.pet.reminderConsultationDate.split("T")[0] || "" : "");
+        setVaccinationDate(booking.ok && booking.data.pet.reminderConsultationDate ? booking.data.pet.reminderVaccineDate.split("T")[0] || "" : "");
         console.log(booking.data);
+        console.log("chat response ",res)
         if (res.ok) setMessages(res.data);
       } catch (e) {
         console.warn(e);

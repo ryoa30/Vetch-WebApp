@@ -5,6 +5,7 @@ const ConcernTypeRepository = require('../repository/ConcernTypeRepository');
 const NotificationController = require('./NotificationController');
 const PetRepository = require('../repository/PetRepository');
 const { hhmmToUTCDate, dateToHHMM, formatIsoJakartaShort } = require('../utils/dateUtils');
+const { parseStringArrayParam } = require('../utils/jsonToArray');
 
 
 class BookingController {
@@ -89,7 +90,8 @@ class BookingController {
     async getBookingsByUserId(req, res) {
         try {
             const {userId, status, type} = req.query;
-            const bookings = await this.#bookingRepository.findBookingsByUserId(userId, status, type);
+            const statuses = parseStringArrayParam(status);
+            const bookings = await this.#bookingRepository.findBookingsByUserId(userId, statuses, type);
             res.status(200).json({ok: true, data: bookings, message: 'Bookings fetched successfully'});
         } catch (error) {
             console.log(error);
@@ -177,6 +179,11 @@ class BookingController {
             }else if(status === "ONGOING") {
                 this.#notificationController.sendToPetOwners(status,[updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now ongoing`});
                 this.#notificationController.sendToVets([updatedBooking.vetId], {title:`The booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now ongoing`});
+            }else if(status === "OTW") {
+                this.#notificationController.sendToPetOwners(status,[updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} appointment's vet is on their way to your home`});
+                this.#notificationController.sendToVets([updatedBooking.vetId], {title:`Your ${updatedBooking.bookingType} booking for ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)} is now marked as OTW`});
+            }else if(status === "ARRIVED") {
+                this.#notificationController.sendToPetOwners(status,[updatedBooking.petId], {title:`Your ${updatedBooking.bookingType} appintment's vet has arrived to your home`});
             }
             res.status(200).json({ok: true, data: updatedBooking, message: 'Booking status updated successfully'});
         } catch (error) {
@@ -234,9 +241,11 @@ class BookingController {
                 }
             }
             if(bookingsStart.length > 0) {
-                const bookingIds = bookingsStart.filter(item => item.bookingStatus == "ACCEPTED").map(b => b.id);
+                const bookingIds = bookingsStart.filter(item => item.bookingStatus == "ACCEPTED" && item.bookingType == "Online").map(b => b.id);
+                const bookingIdsOTW = bookingsStart.filter(item => item.bookingStatus == "ACCEPTED" && item.bookingType == "Homecare").map(b => b.id);
                 const vetIds = bookingsStart.map(b => b.vetId);
                 await this.#bookingRepository.updateBookingsStatus(bookingIds, "ONGOING");
+                await this.#bookingRepository.updateBookingsStatus(bookingIdsOTW, "OTW");
                 this.#notificationController.sendToVets(vetIds, {title: "Your booking is starting now, please begin the consultation"});
                 this.#notificationController.sendToUsers("ONGOING",bookingsStart.map(b => b.pet.userId), {title: "Your booking is starting now, please begin the consultation"});
             }

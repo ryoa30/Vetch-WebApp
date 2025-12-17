@@ -26,7 +26,7 @@ export default function HistoryPage() {
       setIsLoading(true);
       try {
         if(user){
-          const result = await bookingService.fetchVetBookings(user?.id, ["PENDING","ACCEPTED", "ONGOING"]);
+          const result = await bookingService.fetchVetBookings(user?.id, ["PENDING","ACCEPTED", "ONGOING", "OTW", "ARRIVED"]);
           console.log(result);
           if(result.ok){
             setAppointments(result.data);
@@ -61,13 +61,21 @@ export default function HistoryPage() {
     }
   }
   
-  const handleChatOpen = () => {
-    setOpenDetail(false); // Tutup detail
-    setIsChatOpen(true); // Buka chat
+  const handleChatOpen = async (isUpdateHomecare: boolean) => {
+    if(isUpdateHomecare){
+      const result = await bookingService.changeBookingStatus(selectedBooking.id, ("ARRIVED"));
+      if(result.ok){
+        handleCloseDetail();
+        loadAppointments();
+      }
+    }else{
+      setOpenDetail(false); // Tutup detail
+      setIsChatOpen(true); // Buka chat
+    }
   };
 
   const handleStartAppointment = async () => {
-    const result = await bookingService.changeBookingStatus(selectedBooking.id, ("ONGOING"));
+    const result = await bookingService.changeBookingStatus(selectedBooking.id, (selectedBooking.bookingType === "Homecare" ? "OTW" :"ONGOING"));
     if(result.ok){
       loadAppointments();
       setOpenDetail(false); // Tutup detail
@@ -78,7 +86,7 @@ export default function HistoryPage() {
   // 🔍 Filter berdasarkan section
   const pendingAppointments = appointments? appointments.filter(a => lowerCase(a.bookingStatus) === "pending"): [];
   const acceptedAppointments = appointments? appointments.filter(a => lowerCase(a.bookingStatus) === "accepted") : [];
-  const ongoingAppointments = appointments?appointments.filter(a => lowerCase(a.bookingStatus) === "ongoing"):[];
+  const ongoingAppointments = appointments?appointments.filter(a => lowerCase(a.bookingStatus) === "ongoing" || lowerCase(a.bookingStatus) === "otw" || lowerCase(a.bookingStatus) === "arrived"):[];
 
   return (
     <div className="p-6 min-h-screen text-black">
@@ -126,7 +134,7 @@ export default function HistoryPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <p className="font-medium">{item.bookingType}</p>
+              <p className="font-medium">{item.bookingType} {item.bookingType === "Homecare"? <span className="bg-yellow-500 p-1 rounded">{item.bookingStatus}</span>: ""}</p>
               <ChevronRight size={18} className="text-black dark:text-white" />
             </div>
           </div>
@@ -224,7 +232,7 @@ export default function HistoryPage() {
           onClose={handleCloseDetail}
           onAction={
             selectedBooking.bookingStatus === "PENDING" ? handlePendingBooking : 
-            selectedBooking.bookingStatus === "ONGOING" ? handleChatOpen :
+            selectedBooking.bookingStatus === "ONGOING" || selectedBooking.bookingStatus === "OTW" || selectedBooking.bookingStatus === "ARRIVED" ? handleChatOpen :
             selectedBooking.bookingStatus === "ACCEPTED" ? handleStartAppointment :
             () => console.log("Action")
           }  

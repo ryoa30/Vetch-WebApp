@@ -173,7 +173,7 @@ export default function OverlayPetDetail({
 
         {/* Button */}
         {
-          data.bookingStatus === "ACCEPTED" && 
+          data.bookingStatus === "ACCEPTED" && data.bookingType === "Online" && 
           <div className="mt-6 text-right">
             <button
               onClick={onAction}
@@ -188,16 +188,37 @@ export default function OverlayPetDetail({
           </div>
         }
 
-        {/* Button */}
         {
-          data.bookingStatus === "ONGOING" && 
+          data.bookingStatus === "ACCEPTED" && data.bookingType === "Homecare" && 
           <div className="mt-6 text-right">
             <button
               onClick={onAction}
-              className="bg-[#3D8D7A] hover:bg-[#327566] text-white px-4 py-2 rounded-lg font-semibold"
+              className={`bg-[#3D8D7A] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#327566]`}
             >
+              On My Way!
+            </button>
+          </div>
+        }
+
+        {/* Button */}
+        {
+          (data.bookingStatus === "ONGOING" || data.bookingStatus === "OTW" || data.bookingStatus === "ARRIVED") && 
+          <div className="mt-6 text-right flex flex-row-reverse gap-2">
+            <button
+              onClick={() => onAction(false)}
+              className="bg-[#3D8D7A] hover:bg-[#327566] text-white px-4 py-2 rounded-lg font-semibold"
+              >
               Chat With Pet Owner
             </button>
+            {
+              data.bookingStatus === "OTW" &&
+              <button
+                onClick={() => onAction(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
+              >
+                I have Arrived
+              </button>  
+            }
           </div>
         }
 

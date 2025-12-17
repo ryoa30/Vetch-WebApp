@@ -60,8 +60,8 @@ class BookingRepository extends BaseRepository {
         userId: userId,
       },
       isDeleted: false,
-      bookingStatus: status
-        ? status
+      bookingStatus: status.length > 0
+        ? { in: status}
         : { in: ["PAYMENT", "PENDING", "ACCEPTED", "ONGOING", "DONE", "CANCELLED"] },
       bookingType: type ? type : { in: ["Online", "Homecare"] },
     };

@@ -34,9 +34,9 @@ export class BookingService {
   }
 
   async fetchBookingConsultationHomecare(userId: string, status: string){
-    const resultOnline =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Online&status=${status}`);
-    const resultHomecare =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Homecare&status=${status}`);
-    const resultEmergency =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Emergency&status=${status}`);
+    const resultOnline =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Online&status=${JSON.stringify([status])}`);
+    const resultHomecare =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Homecare&status=${JSON.stringify(status === "ONGOING" ? ["OTW", "ARRIVED"] :[status])}`);
+    const resultEmergency =  await this.#http.get<IResponse>(`/?userId=${userId}&type=Emergency&status=${JSON.stringify([status])}`);
 
     console.log(resultOnline, resultHomecare, resultEmergency);
 
