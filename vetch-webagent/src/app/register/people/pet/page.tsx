@@ -114,7 +114,7 @@ const RegisterPeoplePetPage = () => {
           <div className="flex-1 w-full space-y-4">
             {/* Pet&apos; Name */}
             <div className="space-y-2">
-              <Label htmlFor="petName">Pet&apos;s Name</Label>
+              <Label htmlFor="petName">Pet&apos;s Name <span className="text-red-500">*</span></Label>
               <Input
                 id="petName"
                 placeholder="Must at least be 3 characters"

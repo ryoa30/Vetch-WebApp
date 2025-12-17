@@ -166,9 +166,6 @@ export default function BlogPage() {
 
               {/* Read More + Action Buttons */}
               <div className="flex justify-between items-center mt-3">
-                <Button className="bg-[#9D6B6B] hover:bg-[#7b5252] text-black rounded-full px-4">
-                  Read More
-                </Button>
                 <div className="flex gap-2">
                   <Link href={`/admin/blog/set-blog/${blog.id}`}>
                     <Button
