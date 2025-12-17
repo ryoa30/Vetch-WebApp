@@ -137,6 +137,9 @@ export function EditPetDialog({
                   <SelectItem value="gray">Gray</SelectItem>
                   <SelectItem value="golden">Golden</SelectItem>
                   <SelectItem value="orange">Orange</SelectItem>
+                  <SelectItem value="red">Red</SelectItem>
+                  <SelectItem value="green">Green</SelectItem>
+                  <SelectItem value="blue">Blue</SelectItem>
                   <SelectItem value="mixed">Mixed</SelectItem>
                 </SelectContent>
               </Select>
