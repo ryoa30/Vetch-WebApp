@@ -1,12 +1,14 @@
 const midtransClient = require('midtrans-client');
 const PaymentRepository = require('../repository/PaymentRepository');
 const BookingRepository = require('../repository/BookingRepository');
+const NotificationController = require('./NotificationController');
 const { randomUUID } = require('crypto');
 
 class PaymentController {
     #snap;
     #paymentRepository;
     #bookingRepository;
+    #notificationController;
 
     constructor() {
         this.#snap = new midtransClient.Snap({
@@ -18,6 +20,7 @@ class PaymentController {
 
         this.#paymentRepository = new PaymentRepository();
         this.#bookingRepository = new BookingRepository();
+        this.#notificationController = new NotificationController();
 
         this.getTransactionToken = this.getTransactionToken.bind(this);
         this.putPaymentDetails = this.putPaymentDetails.bind(this);
@@ -37,6 +40,7 @@ class PaymentController {
             if(body.transaction_status === 'settlement' || body.transaction_status === 'capture') {
                 await this.#paymentRepository.updatePaymentByBookingId(payment.bookingId, {paymentStatus: 'DONE', paymentMethod: body.payment_type, transactionId: body.transaction_id});
                 await this.#bookingRepository.updateBookingsStatus([payment.bookingId], 'PENDING');
+                this.#notificationController.sendToVets([updatedBooking.vetId], {title:`You have a new ${updatedBooking.bookingType} booking request on ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)}`});
             }else if(body.transaction_status === 'deny' || body.transaction_status === 'cancel' || body.transaction_status === 'expire') {
                 await this.#paymentRepository.updatePaymentByBookingId(payment.bookingId, {paymentStatus: 'FAILED', paymentMethod: body.payment_type, transactionId: body.transaction_id});
                 await this.#bookingRepository.updateBookingsStatus([payment.bookingId], 'CANCELLED');

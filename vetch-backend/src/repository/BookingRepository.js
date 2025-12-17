@@ -60,8 +60,8 @@ class BookingRepository extends BaseRepository {
         userId: userId,
       },
       isDeleted: false,
-      bookingStatus: status
-        ? status
+      bookingStatus: status.length > 0
+        ? { in: status}
         : { in: ["PAYMENT", "PENDING", "ACCEPTED", "ONGOING", "DONE", "CANCELLED"] },
       bookingType: type ? type : { in: ["Online", "Homecare"] },
     };
@@ -253,7 +253,7 @@ class BookingRepository extends BaseRepository {
           },
           {
             bookingStatus: { in: ["PAYMENT", "PENDING"] },
-            bookingType: { in: ["Homecare", "Emergency"] },
+            bookingType: { in: ["Homecare"] },
             OR:[
               {
                 bookingDate: endDate,
@@ -263,6 +263,11 @@ class BookingRepository extends BaseRepository {
                 bookingDate: { lt: endDate },
               }
             ]
+          },
+          {
+            bookingStatus: { in: ["PAYMENT", "PENDING"] },
+            bookingType: { in: ["Emergency"] },
+            bookingDate: { lt: endDate },
           }
         ]
       },

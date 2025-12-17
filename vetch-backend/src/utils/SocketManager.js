@@ -47,6 +47,8 @@ class SocketManager {
               type: type,
             });
 
+            console.log("saved", saved);
+
             // Count others in the room (works with clustered adapters)
             const socketsInRoom = await this.io.in(roomId).allSockets();
             const total = socketsInRoom.size;

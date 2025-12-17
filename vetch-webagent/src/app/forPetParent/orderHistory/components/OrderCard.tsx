@@ -42,6 +42,7 @@ const OrderCard = ({
                     "T" +
                     booking.bookingTime.split("T")[1]
                 ):"EMERGENCY BOOKING"}
+                {booking.bookingType === "Homecare"? <span className="ml-2 bg-yellow-500 px-1 py-0.5 rounded">{booking.bookingStatus}</span>: ""}
               </p>
               <div className="flex items-center mt-1">
                 <Image
@@ -150,7 +151,7 @@ const OrderCard = ({
             </ConfirmationDialogBox>
           </div>
         )}
-        {booking.bookingStatus === "ONGOING" && (
+        {(booking.bookingStatus === "ONGOING" || booking.bookingStatus === "OTW" || booking.bookingStatus === "ARRIVED") && (
           <button
             onClick={() => {
               setIsChatOpen(true);

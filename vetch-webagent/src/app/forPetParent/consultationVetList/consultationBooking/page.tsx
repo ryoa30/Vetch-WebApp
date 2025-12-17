@@ -341,7 +341,7 @@ export default function ConfirmBookingPage() {
               </p>
               <div className="flex gap-3">
                 <button
-                  disabled={bookingId != ""}
+                  disabled={bookingId != "" || !vet?.isAvailHomecare}
                   onClick={() => setConsultationType("Homecare")}
                   className={`flex-1 px-4 py-2 rounded-full font-medium ${
                     consultationType === "Homecare"
