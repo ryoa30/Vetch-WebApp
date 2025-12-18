@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronRight, MapPin, User } from "lucide-react";
+import { Camera, ChevronRight, MapPin, User } from "lucide-react";
 import Image from "next/image";
 import { UserService } from "@/lib/services/UserService";
 import { useSession } from "@/contexts/SessionContext";
@@ -105,12 +105,15 @@ export default function ProfilePage() {
       {/* Avatar */}
       <div className="w-full flex justify-center mt-10">
         <div className="relative w-[200px] h-[200px] rounded-full bg-gray-200">
-          <input
-            className="absolute z-100 w-[200px] h-[200px] opacity-0 cursor-pointer rounded-full"
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-          ></input>
+          <div className="absolute z-100 w-[200px] h-[200px] bg-black/50 rounded-full flex flex-col items-center justify-center opacity-0 hover:opacity-100 duration-300 cursor-pointer">
+            <input
+              className="opacity-0 w-[200px] z-100 h-[200px] cursor-pointer rounded-full "
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+            ></input>
+            <Camera className="absolute w-10 z-0 h-10"/>
+          </div>
           <Image
             src={
               formData.image

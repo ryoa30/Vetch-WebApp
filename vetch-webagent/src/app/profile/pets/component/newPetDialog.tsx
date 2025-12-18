@@ -36,7 +36,7 @@ export interface PetFormData {
   primaryColor: string;
   gender: "male" | "female";
   neuterStatus: boolean;
-  weight: number | string; // allow decimal weight, e.g. "1.5"
+  weight: string; // allow decimal weight, e.g. "1.5"
   dob: Date | undefined;
 }
 
@@ -118,7 +118,8 @@ export function PetDialog({ show, onClose, onSubmit }: PetDialogProps) {
           form.dob instanceof Date
             ? formatLocalDate(form.dob)
             : undefined,
-        userId: user?.id
+        userId: user?.id,
+        weight: parseFloat(form.weight),
       });
       console.log(result);
       if (!result.ok) {

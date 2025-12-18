@@ -66,7 +66,7 @@ export function EditPetDialog({
       return;
     }else{
       setErrors({});
-      const result = await petService.updatePet(form);
+      const result = await petService.updatePet({...form, weight: parseFloat(form.weight)});
       console.log(result);
       if(!result.ok){
         setShowFailure(true);

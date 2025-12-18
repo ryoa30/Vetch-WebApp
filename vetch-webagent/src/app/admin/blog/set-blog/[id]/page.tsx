@@ -147,14 +147,14 @@ export default function AddBlogPage() {
           />
         )}
         <label className={`cursor-pointer flex flex-col items-center justify-center z-10 ${(image || existingImageUrl) ? 'duration-300 opacity-0 hover:opacity-100 hover:bg-black/50 text-white p-2 w-full h-full rounded-md' : 'text-gray-600'}`}>
-            <span className={`font-medium ${(image || existingImageUrl) ? ' text-white ' : 'text-gray-600'}`}>+ Add Picture</span>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-          </label>
+          <span className={`font-medium ${(image || existingImageUrl) ? ' text-white ' : 'text-gray-600'}`}>+ Add Picture</span>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </label>
       </div>
 
       {/* Blog Title */}
