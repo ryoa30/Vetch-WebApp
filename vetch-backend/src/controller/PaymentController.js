@@ -94,8 +94,6 @@ class PaymentController {
             res.status(500).json({ok: false, message: 'Error processing refund', error: error.message });
         }
     }
-    
-
 
     async getTransactionToken(req, res) {
         try {

@@ -11,7 +11,7 @@ const defaultPayload = {
   vibrate: [100, 50, 100],
 };
 
-class PaymentController {
+class NotificationController {
   #notificationSubscriptionRepository;
   #notificationRepository;
 
@@ -328,4 +328,4 @@ class PaymentController {
   }
 }
 
-module.exports = PaymentController;
+module.exports = NotificationController;
