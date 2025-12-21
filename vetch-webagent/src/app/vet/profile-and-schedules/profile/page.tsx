@@ -87,7 +87,8 @@ export default function ProfilePage() {
         );
         console.log(result);
         if (result.ok && result2.ok) {
-          console.log("Vet details updated successfully");
+          setSuccessMessage("Vet details update successfully");
+          setSuccessVisible(true);
         }
       }
     } catch (error) {
@@ -333,6 +334,14 @@ export default function ProfilePage() {
           errors={Object.values(errors)}
           open={isErrorVisible}
           onOpenChange={() => setIsErrorVisible(false)}
+        />
+        <SuccessDialog
+          onOpenChange={() => {
+          setSuccessVisible(false);
+          loadVetDetails();
+          }}
+          open={successVisible}
+          message={successMessage}
         />
         <LocationDialog
           onClose={(e) => {
