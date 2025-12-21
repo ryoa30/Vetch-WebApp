@@ -94,8 +94,6 @@ model Pet {
   neuterStatus             Boolean    @map("neuter_status")
   primaryColor             String     @map("primary_color") @db.VarChar(65)
   weight                   Float
-  reminderConsultation     String?    @map("reminder_consultation") @db.VarChar(65)
-  reminderVaccine          String?    @map("reminder_vaccine") @db.VarChar(65)
   reminderConsultationDate DateTime?  @map("reminder_consultation_date")
   reminderVaccineDate      DateTime?  @map("reminder_vaccine_date")
   isDeleted                Boolean    @default(false) @map("is_deleted")
