@@ -144,7 +144,7 @@ export default function SchedulesPage() {
   const handleDeleteSchedule = async (index: number) => {
     setIsLoading(true);
     try {
-      if(schedule[index].id !== "new"){
+      if(!schedule[index].id.startsWith("new")){
         const response = await vetService.deleteVetSchedule(
           schedule[index].id
         );
