@@ -262,7 +262,7 @@ export default function ProfilePage() {
             onChange={(e) =>
               setVetDetails({
                 ...vetDetails!,
-                price: parseFloat(e.target.value),
+                description: e.target.value,
               })
             }
           />
