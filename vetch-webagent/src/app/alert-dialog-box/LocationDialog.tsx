@@ -173,7 +173,7 @@ export function LocationDialog({
             const t = e.target as HTMLElement | null;
             if (t && t.closest(".pac-container")) e.preventDefault();
           }}
-          className="sm:max-w-lg lg:max-w-2xl bg-white overflow-y-auto dark:bg-[#1F2D2A] text-black rounded-xl shadow-lg"
+          className="sm:max-w-lg lg:max-w-2xl bg-white overflow-y-auto dark:bg-[#1F2D2A] text-black rounded-xl shadow-lg z-1000"
         >
           <DialogHeader>
             <DialogTitle className="text-2xl text-[#0F5544] font-semibold dark:text-white">

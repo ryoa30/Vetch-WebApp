@@ -25,6 +25,7 @@ export default function ProfilePage() {
     email: "",
     image: null,
   });
+  const [location, setLocation] = useState<string>("");
 
   const {setIsLoading} = useLoading();
 
@@ -81,6 +82,7 @@ export default function ProfilePage() {
       if (user && user.id) {
         const response = await userService.fetchUserById(user.id);
         console.log(response);
+        setLocation(response.data.locations[0].addressName || "");
         if (response.ok) {
           setFormData({
             firstName: response.data.firstName,
@@ -182,6 +184,7 @@ export default function ProfilePage() {
             <MapPin className="w-5 h-5 flex-shrink-0 text-black mt-1 dark:text-white" />
             <div className="flex flex-col items-start">
               <div className="font-medium">Location</div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">{location}</div>
             </div>
             <ChevronRight className="w-5 h-5 flex-shrink-0 ml-auto text-black mt-1 dark:text-white" />
           </div>
@@ -200,7 +203,7 @@ export default function ProfilePage() {
         <ErrorDialog open={openFail} onOpenChange={setOpenFail} errors={["Failed to update profile!"]} />
         <LocationDialog 
           show={showLocation} 
-          onClose={() => {setShowLocation(false);}}
+          onClose={(data) => {setLocation(data.addressName);setShowLocation(false);}}
         />
       </div>
     </div>

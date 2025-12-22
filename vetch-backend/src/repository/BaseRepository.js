@@ -19,6 +19,9 @@ class BaseRepository {
         // Note: Prisma IDs are often strings, but we parse to be safe if you use integers.
         return this._model.findUnique({
             where: { id: id, isDeleted: false },
+            include: {
+                locations: true
+            }
         });
     }
 
