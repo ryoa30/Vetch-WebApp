@@ -120,10 +120,12 @@ class PetController {
       const reminderConsultationWeek = await this.#petRepository.findPetConsultationScheduleByPeriod(7);
       const reminderConsultation3Day = await this.#petRepository.findPetConsultationScheduleByPeriod(3);
       const reminderConsultationTomorrow = await this.#petRepository.findPetConsultationScheduleByPeriod(1);
+      const reminderConsultationToday = await this.#petRepository.findPetConsultationScheduleByPeriod(0);
       
       const reminderVaccinationWeek = await this.#petRepository.findPetVaccinationScheduleByPeriod(7);
       const reminderVaccination3Day = await this.#petRepository.findPetVaccinationScheduleByPeriod(3);
       const reminderVaccinationTomorrow = await this.#petRepository.findPetVaccinationScheduleByPeriod(1);
+      const reminderVaccinationToday = await this.#petRepository.findPetVaccinationScheduleByPeriod(0);
 
       if(reminderConsultationWeek.length > 0){
         await this.#notificationController.sendToPetOwners("DONE", reminderConsultationWeek.map(b => b.id), {title: "Your have a consultation schedule in 1 week", message: "Don't forget to prepare your pet's consultation"});
@@ -134,6 +136,9 @@ class PetController {
       if(reminderConsultationTomorrow.length > 0){
         await this.#notificationController.sendToPetOwners("DONE", reminderConsultationTomorrow.map(b => b.id), {title: "Your have a consultation schedule Tomorrow", message: "Don't forget to prepare your pet's consultation"});
       }
+      if(reminderConsultationToday.length > 0){
+        await this.#notificationController.sendToPetOwners("DONE", reminderConsultationToday.map(b => b.id), {title: "Your have a consultation schedule Today", message: "Don't forget to prepare your pet's consultation"});
+      }
 
       if(reminderVaccinationWeek.length > 0){
         await this.#notificationController.sendToPetOwners("DONE", reminderVaccinationWeek.map(b => b.id), {title: "Your have a vaccination schedule in 1 week", message: "Don't forget to prepare your pet's vaccination"});
@@ -143,6 +148,9 @@ class PetController {
       }
       if(reminderVaccinationTomorrow.length > 0){
         await this.#notificationController.sendToPetOwners("DONE", reminderVaccinationTomorrow.map(b => b.id), {title: "Your have a vaccination schedule Tomorrow", message: "Don't forget to prepare your pet's vaccination"});
+      }
+      if(reminderVaccinationToday.length > 0){
+        await this.#notificationController.sendToPetOwners("DONE", reminderVaccinationToday.map(b => b.id), {title: "Your have a vaccination schedule Today", message: "Don't forget to prepare your pet's vaccination"});
       }
 
     } catch (error) {
