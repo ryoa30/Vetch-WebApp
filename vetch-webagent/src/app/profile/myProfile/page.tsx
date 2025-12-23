@@ -203,7 +203,7 @@ export default function ProfilePage() {
         <ErrorDialog open={openFail} onOpenChange={setOpenFail} errors={["Failed to update profile!"]} />
         <LocationDialog 
           show={showLocation} 
-          onClose={(data) => {setLocation(data.addressName);setShowLocation(false);}}
+          onClose={(data) => {if(data){setLocation(data.addressName)};setShowLocation(false);}}
         />
       </div>
     </div>
