@@ -232,6 +232,8 @@ class BookingRepository extends BaseRepository {
     const endDate = new Date(`${new Date().toISOString().split("T")[0]}T00:00:00.000Z`);
     
     const start = new Date(`1970-01-01T${timeOfDay.toISOString().split("T")[1]}`);
+    const startOngoing = new Date(`1970-01-01T${new Date(timeOfDay.getTime() - 45 * 60 * 1000).toISOString().split("T")[1]}`);
+    // console.log("TIME",startOngoing, start);
     // console.log(endDate);
 
     const bookings = await this._model.findMany({
@@ -239,12 +241,25 @@ class BookingRepository extends BaseRepository {
       {
         OR:[
           {
-            bookingStatus: { in: ["PAYMENT", "PENDING", "ONGOING"] },
+            bookingStatus: { in: ["PAYMENT", "PENDING"] },
             bookingType: { in: ["Online"] },
             OR:[
               {
                 bookingDate: endDate,
                 bookingTime: { lt: start },
+              },
+              {
+                bookingDate: { lt: endDate },
+              }
+            ]
+          },
+          {
+            bookingStatus: { in: ["ONGOING"] },
+            bookingType: { in: ["Online"] },
+            OR:[
+              {
+                bookingDate: endDate,
+                bookingTime: { lt: startOngoing },
               },
               {
                 bookingDate: { lt: endDate },
