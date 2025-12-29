@@ -1,5 +1,6 @@
 // components/OverlayPetDetail.tsx
 "use client";
+import OrderDetailOverlay from "@/app/forPetParent/orderHistory/components/OrderDetailOverlay";
 import { BookingService } from "@/lib/services/BookingService";
 import { ageFromDob, formatAge, formatIso, formatIsoJakarta } from "@/lib/utils/formatDate";
 import { capitalize, snakeCase } from "lodash";
@@ -26,6 +27,14 @@ export default function OverlayPetDetail({
 
   const [medicalHistory, setMedicalHistory] = useState<any[]>([]);
   const [medicalHistoryWithVet, setMedicalHistoryWithVet] = useState<any[]>([]);
+
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
+  const openMedicalHistory = (booking?: any) => {
+    setSelectedBooking(booking);
+    setIsDetailOpen(true);
+  }
   
   const loadMedicalHistory = async () => {
     try {
@@ -51,7 +60,7 @@ export default function OverlayPetDetail({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 z-50 bg-black/60" onClick={onClose}></div>
-      <div className="bg-white dark:bg-gray-800 z-100 rounded-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh]">
+      <div className="bg-white dark:bg-[#1F2D2A] z-100 rounded-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh]">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-600 dark:text-gray-200"
@@ -127,9 +136,9 @@ export default function OverlayPetDetail({
           <h3 className="font-semibold text-black dark:text-white mb-2">
             Medical History
           </h3>
-          <ul className="list-disc list-inside text-sm space-y-2">
+          <ul className="list-disc list-inside text-sm space-y-2 dark:text-white">
             {medicalHistory?.map((item, idx) => (
-              <li key={idx} className="flex items-center justify-between text-black dark:text-white">
+              <li key={idx} className="flex items-center justify-between cursor-pointer hover:bg-gray-100/50 rounded-md p-2" onClick={()=>openMedicalHistory(item)}>
                 <span className="flex-[30%]">
                   {formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}
                 </span>
@@ -151,9 +160,9 @@ export default function OverlayPetDetail({
           <h3 className="font-semibold text-black dark:text-white mb-2">
             Medical History With Me
           </h3>
-          <ul className="list-disc list-inside text-sm space-y-2">
+          <ul className="list-disc list-inside text-sm space-y-2 dark:text-white">
             {medicalHistoryWithVet?.map((item, idx) => (
-              <li key={idx} className="flex items-center justify-between text-black dark:text-white">
+              <li key={idx} className="flex items-center justify-between cursor-pointer hover:bg-gray-100/50 rounded-md p-2" onClick={()=>openMedicalHistory(item)}>
                 <span className="flex-[30%]">
                   {formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}
                 </span>
@@ -241,6 +250,13 @@ export default function OverlayPetDetail({
           </div>
         }
       </div>
+      {isDetailOpen && selectedBooking &&
+        <OrderDetailOverlay 
+          booking={selectedBooking}
+          handleAction={()=>{}}
+          open={isDetailOpen}
+          setIsOpen={setIsDetailOpen}
+        />}
     </div>
   );
 }

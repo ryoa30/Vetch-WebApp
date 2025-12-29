@@ -199,7 +199,7 @@ export default function DashboardPage() {
           return (
             <div
               key={i}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
+              className="bg-white dark:bg-[#1F2D2A] rounded-lg shadow-md overflow-hidden"
             >
               <div className="bg-[#D1E7C2] dark:bg-[#3D8D7A] py-2 text-center">
                 <p className="text-sm font-semibold text-gray-800 dark:text-white">
@@ -220,7 +220,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Today Appointment */}
-      <div className="mt-6 mx-6 bg-white dark:bg-gray-800 rounded shadow">
+      <div className="mt-6 mx-6 bg-white dark:bg-[#1F2D2A] rounded shadow">
         <div className="bg-[#3D8D7A] text-white px-4 py-2 rounded-t">
           <h2 className="font-bold">Today&apos;s Upcoming Appointment</h2>
         </div>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
       </div>
 
       {/* My Schedule */}
-      <div className="mt-6 mx-6 mb-6 bg-white dark:bg-gray-800 rounded shadow">
+      <div className="mt-6 mx-6 mb-6 bg-white dark:bg-[#1F2D2A] rounded shadow">
         <div className="bg-[#3D8D7A] text-white px-4 py-2 rounded-t">
           <h2 className="font-bold">My Schedule</h2>
         </div>

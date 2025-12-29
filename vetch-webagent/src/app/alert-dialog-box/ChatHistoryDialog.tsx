@@ -52,7 +52,7 @@ export default function ChatHistoryDialogBox({
       >
         <div className="flex flex-col h-[600px] w-full">
           <DialogTitle>
-            <div className="bg-teal-600 dark:bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
+            <div className="bg-teal-600 dark:bg-[#1F2D2A] text-white px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setIsOpen(false)}
@@ -137,7 +137,7 @@ export default function ChatHistoryDialogBox({
           </div>
 
           {/* Input Area */}
-          <div className="bg-[#3D8D7A] dark:bg-gray-800 border-t border-gray-200 p-3">
+          <div className="bg-[#3D8D7A] dark:bg-[#1F2D2A] border-t border-gray-200 p-3">
             <div className="flex items-center gap-2">
               <span className="text-black w-[80%] py-2 text-2xl bg-white rounded-lg text-center mx-auto font-medium">
                 {" "}

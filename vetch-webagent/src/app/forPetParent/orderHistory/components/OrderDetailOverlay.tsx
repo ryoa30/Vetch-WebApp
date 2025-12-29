@@ -36,12 +36,13 @@ export default function OrderDetailOverlay({
   booking,
   handleAction,
 }: PetDetailProps) {
+  console.log(booking);
 
   return (
     <Dialog open={open} onOpenChange={setIsOpen}>
       <DialogContent
         showCloseButton={false}
-        className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]"
+        className="bg-white dark:bg-[#1F2D2A] rounded-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]"
       >
         <DialogTitle className="flex items-start justify-between">
           <span className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
@@ -71,7 +72,7 @@ export default function OrderDetailOverlay({
             </div>
           </div>
 
-          <div className="flex flex-row gap-2 items-center">
+          {booking?.pet && <div className="flex flex-row gap-2 items-center">
             <Image
               src={`/img/pet-logo/${snakeCase(booking?.pet?.speciesName)}.png`}
               alt="Pet Species"
@@ -87,7 +88,7 @@ export default function OrderDetailOverlay({
                 {booking?.pet?.speciesName}
               </p>
             </div>
-          </div>
+          </div>}
 
           <div className="flex flex-row gap-2 items-center">
             <ClipboardPlus className="w-10 h-10 text-black dark:text-white" />

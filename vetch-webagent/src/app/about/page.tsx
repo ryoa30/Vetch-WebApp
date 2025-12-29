@@ -29,7 +29,7 @@ export default function AboutPage() {
       </section>
 
       {/* About Us */}
-      <section className="bg-[#EAF4F2] dark:bg-gray-800 flex flex-col md:flex-row items-center px-6 md:px-20 py-12 gap-8">
+      <section className="bg-[#EAF4F2] dark:bg-[#1F2D2A] flex flex-col md:flex-row items-center px-6 md:px-20 py-12 gap-8">
         <div className="flex-1 flex justify-center">
           <Image
             src="/img/about-us.png"
@@ -83,7 +83,7 @@ export default function AboutPage() {
       </section>
 
       {/* Our Mission */}
-      <section className="bg-[#EAF4F2] dark:bg-gray-800 flex flex-col md:flex-row items-center px-6 md:px-20 py-12 gap-8">
+      <section className="bg-[#EAF4F2] dark:bg-[#1F2D2A] flex flex-col md:flex-row items-center px-6 md:px-20 py-12 gap-8">
         <div className="flex-1 flex justify-center">
           <Image
             src="/img/about-us.png"

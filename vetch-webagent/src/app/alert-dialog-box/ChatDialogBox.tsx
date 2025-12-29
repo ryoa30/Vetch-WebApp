@@ -546,7 +546,7 @@ export default function ChatDialogBox({
           } flex bg-white p-0 gap-0 rounded-lg shadow-xl overflow-hidden`}
         >
           {user?.role === "vet" && (
-            <div className={`${isVetOptionsOpen ? "opacity-100 w-full" : "opacity-0 w-0 md:opacity-100 hidden md:block"} transition-all duration-300 md:w-2/3 h-[600px] bg-gray-50 md:relative absolute z-100 dark:bg-gray-800 p-4 flex flex-col border-r border-gray-200 dark:border-gray-700`}>
+            <div className={`${isVetOptionsOpen ? "opacity-100 w-full" : "opacity-0 w-0 md:opacity-100 hidden md:block"} transition-all duration-300 md:w-2/3 h-[600px] bg-gray-50 md:relative absolute z-100 dark:bg-[#1F2D2A] p-4 flex flex-col border-r border-gray-200 dark:border-gray-700`}>
               <div className="mb-6">
                 <div className="flex flex-row justify-between">
                   <h3 className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white mb-2">
@@ -620,7 +620,7 @@ export default function ChatDialogBox({
 
           <div className="flex flex-col h-[600px] w-full relative">
             <DialogTitle>
-              <div className="bg-teal-600 dark:bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
+              <div className="bg-teal-600 dark:bg-[#1F2D2A] text-white px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setIsOpen(false)}
@@ -720,7 +720,7 @@ export default function ChatDialogBox({
             </div>
 
             {/* Input Area */}
-            <div className="bg-white dark:bg-gray-800 border-t border-gray-200 p-3  ">
+            <div className="bg-white dark:bg-[#1F2D2A] border-t border-gray-200 p-3  ">
                 <div className={`absolute flex flex-col justify-start bottom-0 w-full left-0 rounded-md overflow-hidden bg-gray-50 dark:bg-gray-700 transition-all duration-300 ${imageMessage ? 'h-[65%] p-2 border border-gray-300' : 'h-0'}`}>
                   <button onClick={handleCancelUpload} className="self-end rounded-full p-1 hover:bg-gray-500/50 mb-2 duration-200"><X className="w-5 h-5"/></button>
                   {imageMessage && imagePreviewUrl && (

@@ -49,7 +49,7 @@ export default function IncomingCallDialog({
       >
         <DialogTitle className="sr-only">Incoming Call</DialogTitle>
         
-        <div className="bg-white dark:bg-gray-800">
+        <div className="bg-white dark:bg-[#1F2D2A]">
           {/* Header */}
           <div className="px-5 py-4 bg-teal-600 text-white flex items-center justify-between">
             <span className="font-semibold">Incoming Call</span>

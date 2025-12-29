@@ -37,7 +37,7 @@ export default function Calendar({selectedDate, onDateSelect}: {selectedDate: Da
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 w-full transition-colors duration-300">
+    <div className="bg-white dark:bg-[#1F2D2A] rounded-lg shadow-md p-4 w-full transition-colors duration-300">
       {/* Header bulan */}
       <div className="flex justify-between items-center mb-3">
         <button

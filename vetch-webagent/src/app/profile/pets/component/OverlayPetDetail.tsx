@@ -7,6 +7,8 @@ import { ClipboardPlus, X, AlignLeft } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { EditPetDialog } from "./editPetDialog";
+import OrderCard from "@/app/forPetParent/orderHistory/components/OrderCard";
+import OrderDetailOverlay from "@/app/forPetParent/orderHistory/components/OrderDetailOverlay";
 
 // Tipe untuk props komponen
 interface PetDetailProps {
@@ -27,10 +29,18 @@ export default function OverlayPetDetail({
 
   const [medicalHistory, setMedicalHistory] = useState<any[]>([]);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
+  const openMedicalHistory = (booking?: any) => {
+    setSelectedBooking(booking);
+    setIsDetailOpen(true);
+  }
   
   const loadMedicalHistory = async () => {
     try {
       const result1 = await bookingService.fetchPetMedicalHistory(data.id);
+      console.log(result1);
       setMedicalHistory(result1.data || []);
     } catch (error) {
       console.log(error);
@@ -40,6 +50,7 @@ export default function OverlayPetDetail({
   useEffect(()=>{
     loadMedicalHistory();
   }, [data])
+
 
   if (!open || !data) return null;
 
@@ -111,7 +122,7 @@ export default function OverlayPetDetail({
           </h3>
           <ul className="list-disc list-inside text-sm space-y-2">
             {medicalHistory?.map((item, idx) => (
-              <li key={idx} className="flex items-center justify-between">
+              <li key={idx} className="flex items-center justify-between cursor-pointer hover:bg-gray-100/50 rounded-md p-2" onClick={()=>openMedicalHistory(item)}>
                 <span className="flex-[30%]">
                   {formatIso(item.bookingDate.split("T")[0] +"T"+ item.bookingTime.split("T")[1])}
                 </span>
@@ -194,7 +205,13 @@ export default function OverlayPetDetail({
           weight: data.weight,
         }}
       />
-
+      {isDetailOpen && selectedBooking &&
+        <OrderDetailOverlay 
+          booking={selectedBooking}
+          handleAction={()=>{}}
+          open={isDetailOpen}
+          setIsOpen={setIsDetailOpen}
+        />}
       </div>
     </div>
   );

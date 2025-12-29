@@ -6,6 +6,7 @@ import { ageFromDob, formatAge, formatIso, formatIsoJakarta } from "@/lib/utils/
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Loader } from "lucide-react";
+import OrderDetailOverlay from "@/app/forPetParent/orderHistory/components/OrderDetailOverlay";
 
 // Tipe untuk item riwayat
 interface HistoryItem {
@@ -32,7 +33,13 @@ export default function OverlayPetDetail({
 
   const [medicalHistory, setMedicalHistory] = useState<any[]>([]);
 
-
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
+  const openMedicalHistory = (booking?: any) => {
+    setSelectedBooking(booking);
+    setIsDetailOpen(true);
+  }
 
   const loadMedicalHistory = async () => {
     setIsLoading(true);
@@ -59,7 +66,7 @@ export default function OverlayPetDetail({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 z-50 bg-black/50" onClick={onClose}></div>
-      <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh] z-100">
+      <div className="bg-white dark:bg-[#1F2D2A] rounded-lg w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh] z-100">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-600 dark:text-gray-200"
@@ -106,7 +113,7 @@ export default function OverlayPetDetail({
           </h3>
           <ul className="list-disc list-inside text-sm space-y-2 text-black dark:text-white">
             {medicalHistory?.map((item, idx) => (
-              <li key={idx} className="flex items-center justify-between">
+              <li key={idx} className="flex items-center justify-between cursor-pointer hover:bg-gray-100/50 rounded-md p-2" onClick={()=>openMedicalHistory(item)}>
                 <span className="flex-[30%]">
                   {formatIso(
                     item.bookingDate.split("T")[0] +
@@ -132,6 +139,13 @@ export default function OverlayPetDetail({
             )}
           </ul>
         </div>
+        {isDetailOpen && selectedBooking &&
+          <OrderDetailOverlay 
+            booking={selectedBooking}
+            handleAction={()=>{}}
+            open={isDetailOpen}
+            setIsOpen={setIsDetailOpen}
+          />}
       </div>
     </div>
   );
