@@ -2,6 +2,7 @@ const midtransClient = require('midtrans-client');
 const PaymentRepository = require('../repository/PaymentRepository');
 const BookingRepository = require('../repository/BookingRepository');
 const NotificationController = require('./NotificationController');
+const { hhmmToUTCDate, dateToHHMM, formatIsoJakartaShort } = require('../utils/dateUtils');
 const { randomUUID } = require('crypto');
 
 class PaymentController {
@@ -39,11 +40,12 @@ class PaymentController {
             }
             if(body.transaction_status === 'settlement' || body.transaction_status === 'capture') {
                 await this.#paymentRepository.updatePaymentByBookingId(payment.bookingId, {paymentStatus: 'DONE', paymentMethod: body.payment_type, transactionId: body.transaction_id});
-                await this.#bookingRepository.updateBookingsStatus([payment.bookingId], 'PENDING');
+                const updatedBooking = await this.#bookingRepository.update(payment.bookingId, {bookingStatus: "PENDING"});
+                // console.log("updated booking", updatedBooking);
                 this.#notificationController.sendToVets([updatedBooking.vetId], {title:`You have a new ${updatedBooking.bookingType} booking request on ${formatIsoJakartaShort(updatedBooking.bookingDate)} at ${dateToHHMM(updatedBooking.bookingTime)}`});
             }else if(body.transaction_status === 'deny' || body.transaction_status === 'cancel' || body.transaction_status === 'expire') {
                 await this.#paymentRepository.updatePaymentByBookingId(payment.bookingId, {paymentStatus: 'FAILED', paymentMethod: body.payment_type, transactionId: body.transaction_id});
-                await this.#bookingRepository.updateBookingsStatus([payment.bookingId], 'CANCELLED');
+                await this.#bookingRepository.update(payment.bookingId, {bookingStatus: "CANCELLED"});
             }else if(body.transaction_status === 'pending') {
                 await this.#paymentRepository.updatePaymentByBookingId(payment.bookingId, {paymentStatus: 'PENDING', paymentMethod: body.payment_type});
             }
