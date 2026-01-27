@@ -15,13 +15,11 @@ class BaseRepository {
         return this._model.create({ data });
     }
 
-    async findById(id) {
+    async findById(id, options = {}) {
         // Note: Prisma IDs are often strings, but we parse to be safe if you use integers.
         return this._model.findUnique({
             where: { id: id, isDeleted: false },
-            include: {
-                locations: true
-            }
+            ...options,
         });
     }
 

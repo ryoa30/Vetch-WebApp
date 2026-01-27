@@ -121,6 +121,7 @@ class BlogController {
         .status(200)
         .json({ ok: true, message: "Success get Blog By ID", data: blog });
     } catch (error) {
+      console.log(error);
       res
         .status(500)
         .json({ message: "Error fetching blog", error: error.message });

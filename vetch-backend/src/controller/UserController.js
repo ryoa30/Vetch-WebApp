@@ -119,7 +119,9 @@ class UserController {
     async getUserById(req, res) {
         try {
             const { id } = req.params;
-            const user = await this.#userRepository.findById(id);
+            const user = await this.#userRepository.findById(id, {
+                include: { locations: true },
+            });
             if (!user) {
                 return res.status(404).json({ok:false ,message: 'User not found' });
             }
